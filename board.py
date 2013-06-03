@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-# TODO: Document all classes / methods to work with Sphinx documentation
-# generator http://sphinx-doc.org/examples.html
-#
 import numpy as np
 
 _HAS_MOVED = 'm'
@@ -48,9 +44,7 @@ class Move(object):
         self.from_ = from_
         self.to_ = to_
         if isinstance(piece,Pawn):
-            # TODO: This is not very OO, but it'll do for now
-            if abs(from_[1] - to_[1]) == 2:
-                # The pawn moved two squares
+            if abs(from_[1] - to_[1]) == 2:  # The pawn moved two squares
                 self.double_move = True
         else:
             self.double_move = False
@@ -172,12 +166,6 @@ class Board(object):
                 return True
         return False
 
-    def _castle(self, colour, left=True):
-        # TODO: implement this :)
-        
-
-        pass
-
     def move_piece(self, from_, to_):
         """Move a piece from the location from_ to the location to_.
 
@@ -291,7 +279,7 @@ class Board(object):
 
     def _get_pinned_direction(self, from_):
         """Returns the direction a piece is pinned or None if it is not pinned."""
-        # TODO: 
+        # TODO: Implement meeeeeeee!!!!!!!!
         pass
 
 
@@ -337,8 +325,7 @@ class Board(object):
             # Add any castling moves
             moves.extend(self._get_castle_moves(loc))
 
-            # Need to check if current piece is pinned
-            # Could do this afterwards?
+            # TODO: Need to check if current piece is pinned
         return moves
 
     def _get_knight_bishop_queen_rook_king_moves(self, piece, loc):
@@ -505,52 +492,9 @@ class Board(object):
         for x in xrange(1,9):
             for y in xrange(3, 7):
                 self._all_pieces[(x,y)] = None
-
-    # Returns a string representation of version of the chess board that can be
-    # reconstructed when passed to the constructor.
-    #
-    # There are 12 unique chess pieces, 64 squares and a flag to
-    # indicate whose turn it is. If we think of the chess board as a grid then
-    # with coordinates from A1 to H8 (as you would find in the newspaper) we
-    # will define the starting position of the white player's pieces in rows A
-    # and B, and the black player's pieces in rows G and H. This is the internal
-    # representation, the orientation may be changed for display purposes.
-    #
-    # A chess board is represented by a 71+ character string of the
-    # following format:
-    #
-    # c4e55[player][row a][row b][row c][row d][row e][row f][row g][rowh]
-    #
-    # c4e55        - Used only to mark a chess board representation.
-    #
-    # player       - Either 1 representing white players turn to move or 2
-    #                representing black player's turn to move.
-    #
-    # row [x]      - An 8 character string. The first character coresponds to
-    #                the piece in column 1, the second to column 2, etc
-    #
-    # The encoding for each piece is listed below. Note that the digit also
-    # corresponds to the last digit of the unicode representation of chess
-    # pieces (if your're wonding why the values were chosen) :
-    #
-    # no piece    - 0
-    # BlackKing   - 4
-    # BlackQueen  - 5
-    # BlackRook   - 6
-    # BlackBishop - 7
-    # BlackKnight - 8
-    # BlackPawn   - 9
-    # WhiteKing   - a
-    # WhiteQueen  - b
-    # WhiteRook   - c
-    # WhiteBishop - d
-    # WhiteKnight - e
-    # WhitePawn   - f
-    #
-    # Note: This format doesn't care about the number of the turn because that
-    # is conceptually linked to a game (the controller), while which player's
-    # turn to move completely changes the interpretation of a board.
+    
     def __repr__(self):
+        """Returns a string representation of the chess board that can be reconstructed when passed to the constructor."""
         # 1 indexed chessboard, 1 <= x < 9, 1 <= y < 9
         # xrange would be more a more efficient implemenation but this is a
         # minor and in python 3.x we get this benefit implicitly
@@ -581,7 +525,7 @@ class Board(object):
         unicode_board_string = board_string.decode('utf-8')
         [piece_string, player_colour_code, turn, stalemate_count] = unicode_board_string.split(u',')
         
-        self._previous_move = None # TODO:
+        self._previous_move = None
 
         self.current_player = Colour._get_colour(player_colour_code)
         self.turn = turn
