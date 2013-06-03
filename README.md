@@ -18,7 +18,7 @@ This is still very much a work-in-progress with the following main outstanding i
 Development Setup 
 ----
 0. Requirements
-    Pythom 2.7 (for PyLint)
+    Python 2.7 (for PyLint)
 1. Install hamcrest using distribute
     a. Install Distribute (https://pypi.python.org/pypi/distribute)
        If your shell has the `curl` program you can do:
