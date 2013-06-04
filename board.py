@@ -15,12 +15,22 @@ class Colour(object):
         
         raise ValueError("Invalid colour code '{0}.".format(code))
 
+
 class Black(Colour): 
     code = 'B'
 
 
 class White(Colour):
     code = 'W'
+
+
+def _inverse_colour(colour):
+    if colour is Black:
+        return White
+    elif colour is White:
+        return Black
+    else:
+        raise ValueError("Invalid colour, expected Black or White")
 
 
 class IllegalMoveException(Exception):
@@ -65,6 +75,8 @@ class Board(object):
     stalemate_count = 0
 
     _all_pieces = None
+    _king_locations = None
+    
 
     def __init__(self, board_string=None):
         if board_string is None:
@@ -100,10 +112,7 @@ class Board(object):
         if king is None or king.has_moved is True:
             return moves
 
-        if king.colour is Black:
-            enemy_colour = White
-        elif king.colour is White:
-            enemy_colour = Black
+        enemy_colour = _inverse_colour(king.colour)
 
         # Castling left?
         if left_rook.has_moved is False:
@@ -171,7 +180,7 @@ class Board(object):
 
         Raises a ValueError if the move is not a legal chess move.
         """
-        legal_moves = self._get_moves(from_)
+        legal_moves = self.get_moves(from_)
         piece = self._all_pieces[from_]
         if legal_moves is not False:
             if to_ in legal_moves:
@@ -194,6 +203,10 @@ class Board(object):
                     self._all_pieces[(8,y)] = None
                     self._all_pieces[(6,y)] = rook
 
+                # Keep track of where the king is
+                if isinstance(piece, King):
+                    self._king_location[piece.colour] = to_
+
                 # TODO: Somewhere we need to check if this puts our king into check
                 # This is partially handled, as the king himself can't move into check
                 # A lazy way would be to move, check, and then roll back state if board
@@ -202,6 +215,10 @@ class Board(object):
                 self._all_pieces[from_] = None
                 self._all_pieces[to_] = piece
                 self._previous_move = Move(piece, from_, to_)
+
+                # These data structures must be kept in sync
+                assert isinstance(self._all_pieces[self._king_location[Black]], BlackKing)
+                assert isinstance(self._all_pieces[self._king_location[White]], WhiteKing)
 
                 return
         # Fall through error
@@ -242,14 +259,14 @@ class Board(object):
             pawn = BlackPawn(loc)
 
         # Get the squares of any knights that can attack this square
-        knight_squares = self._get_moves(loc, knight)
+        knight_squares = self._get_knight_bishop_queen_rook_king_moves(knight, loc)
         for k in knight_squares:
             piece = self.get_piece(k)
             if isinstance(piece, Knight):
                 # Opponents knight - an attacker
                 attackers.add(k)
 
-        rooks_or_queen_squares = self._get_moves(loc, rook)
+        rooks_or_queen_squares = self._get_knight_bishop_queen_rook_king_moves(rook, loc)
         for r in rooks_or_queen_squares:
             piece = self.get_piece(r)
             if isinstance(piece, Rook) or isinstance(piece, Queen):
@@ -259,7 +276,7 @@ class Board(object):
                 if self._is_adjacent(r, loc):
                     attackers.add(r)
 
-        bishop_or_queen_squares = self._get_moves(loc, bishop)
+        bishop_or_queen_squares = self._get_knight_bishop_queen_rook_king_moves(bishop, loc)
         for b in bishop_or_queen_squares:
             piece = self.get_piece(b)
             if isinstance(piece, Bishop) or isinstance(piece, Queen):
@@ -277,46 +294,65 @@ class Board(object):
 
         return attackers
 
-    def _get_pinned_direction(self, from_):
-        """Returns the direction a piece is pinned or None if it is not pinned."""
-        # TODO: Implement meeeeeeee!!!!!!!!
-        pass
+    def _get_pinned_directions(self, from_):
+        """Returns the directions a piece is pinned or None if it is not pinned."""
 
+        piece = self.get_piece(from_)
+        assert piece is not None
+        colour = piece.colour
+        enemy_colour = _inverse_colour(colour)
 
-    def _get_moves(self, loc, piece=None):
+        # A piece can only be pinned if it's in a line with the king
+        king_loc = self._king_location[colour]
+
+        pinned_vector = (king_loc[0] - from_[0], king_loc[1] - from_[1])
+        # Since only queen, rook and bishop can pin, 
+        # pinned_vector must normalze to one of (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (1, -1)
+
+        [x, y] = pinned_vector
+
+        if x == 0:
+            y = y / abs(y)
+        elif y == 0:
+            x = x / abs(x)
+        elif x == y or x == -y:
+            x = x / abs(x)
+            y = y / abs(y)
+        else:
+            # Can't be pinned
+            return None
+
+        pinned_direction = (x, y)
+        negative_pinned_direction = (-x, -y)
+        # We're only pinned if there is an attacker in this direction
+        squares = self._get_squares(from_, pinned_direction)
+        # The last square will contain an attacker if there is any
+        enemy_piece= squares[-1].piece
+        if enemy_piece is not None and enemy_piece.colour is enemy_colour:
+            if negative_pinned_direction in enemy_piece.moves:
+                return [pinned_direction, negative_pinned_direction]
+
+        return None
+
+    def get_moves(self, loc):
         """Returns all of the valid moves for piece in the given location.
 
-        loc -- The location to get the possible moves from.
-        piece -- The piece to move, if None this used the piece in the location
-        specified.
+        loc -- The location of the piece to get the possible moves for.
         returns -- a set of all the legal moves from loc by the chess piece.
-
         """
+        
+        piece = self.get_piece(loc)
         if piece is None:
-            piece = self.get_piece(loc)
-            if piece is None:
-                return []
-
-
-        if isinstance(piece, Pawn):
-            moves = self._get_pawn_moves(piece)
-        elif not isinstance(piece,  Pawn):
-            moves = self._get_knight_bishop_queen_rook_king_moves(piece, loc)
+            raise ValueError("Square at location {0} is empty".format(loc))
 
         if isinstance(piece, King):
-
-            if piece.colour is White:
-                opponent_colour = Black
-            elif piece.colour is Black:
-                opponent_colour = White
-            else:
-                raise LookupError("A famous... should not happen error ;)")
+            moves = self._get_knight_bishop_queen_rook_king_moves(piece, loc)
+            enemy_colour = _inverse_colour(piece.colour)
 
             # Can't move king into check
             new_moves = []
-            for m in moves:
-                
-                if len(self._get_attackers(m, opponent_colour)) > 0:
+            for m in moves:                
+                if len(self._get_attackers(m, enemy_colour)) > 0:
                     pass
                 else:
                     new_moves.append(m)
@@ -324,16 +360,30 @@ class Board(object):
 
             # Add any castling moves
             moves.extend(self._get_castle_moves(loc))
+        else:
+            # Check if this piece is pinned, and then pass the limited move vector to
+            # the _get_*piece*_moves methods. They need to be restricted in what they
+            # search. pinned_direction = self._get_pinned_directions(loc)
 
-            # TODO: Need to check if current piece is pinned
+            if isinstance(piece, Pawn):
+                moves = self._get_pawn_moves(piece)
+            elif isinstance(piece, Queen) or isinstance(piece, Rook) or isinstance(piece, Bishop) or isinstance(piece,  Knight):
+                # A pinned piece can only move in the vector it is pinned in
+                moves = self._get_knight_bishop_queen_rook_king_moves(piece, loc)
+            
         return moves
 
-    def _get_knight_bishop_queen_rook_king_moves(self, piece, loc):
+    # TODO: Use direction tp limit the moves this peice can make when pinned
+    def _get_knight_bishop_queen_rook_king_moves(self, piece, loc, direction=None):
         """Returns all of the location any of these pieces can move to from the
         location specified.
+
+        direction -- limits the valid moves to only the direction vector (both +ve and -ve)
         """
         squares = []
         locations = []
+
+
         for direction in piece.moves:
             squares += self._get_squares(loc, direction, piece.limit)
 
@@ -344,13 +394,16 @@ class Board(object):
         
         return locations
 
-    def _get_pawn_moves(self, piece, attacks_only=False):
+    # TODO: Use direction tp limit the moves this peice can make when pinned
+    def _get_pawn_moves(self, piece, attacks_only=False, direction=None):
         """Returns all of the valid moves for a board in the location from_
         specified. Does not check if the move will put the mover into check.
 
         If attacks_only is True, then only returns the squares threatened by
         this piece.
         """
+
+        #TODO check_is_pinned
 
         moves = []
         if not attacks_only:
@@ -400,12 +453,6 @@ class Board(object):
 
         return False
 
-    def _get_square(self, loc):
-        """Returns a square on a chess board."""
-        piece = self.get_piece(loc)
-        return Square(loc, piece)
-
-
     def _get_squares(self, from_, direction, limit=None):
         """Returns an ordered list of squares on a chess board from from_ in
         the direction dir_ given. This does not include the starting square.
@@ -419,8 +466,8 @@ class Board(object):
             loc = tuple(np.array(from_) + i * np.array(direction))
             i += 1
             try:
-                # Will raise a value error if we step off the board
-                square = self._get_square(loc)
+                piece = self.get_piece(loc) # Will raise a KeyError if we step off the board
+                square = Square(loc, piece)
                 squares.append(square)
                 if square.piece is not None:
                     # We've found another piece
@@ -451,6 +498,7 @@ class Board(object):
         self.stalemate_count = 0
         self.current_player = White
         self._all_pieces = dict()
+        self._king_location = dict()
 
         # Place all the White pieces on the board
         self._all_pieces[(1, 1)] = WhiteRook()
@@ -487,6 +535,14 @@ class Board(object):
         self._all_pieces[(6, 7)] = BlackPawn((6, 7))
         self._all_pieces[(7, 7)] = BlackPawn((7, 7))
         self._all_pieces[(8, 7)] = BlackPawn((8, 7))
+
+        # Locate the black and white kings
+        self._king_location[White] = (5, 1)
+        self._king_location[Black] = (5, 8)
+
+        # These data structures must be kept in sync
+        assert isinstance(self._all_pieces[self._king_location[Black]], BlackKing)
+        assert isinstance(self._all_pieces[self._king_location[White]], WhiteKing)        
 
         # Add all of the empty squares
         for x in xrange(1,9):
@@ -531,6 +587,7 @@ class Board(object):
         self.turn = turn
         self.stalemate_count = stalemate_count      
         self._all_pieces = dict()
+        self._king_location = dict()
 
         row_strings = piece_string.split(u'-')
         y = 0
@@ -552,7 +609,11 @@ class Board(object):
 
                         if issubclass(cls, Pawn):
                             self._all_pieces[loc] = cls(loc)
-                        elif issubclass(cls, King) or  issubclass(cls, Rook): 
+                        elif issubclass(cls, King):
+                            # Cannot handle multiple kings of the the same colour, just saying
+                            self._king_location[cls.colour] = loc
+                            self._all_pieces[loc] = cls(has_moved)
+                        elif issubclass(cls, Rook): 
                             self._all_pieces[loc] = cls(has_moved)
                         elif issubclass(cls, Knight) or issubclass(cls, Bishop) \
                                 or issubclass(cls, Queen): 
@@ -560,6 +621,10 @@ class Board(object):
                         else:
                             raise ValueError("Invalid chess piece {0}".format(symbol))
                         has_moved = False
+
+        # These data structures must be kept in sync
+        assert isinstance(self._all_pieces[self._king_location[Black]], BlackKing)
+        assert isinstance(self._all_pieces[self._king_location[White]], WhiteKing)
 
     def display(self):
         """Prints out a unicode representation of the chess board.

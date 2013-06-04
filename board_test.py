@@ -165,136 +165,142 @@ class TestBoardFunctions(unittest.TestCase):
             for y in range(3, 7):
                 assert_that(self.board.get_piece((x,y)), is_(None))
 
-    def test_get_pawn_moves(self):
-        # TODO: 
-        # Add more tests for the following
-        # * Cannot attack own colour
-        # * En passent
 
-        # Check that a pawn can move from it's starting position as
-        # Either a single or double move
-        white_pawn = board.WhitePawn((1,2))
-        pawn_moves = self.board._get_moves((1,2), white_pawn)
-        assert_that(pawn_moves, only_contains((1,3),(1,4)))
+    def test_get_moves_opening_white_pawn(self):
+        """Check that a white pawn can move from it's starting position as either a single or double move."""
+        pawn_moves = self.board.get_moves((1, 2))
+        assert_that(pawn_moves, only_contains((1, 3), (1, 4)))
 
-        # Check that a pawn that has moved can only move one space
-        white_pawn_2_4 = board.WhitePawn((2,4))
-        white_pawn_2_4.has_not_moved = False
-        white_pawn_moves_from_2_4 = self.board._get_moves((1,2), white_pawn_2_4)        
-        assert_that(white_pawn_moves_from_2_4, only_contains((2,5)))
+    def test_get_moves_opening_black_pawn(self):
+        """Check that a black pawn can move from it's starting position as either a single or double move."""
+        pawn_moves = self.board.get_moves((6, 7))
+        assert_that(pawn_moves, only_contains((6, 6), (6, 5)))
 
-        # Check that a white pawn with 3 Black pieces in front can attack
-        # The two pieces on the sides only
-        white_pawn_2_6 = board.WhitePawn((2,6))
-        white_pawn_2_6.has_not_moved = False
-        white_pawn_moves_from_2_6 = self.board._get_moves((2, 6), white_pawn_2_6)        
-        assert_that(white_pawn_moves_from_2_6, only_contains((1, 7), (3, 7))) 
+    def test_get_moves_moved_white_pawn(self):
+        """Check that a white pawn that has moved can only move one space (when nothing to attack)."""
+        pawn_board = board.Board("♖♘♗♕♔♗♘♖-♙♙_♙♙♙♙♙-__♙_____-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_moves = pawn_board.get_moves((3, 3))
+        assert_that(pawn_moves, only_contains((3, 4)))
 
-        # Check that a Black pawn can do a single or double move from its
-        # starting position
-        black_pawn = board.BlackPawn((8,7))
-        black_pawn_starting_moves = self.board._get_moves((8,7), black_pawn)
-        assert_that(black_pawn_starting_moves, only_contains((8,6),(8,5)))
+    def test_get_moves_white_pawn_attacks_both(self):
+        """Check that a white pawn with 3 Black pieces in front can attack the two pieces on the sides only"""
+        pawn_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙_♙♙♙♙-________-________-________-___♙___-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_moves = pawn_board.get_moves((4, 6))
+        assert_that(pawn_moves, only_contains((3, 7), (5, 7)))
 
-        # Check that a black pawn next to the right board edge blocked by
-        # two white pieces can attak the piece diagonally left
-        black_pawn_8_3 = board.BlackPawn((8,3))
-        black_pawn_moves_from_8_3 = self.board._get_moves((8,3), black_pawn_8_3)
-        assert_that(black_pawn_moves_from_8_3, only_contains((7,2)))
+    def test_get_moves_black_pawn_attack_left(self):
+        """Check that a black pawn next to the right board edge blocked by two white pieces can attak the piece diagonally left"""
+        pawn_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙__-________-______♙♙-_______♟-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_moves = pawn_board.get_moves((8, 5))
+        assert_that(pawn_moves, only_contains((7, 4)))
 
-        #Check that a black pawn can't attack it's own peices
-        black_pawn_7_8 = board.BlackPawn((7,8))
-        black_pawn_moves_from_7_8 = self.board._get_moves((7,8), black_pawn_7_8)
-        assert_that(black_pawn_moves_from_7_8, is_([]))
+    def test_get_moves_black_pawn_cant_attack_black(self):
+        """Check that a black pawn can't attack it's own pieces."""
+        pawn_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-______♟♟-_______♟-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_moves = pawn_board.get_moves((8, 5))
+        assert_that(pawn_moves, is_([]))     
 
-    def test_get_knight_moves(self):
-        # Check the opening moves of a white knight
-        white_knight = board.WhiteKnight()
-        white_knight_moves_from_2_1 = self.board._get_moves((2,1), white_knight)
-        assert_that(white_knight_moves_from_2_1, only_contains((1, 3), (3, 3)))
+    # TODO: 
+    # Add more tests for the following
+    # * Cannot attack own colour
+    # * En passent
 
-        # Check the opening moves of a black knight
-        black_knight = board.BlackKnight()
-        black_knight_moves_from_7_8 = self.board._get_moves((7, 8), black_knight)
-        assert_that(black_knight_moves_from_7_8, only_contains((6, 6), (8, 6)))
+    def test_get_moves_white_knight_opening(self):
+        """Check the opening moves of a white knight."""
+        knight_moves = self.board.get_moves((2,1))
+        assert_that(knight_moves, only_contains((1, 3), (3, 3)))
 
-        # Check some common attacks and moves
-        white_knight_moves_from_3_7 = self.board._get_moves((3,7), white_knight)
-        assert_that(white_knight_moves_from_3_7,
-            only_contains((1, 8), (5, 8), (1, 6), (5, 6), (2, 5), (4, 5)))        
+    def test_get_moves_black_knight_opening(self):
+        """Check the opening moves of a black knight."""
+        knight_moves = self.board.get_moves((7, 8))
+        assert_that(knight_moves, only_contains((6, 6), (8, 6)))
 
-    def test_get_bishop_moves(self):
 
-        # Check the opening moves of a white bishop
-        white_bishop = board.WhiteBishop()
-        white_bishop_moves_from_3_1 = self.board._get_moves((3,1), white_bishop)
-        assert_that(white_bishop_moves_from_3_1, is_([]))
+    def test_get_moves_knight_fork_attack(self):
+        """Check if a knight at G3 can fork the king and rook, as well as other moves."""
+        knight_board = board.Board("♖_♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♘♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        knight_moves = knight_board.get_moves((3, 7))
+        assert_that(knight_moves, only_contains((1, 8), (5, 8), (1, 6), (5, 6), (2, 5), (4, 5)))        
 
-        # Check the opening moves of a black bishop
-        black_bishop = board.BlackBishop()
-        black_bishop_moves_from_3_8 = self.board._get_moves((3,8), black_bishop)
-        assert_that(black_bishop_moves_from_3_8, is_([])) 
+    def test_get_moves_white_bishop_opening(self):
+        """Check the opening moves of a white bishop."""
+        bishop_moves = self.board.get_moves((3,1))
+        assert_that(bishop_moves, is_([]))
 
-        # Check some common moves and attacks
-        black_bishop_moves_from_4_5 = self.board._get_moves((4,5), black_bishop)
-        assert_that(black_bishop_moves_from_4_5, only_contains(
-            (3, 6), #(2, 7),  # forward left
-            (5, 6), #(6, 7),  # forward right
-            (3, 4), (2, 3), (1, 2),  # backward left
-            (5, 4), (6, 3), (7, 2)   # backward right
-        ))
+    def test_get_moves_black_bishop_opening(self):
+        """Check the opening moves of a black bishop."""
+        bishop_moves = self.board.get_moves((3,8))
+        assert_that(bishop_moves, is_([]))        
 
-        white_bishop_moves_from_5_5 = self.board._get_moves((5,5), white_bishop)
-        assert_that(white_bishop_moves_from_5_5, only_contains(
+    def test_get_moves_white_bishop_free(self):
+        """Test get_moves for a white bishop in the middle of the board."""
+        bishop_board = board.Board("♖♘_♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♗___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        bishop_moves = bishop_board.get_moves((5,5))
+        assert_that(bishop_moves, only_contains(
             (4, 6), (3, 7),  # forward left
             (6, 6), (7, 7),  # forward right
             (4, 4), (3, 3),  # backward left
             (6, 4), (7, 3)   # backward right
         ))
 
-    def test_get_rook_moves(self):
-        # Check the opening moves of a white rook
-        white_rook = board.WhiteRook()
-        white_rook_moves_from_8_1 = self.board._get_moves((8,1), white_rook)
-        assert_that(white_rook_moves_from_8_1, is_([]))
+    def test_get_moves_black_bishop_free(self):
+        """Test get_moves for a black bishop in the middle of the board."""
+        bishop_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-___♝____-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚_♞♜,W,0,0")        
+        bishop_moves = bishop_board.get_moves((4,5))
+        assert_that(bishop_moves, only_contains(
+            (3, 6), #(2, 7),  # forward left
+            (5, 6), #(6, 7),  # forward right
+            (3, 4), (2, 3), (1, 2),  # backward left
+            (5, 4), (6, 3), (7, 2)   # backward right
+        ))        
 
-        # Check the opening moves of a black rook
-        black_rook = board.BlackRook()
-        black_rook_moves_from_8_8 = self.board._get_moves((8,8), black_rook)
-        assert_that(black_rook_moves_from_8_8, is_([]))
+    def test_get_moves_white_rook_opening(self):
+        """Test get_moves for the opening moves of a white rook."""
+        rook_moves = self.board.get_moves((8,1))
+        assert_that(rook_moves, is_([]))
 
-        # Check the moves of a white rook in the open
-        white_rook_moves_from_2_3 = self.board._get_moves((2,3), white_rook)
-        assert_that(white_rook_moves_from_2_3, only_contains(
+    def test_get_moves_black_rook_opening(self):
+        """Test get_moves for the opening moves of a black rook."""
+        rook_moves = self.board.get_moves((8,8))
+        assert_that(rook_moves, is_([]))
+
+    def test_get_moves_white_rook_free(self):
+        """Test get_moves for a white rook in the middle of the board."""
+        rook_board = board.Board("♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-_♖______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        rook_moves = rook_board.get_moves((2,3))
+        assert_that(rook_moves, only_contains(
             (2, 4), (2, 5), (2, 6), (2, 7),  # forward
             (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3),  # right
             (1, 3)  # left
             # none backward
         ))
 
-        # Check the moves of a black rook in the open
-        black_rook_moves_from_2_3 = self.board._get_moves((2,3), black_rook)
-        assert_that(black_rook_moves_from_2_3, only_contains(
+    def test_get_moves_black_rook_free(self):
+        """Test get_moves for a black rook in the middle of the board."""
+        rook_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-_♜______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_,W,0,0")
+        rook_moves = rook_board.get_moves((2,3))
+        assert_that(rook_moves, only_contains(
             (2, 4), (2, 5), (2, 6), (2, 6),  # forward
             (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3),  # right
             (1, 3),  # left
             (2, 2)  # backward
-        ))
+        ))   
 
-    def test_get_queen_moves(self):
-        # Check the opening moves of a white queen
-        white_queen = board.WhiteQueen()
-        white_queen_moves_from_4_1 = self.board._get_moves((4,1), white_queen)
-        assert_that(white_queen_moves_from_4_1, is_([]))
+    def test_get_moves_white_queen_opening(self):
+        """Test get_moves for the opening moves of a white queen."""
+        queen_moves = self.board.get_moves((4,1))
+        assert_that(queen_moves, is_([]))
 
-        # Check the opening moves of a black queen
-        black_queen = board.BlackQueen()
-        black_queen_moves_from_4_8 = self.board._get_moves((4,8), black_queen)
-        assert_that(black_queen_moves_from_4_8, is_([]))
+    def test_get_moves_black_queen_opening(self):
+        """Test get_moves for the opening moves of a black queen."""
+        queen_moves = self.board.get_moves((4,8))
+        assert_that(queen_moves, is_([]))
 
-        # Check the moves of a white queen in the open
-        white_queen_moves_from_4_4 = self.board._get_moves((4,4), white_queen)
-        assert_that(white_queen_moves_from_4_4, only_contains(
+    def test_get_moves_white_queen_free(self):
+        """Check the moves of a white queen in the open."""
+        queen_board = board.Board("♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-________-___♕____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        queen_moves = queen_board.get_moves((4,4))
+        assert_that(queen_moves, only_contains(
             (4, 5), (4, 6), (4, 7),  # forward
             (5, 5), (6, 6), (7, 7),  # forward right
             (5, 4), (6, 4), (7, 4), (8, 4),  # right
@@ -305,9 +311,11 @@ class TestBoardFunctions(unittest.TestCase):
             (3, 5), (2, 6), (1, 7)  # forward, left
         ))
 
-        # Check the moves of a black queen in the open
-        black_queen_moves_from_4_4 = self.board._get_moves((4,4), black_queen)
-        assert_that(black_queen_moves_from_4_4, only_contains(
+    def test_get_moves_black_queen_free(self):
+        """Check the moves of a black queen in the open."""
+        queen_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___♛____-________-________-♟♟♟♟♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        queen_moves = queen_board.get_moves((4,4))    
+        assert_that(queen_moves, only_contains(
             (4, 5), (4, 6), # forward
             (5, 5), (6, 6), # forward right
             (5, 4), (6, 4), (7, 4), (8, 4),  # right
@@ -316,6 +324,43 @@ class TestBoardFunctions(unittest.TestCase):
             (3, 3), (2, 2), # backwards left
             (3, 4), (2, 4), (1, 4),  # left
             (3, 5), (2, 6)  # forward, left
+        ))
+
+    def test_get_moves_white_king_opening(self):
+        """Check the opening moves of a white king."""
+        king_moves = self.board.get_moves((5,1))
+        assert_that(king_moves, is_([]))
+
+    def test_get_moves_black_king_opening(self):
+        """Check the opening moves of a black king."""
+        king_moves = self.board.get_moves((5,8))
+        assert_that(king_moves, is_([]))
+
+    def test_get_moves_white_king_free(self):
+        """Check the moves of a white king in the open."""
+        king_board = board.Board("♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-___m♔____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        king_moves = king_board.get_moves((4,4))
+        assert_that(king_moves, only_contains(
+            (4, 5),  # forward
+            (5, 5),  # forward right
+            (5, 4),  # right
+            (5, 3),  # backwards right
+            (4, 3),  # backward
+            (3, 3),  # backwards left
+            (3, 4),  # left
+            (3, 5)   # forward, left
+        ))
+
+    def test_get_moves_black_king_partially_free(self):
+        """Check the moves of a black king in front of white pawns."""
+        king_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___m♚____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,W,0,0")
+        king_moves = king_board.get_moves((4,4))
+        assert_that(king_moves, only_contains(
+            (4, 5),  # forward
+            (5, 5),  # forward right
+            (5, 4),  # right
+            (3, 4),  # left
+            (3, 5)   # forward, left
         ))
 
     def test_get_attackers(self):
@@ -346,39 +391,7 @@ class TestBoardFunctions(unittest.TestCase):
         )) 
 
 
-    def test_get_king_moves(self):
-        # Check the opening moves of a white king
-        white_king = board.WhiteKing()
-        white_king_moves_from_5_1 = self.board._get_moves((5,1), white_king)
-        assert_that(white_king_moves_from_5_1, is_([]))
-
-        # Check the opening moves of a black king
-        black_king = board.BlackKing()
-        black_king_moves_from_5_8 = self.board._get_moves((5,8), black_king)
-        assert_that(black_king_moves_from_5_8, is_([]))
-
-        # Check the moves of a white king in the open
-        white_king_moves_from_4_4 = self.board._get_moves((4,4), white_king)
-        assert_that(white_king_moves_from_4_4, only_contains(
-            (4, 5),  # forward
-            (5, 5),  # forward right
-            (5, 4),  # right
-            (5, 3),  # backwards right
-            (4, 3),  # backward
-            (3, 3),  # backwards left
-            (3, 4),  # left
-            (3, 5)   # forward, left
-        ))
-
-        # Check the moves of a black king in front of white pawns
-        black_king_moves_from_4_4 = self.board._get_moves((4,4), black_king)
-        assert_that(black_king_moves_from_4_4, only_contains(
-            (4, 5),  # forward
-            (5, 5),  # forward right
-            (5, 4),  # right
-            (3, 4),  # left
-            (3, 5)   # forward, left
-        ))
+ 
 
     # TODO: test more castling combinations, and +ve / -ve testing
     def test_get_castle_moves(self):
