@@ -25,6 +25,7 @@ class White(Colour):
 
 
 def _inverse_colour(colour):
+    """Returns the opposite colour to the one provided. """
     if colour is Black:
         return White
     elif colour is White:
@@ -42,22 +43,25 @@ class IllegalMoveException(Exception):
     """
     pass
 
+class InvalidBoardException(Exception):
+    """Returned if a chess board cannot represent a legal game board."""
+    pass
 
 class Move(object):
     from_ = None
     to_ = None
     piece = None
     # Did the the pawn moved two squares? Only valid for pawns
-    double_move = False
+    is_double_move = False
     def __init__(self, piece, from_, to_):
         self.piece = piece
         self.from_ = from_
         self.to_ = to_
         if isinstance(piece,Pawn):
             if abs(from_[1] - to_[1]) == 2:  # The pawn moved two squares
-                self.double_move = True
+                self.is_double_move = True
         else:
-            self.double_move = False
+            self.is_double_move = False
 
 
 class Square(object):
@@ -75,7 +79,7 @@ class Board(object):
     stalemate_count = 0
 
     _all_pieces = None
-    _king_locations = None
+    _king_location = None
     
 
     def __init__(self, board_string=None):
@@ -95,7 +99,7 @@ class Board(object):
         """
         pass
 
-    def is_in_checkmate(self, colour):
+    def is_checkmate(self, colour):
         """Returns True if the King of the colour specified is in checkmate.
         """
         pass
@@ -136,7 +140,7 @@ class Board(object):
             # Empty squares
             if self.get_piece(right_6) is None:
                 if self.get_piece(right_7) is None:
-                    # Witg no attackers?
+                    # With no attackers?
                     if self._get_attackers(right_6, enemy_colour) == set([]):
                         if self._get_attackers(right_7, enemy_colour) == set([]):
                             moves.append(right_7)
@@ -229,7 +233,7 @@ class Board(object):
         """Returns True if two squares are horizontally, vertically or diagonally adjacent (side by side).
         """
         if loc_a[0] - loc_b[0] <= 1:
-            if loc_a[0] - loc_b[1] <= 1:
+            if loc_a[1] - loc_b[1] <= 1:
                 if loc_a != loc_b:
                     return True
         return False
@@ -304,12 +308,11 @@ class Board(object):
 
         # A piece can only be pinned if it's in a line with the king
         king_loc = self._king_location[colour]
+        pinned_vector = (from_[0] - king_loc[0], from_[1] - king_loc[1])
 
-        pinned_vector = (king_loc[0] - from_[0], king_loc[1] - from_[1])
         # Since only queen, rook and bishop can pin, 
         # pinned_vector must normalze to one of (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (1, -1)
-
-        [x, y] = pinned_vector
+        [x, y] = pinned_vector 
 
         if x == 0:
             y = y / abs(y)
@@ -324,13 +327,23 @@ class Board(object):
 
         pinned_direction = (x, y)
         negative_pinned_direction = (-x, -y)
+
         # We're only pinned if there is an attacker in this direction
+        # An execption to this is a pawn may be prevented from attacking
+        # via en passant, but that is a rare case and the logic is handled
+        # there to reduce general complexity
         squares = self._get_squares(from_, pinned_direction)
-        # The last square will contain an attacker if there is any
+    
+        if not squares:
+            # We can't be pinned by pieces not on the board
+            return None
+
+        # The last square will contain an attacker if there is any            
         enemy_piece= squares[-1].piece
+
         if enemy_piece is not None and enemy_piece.colour is enemy_colour:
             if negative_pinned_direction in enemy_piece.moves:
-                return [pinned_direction, negative_pinned_direction]
+                return set([pinned_direction, negative_pinned_direction])
 
         return None
 
@@ -351,7 +364,7 @@ class Board(object):
 
             # Can't move king into check
             new_moves = []
-            for m in moves:                
+            for m in moves:
                 if len(self._get_attackers(m, enemy_colour)) > 0:
                     pass
                 else:
@@ -363,18 +376,18 @@ class Board(object):
         else:
             # Check if this piece is pinned, and then pass the limited move vector to
             # the _get_*piece*_moves methods. They need to be restricted in what they
-            # search. pinned_direction = self._get_pinned_directions(loc)
+            # search. 
 
+            pinned_directions = self._get_pinned_directions(loc)
             if isinstance(piece, Pawn):
-                moves = self._get_pawn_moves(piece)
+                moves = self._get_pawn_moves(piece, False, pinned_directions)
             elif isinstance(piece, Queen) or isinstance(piece, Rook) or isinstance(piece, Bishop) or isinstance(piece,  Knight):
                 # A pinned piece can only move in the vector it is pinned in
-                moves = self._get_knight_bishop_queen_rook_king_moves(piece, loc)
+                moves = self._get_knight_bishop_queen_rook_king_moves(piece, loc, pinned_directions)
             
         return moves
 
-    # TODO: Use direction tp limit the moves this peice can make when pinned
-    def _get_knight_bishop_queen_rook_king_moves(self, piece, loc, direction=None):
+    def _get_knight_bishop_queen_rook_king_moves(self, piece, loc, pinned=None):
         """Returns all of the location any of these pieces can move to from the
         location specified.
 
@@ -383,8 +396,12 @@ class Board(object):
         squares = []
         locations = []
 
+        if pinned is not None:
+            move_vectors = set.intersection(piece.moves, pinned)
+        else:
+            move_vectors = piece.moves
 
-        for direction in piece.moves:
+        for direction in move_vectors:
             squares += self._get_squares(loc, direction, piece.limit)
 
         for s in squares:
@@ -394,8 +411,90 @@ class Board(object):
         
         return locations
 
-    # TODO: Use direction tp limit the moves this peice can make when pinned
-    def _get_pawn_moves(self, piece, attacks_only=False, direction=None):
+    def _get_pawn_attacks(self, pawn, pinned=None):
+        """Returns all of the locations the pawn can attack.
+
+        pawn   -- The pawn to return the location it can attack
+        pinned -- If not None, only attack in a subset of the directions specified by pinned
+        """
+        left_attack = self._get_pawn_attack(pawn, pinned, True)
+        right_attack = self._get_pawn_attack(pawn, pinned, False)
+        return left_attack | right_attack
+
+    # I don't like the similarity in naming with _get_pawn_attacks (differing only by an s)
+    def _get_pawn_attack(self, pawn, pinned=None, left=True):
+        """Returns the location a pawn can attack diagonnaly in one direction.
+
+        pawn   -- The pawn to return the location it can attack
+        left   -- If true check the left location, if false check right
+        pinned -- If not None, only attack in a subset of the directions specified by pinned
+        """
+        attack = set([])
+        [x, y] = pawn.location
+
+        if left:
+            attack_dir = pawn.attack_left
+            en_passant_loc = (x - 1, y)
+        else:
+            attack_dir = pawn.attack_right
+            en_passant_loc = (x + 1, y)
+            #en_passant_dir = pawn.right
+
+
+        # Check if the piece can attack normally
+        if pinned is None or attack_dir in pinned:
+            enemy_squares = self._get_squares(pawn.location, attack_dir, 1)
+            if not enemy_squares:
+                # No squares to attack
+                return set([])
+
+            enemy_piece = enemy_squares[0].piece  
+            enemy_location = enemy_squares[0].location
+            if enemy_piece is not None and enemy_piece.colour is not pawn.colour:
+                # We can capture this normally
+                attack.add(enemy_squares[0].location)
+
+            # Check if the pawn can attack via en passant
+            # TODO: Draw out some chess boards in the comments to make this more
+            # comprehensible to others reading the code. Will have to use unicode in
+            # the source ... should be ok, it's 2013 now and ascii isn't the be all and end all
+            if self._previous_move is not None and self._previous_move.is_double_move:
+                if self._previous_move.to_ == en_passant_loc:
+                    # We can attack this via en passant
+                    # Don't need to check the following, implicity true
+                    # if enemy_piece is not None and enemy_piece.colour is not pawn.colour:
+                    # We can capture this normally
+
+                    # We could be pinned by a rook or queen, but this is very rare
+                    # Since two pieces are in the way, regular _get_pinned direction
+                    # method will not work
+
+                    king_rook_or_queen_loc = self._get_squares(enemy_location, (-1, 0))
+                    king_rook_or_queen_loc_2 = self._get_squares(pawn.location, (1, 0))
+                    if king_rook_or_queen_loc is not None and king_rook_or_queen_loc_2 is not None:
+                        # There are some squares either side of pawns
+                        piece_1 = self.get_piece(king_rook_or_queen_loc[0].location)
+                        piece_2 = self.get_piece(king_rook_or_queen_loc_2[0].location)
+                        if piece_1 is not None and piece_2 is not None:
+                            # They're occupied
+                            if piece_1.colour is pawn.colour and isinstance(piece_1, King):
+                                # By our king
+                                if piece_2 is not pawn.colour and (isinstance(piece_2, Queen) or isinstance(piece_2, Rook)):
+                                    # And an enemy queen or rook, we're pinned, can't move
+                                    return set([])
+                            elif piece_2.colour is pawn.colour and isinstance(piece_2, King):
+                                # By our king
+                                if piece_1 is not pawn.colour and (isinstance(piece_1, Queen) or isinstance(piece_1, Rook)):
+                                    # And an enemy queen or rook, we're pinned, can't move
+                                    return set([])
+
+                    # Not pinned, can attack via en passant
+                    attack.add(enemy_squares[0].location)            
+
+        return attack
+
+    # TODO: Use direction to limit the moves this peice can make when pinned
+    def _get_pawn_moves(self, piece, attacks_only=False, pinned=None):
         """Returns all of the valid moves for a board in the location from_
         specified. Does not check if the move will put the mover into check.
 
@@ -403,38 +502,26 @@ class Board(object):
         this piece.
         """
 
-        #TODO check_is_pinned
+        moves = set([])
 
-        moves = []
+        if pinned is not None and (1, 0) in pinned:
+            # Pinned horizontally, therefore cannot move forward or attack
+            return moves
+        
+        
         if not attacks_only:
+            # Check if the piece is not pinned or only pinned vertically so can move forward    
+            if pinned is None or (0, 1) in pinned:
             # Pawns can move one space forward
-            if self.get_piece(piece.single_move()) is None:
-                moves.append(piece.single_move())                
-                if piece.has_moved is False:
-                    # On their first move, they can double move
-                    if self.get_piece(piece.double_move()) is None:                        
-                        moves.append(piece.double_move())
+                if self.get_piece(piece.single_move()) is None:
+                    moves.add(piece.single_move())
+                    if piece.has_moved is False:
+                        # On their first move, they can double move
+                        if self.get_piece(piece.double_move()) is None:                        
+                            moves.add(piece.double_move())
 
-        # Normal Attacks
-        for square in piece.attack():
-            target = self.get_piece(square)
-            if target is not None and target.colour is not piece.colour:
-                moves.append(square)
-
-        # En passant?
-        # If the previous move was a double move by a pawn, and that pawn has
-        # moved to the left or the right of this piece, then it may be
-        # captured via en passant.
-        if self._previous_move is not None and self._previous_move.double_move:
-            # Don't need to check left and right are valid as the previous
-            # move will be, and this only passes on equality. Colour of piece
-            # being attacked also guarenteed to be oponents in normal game
-            if self._previous_move.to_ == piece.attack_en_passant_left():
-                moves.append(piece.attack_left())
-            elif self._previous_move.to_ == piece.attack_en_passant_right():
-                moves.append(piece.attack_right())           
-
-        return moves
+        attacks = self._get_pawn_attacks(piece, pinned)
+        return moves | attacks
 
     def _is_en_passant_attack(self, from_):
         """Returns True if an attack can be made from the location from_ via via en passant"""
@@ -444,7 +531,7 @@ class Board(object):
             # 1st move has no previous
             if self._previous_move is not None:  
                 # En passant only possible when eneny pawn does double move
-                if self._previous_move.double_move:  # Implies pawn
+                if self._previous_move.is_double_move:  # Implies pawn
                     [x,y] = from_
                     [prev_x, prev_y] = self._previous_move.to_
                     if prev_y == y:  # Same row
@@ -476,7 +563,6 @@ class Board(object):
                 # We've stepped off the board
                 break
         return squares
-
 
     def get_pieces(self, player):
         """Returns all of the pieces owned by a given player."""
@@ -597,7 +683,7 @@ class Board(object):
             has_moved = False
             for symbol in row:
                 if symbol == _HAS_MOVED:
-                    # This is meta data
+                    # This is meta data, it isn't a piece, so don't increment x
                     has_moved = True
                 else:
                     x += 1
@@ -610,7 +696,11 @@ class Board(object):
                         if issubclass(cls, Pawn):
                             self._all_pieces[loc] = cls(loc)
                         elif issubclass(cls, King):
-                            # Cannot handle multiple kings of the the same colour, just saying
+                            if cls.colour in self._king_location:
+                                # Cannot handle multiple kings of the the same colour, just saying
+                                # We already have a king of this colour ... not good
+                                raise InvalidBoardException()
+
                             self._king_location[cls.colour] = loc
                             self._all_pieces[loc] = cls(has_moved)
                         elif issubclass(cls, Rook): 
@@ -622,13 +712,12 @@ class Board(object):
                             raise ValueError("Invalid chess piece {0}".format(symbol))
                         has_moved = False
 
-        # These data structures must be kept in sync
+        # These data structures must be kept in sync 
         assert isinstance(self._all_pieces[self._king_location[Black]], BlackKing)
         assert isinstance(self._all_pieces[self._king_location[White]], WhiteKing)
 
     def display(self):
-        """Prints out a unicode representation of the chess board.
-        """
+        """Prints out a unicode representation of the chess board."""
         WHITE_SQUARE = u"\u25a8"
         BLACK_SQUARE = u"\u25a2"
         line = u""
@@ -662,11 +751,12 @@ class Piece(object):
     # If none then it can move an unlimted amount in a direction
     limit = None  
  
-    # Return a unicode encoded string representation
     def __str__(self):
+        """Return a utf-8 encoded string representation of this chess piece."""
         return unicode(self).encode('utf-8')
 
     def __unicode__(self):
+        """Return the unicode string representation of this chess piece."""
         return self.symbol
 
     def move(self, location):
@@ -687,6 +777,7 @@ class Piece(object):
         
         raise ValueError()
 
+
 class King(object):
     """The King chess piece.
 
@@ -698,8 +789,7 @@ class King(object):
             raise TypeError("King class may not be instantiated.")
         return object.__new__(cls, *args, **kwargs)
 
-    moves = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1),
-            (1, -1)]  # x,y
+    moves = set([(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)])  # x,y
     limit = 1  # The King may only move one place via his move vectors
     has_moved = False
 
@@ -733,8 +823,7 @@ class Queen(object):
             raise TypeError("Queen class may not be instantiated.")
         return object.__new__(cls, *args, **kwargs)  
 
-    moves = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1),
-            (1, -1)]  # x,y
+    moves = set([(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)])  # x,y
 
 
 class WhiteQueen(Queen, Piece):
@@ -760,7 +849,7 @@ class Rook(object):
             raise TypeError("Rook class may not be instantiated.")
         return object.__new__(cls, *args, **kwargs)   
 
-    moves = [(1, 0), (0, 1), (-1, 0), (0, -1)] 
+    moves = set([(1, 0), (0, 1), (-1, 0), (0, -1)]) 
     has_moved = False
 
 
@@ -793,7 +882,7 @@ class Bishop(object):
             raise TypeError("Bishop class may not be instantiated.")
         return object.__new__(cls, *args, **kwargs)   
 
-    moves = [(1, 1), (-1, 1), (-1, -1), (1, -1)]  # x,y              
+    moves = set([(1, 1), (-1, 1), (-1, -1), (1, -1)])  # x,y              
 
 
 class WhiteBishop(Bishop, Piece):
@@ -820,8 +909,7 @@ class Knight(Piece):
         return object.__new__(cls, *args, **kwargs)
 
     # All moves a knight may make
-    moves = [(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1),
-            (-2, 1), (-1, 2)]  # x, y
+    moves = set([(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2)])  # x, y
     limit = 1  # Knights only move one place via their move vectors       
 
         
@@ -843,10 +931,19 @@ class Pawn(object):
     This should not be called directly, instead a  BlackPawn or WhitePawn
     should be instanciated.
     """
+    limit = 1  # Pawns can only attack/move 1 space (double move is treated special)
+    left = (-1, 0)
+    right = (1, 0)
+
     def __new__(cls, *args, **kwargs):
         if cls is Pawn:
             raise TypeError("Pawn class may not be instantiated.")
         return object.__new__(cls, *args, **kwargs)
+
+    # HACK! Pawns use methods for their moves / attacks currently
+    # This was placed here so we can treat them like all other pieses
+    # when checking if a piece is pinned. Note - pawns can't pin a piece
+    moves = set([])
 
     def single_move(self):
         """Returns the location of the square infront of this piece.
@@ -854,83 +951,19 @@ class Pawn(object):
         return (self.location[0], self.location[1] + self.forward)
 
     def double_move(self):
-        """Returns the location two squares infrom of this piece. 
+        """Returns the location two squares infront of this piece. 
         Can be the first move of this piece.
         """
         return (self.location[0], self.location[1] + 2 * self.forward)
-
-    def attack(self):
-        """Return the locations this piece can attack."""
-        locations = []
-        left = self.attack_left()
-        right = self.attack_right()
-        if left is not None:
-            locations.append(left)
-        if right is not None:
-            locations.append(right)
-        return locations
-
-    def attack_left(self):
-        """Return the left location this piece can attack."""
-        # Used with en passant left
-        x = self.location[0] - 1
-        y = self.location[1] + self.forward
-        if x >= 1:
-            return (x, y)
-
-    def attack_right(self):
-        """Return the right location this piece can attack."""
-        # Used with en passant right
-        x = self.location[0] + 1
-        y = self.location[1] + self.forward
-        if x <= 8:
-            return (x, y)
-
-    def attack_en_passant(self, to_):
-        """Returns the location this piece can capture via en passent when moving to to_.
-
-        If the to_move is not valid, return None
-        """
-        # Effectively this is just attacking the piece beside us
-        (x, y) = to_
-        if self.location[1] == y:  # In the same row
-            if abs(self.location[0] - x) == 1:  # Adjacent
-                return (x, self.location[1])
-        return None
-
-    def attack_en_passant_left(self):
-        """Return one of the locations this piece may attack a pawn via en passant.
-
-        En passent is a special pawn capture which can occur immediately 
-        after a player does a 'double move' from its starting position, and
-        the oppoents pawn could have captured it had the same pawn moved only
-        one square forward. The opponent captures the just-moved pawn as if 
-        taking it "as it passes" through the first square.
-        """
-        x = self.location[0] - 1
-        y = self.location[1]
-        if x >= 1:            
-            return (x,y)
-
-    def attack_en_passant_right(self):
-        """Return one of the locations this piece may attack a pawn via en passant.
-
-        En passent is a special pawn capture which can occur immediately 
-        after a player does a 'double move' from its starting position, and
-        the oppoents pawn could have captured it had the same pawn moved only
-        one square forward. The opponent captures the just-moved pawn as if 
-        taking it "as it passes" through the first square.
-        """        
-        x = self.location[0] + 1
-        y = self.location[1]
-        if x <= 8:
-            return (x,y)
 
 
 class WhitePawn(Pawn, Piece):
     """A White Pawn chess piece."""
     symbol = u'\u2659'
     colour = White
+    forward = 1  # Based off White starting at rows 1,2
+    attack_left = (-1, 1)
+    attack_right = (1, 1)
 
     def __init__(self, location):
         if Board._valid_location(location):
@@ -944,13 +977,14 @@ class WhitePawn(Pawn, Piece):
         else:
             self.has_moved = True
 
-        self.forward = 1  # Based off White starting at rows 1,2
-
 
 class BlackPawn(Pawn, Piece):
     """A Black Pawn chess piece."""
     symbol = u'\u265f'
     colour = Black
+    forward = -1 # Based off Black starting at rows 7,8
+    attack_left = (-1, -1)
+    attack_right =(1, -1)
 
     def __init__(self, location):
         if Board._valid_location(location):
@@ -964,4 +998,4 @@ class BlackPawn(Pawn, Piece):
         else:
             self.has_moved = True
 
-        self.forward = -1 # Based off Black starting at rows 7,8
+        

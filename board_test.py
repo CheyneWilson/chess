@@ -169,58 +169,56 @@ class TestBoardFunctions(unittest.TestCase):
     def test_get_moves_opening_white_pawn(self):
         """Check that a white pawn can move from it's starting position as either a single or double move."""
         pawn_moves = self.board.get_moves((1, 2))
-        assert_that(pawn_moves, only_contains((1, 3), (1, 4)))
+        assert_that(pawn_moves, contains_inanyorder((1, 3), (1, 4)))
 
     def test_get_moves_opening_black_pawn(self):
         """Check that a black pawn can move from it's starting position as either a single or double move."""
         pawn_moves = self.board.get_moves((6, 7))
-        assert_that(pawn_moves, only_contains((6, 6), (6, 5)))
+        assert_that(pawn_moves, contains_inanyorder((6, 6), (6, 5)))
 
     def test_get_moves_moved_white_pawn(self):
         """Check that a white pawn that has moved can only move one space (when nothing to attack)."""
         pawn_board = board.Board("♖♘♗♕♔♗♘♖-♙♙_♙♙♙♙♙-__♙_____-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
         pawn_moves = pawn_board.get_moves((3, 3))
-        assert_that(pawn_moves, only_contains((3, 4)))
+        assert_that(pawn_moves, contains_inanyorder((3, 4)))
 
     def test_get_moves_white_pawn_attacks_both(self):
         """Check that a white pawn with 3 Black pieces in front can attack the two pieces on the sides only"""
         pawn_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙_♙♙♙♙-________-________-________-___♙___-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
         pawn_moves = pawn_board.get_moves((4, 6))
-        assert_that(pawn_moves, only_contains((3, 7), (5, 7)))
+        assert_that(pawn_moves, contains_inanyorder((3, 7), (5, 7)))
 
     def test_get_moves_black_pawn_attack_left(self):
         """Check that a black pawn next to the right board edge blocked by two white pieces can attak the piece diagonally left"""
         pawn_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙__-________-______♙♙-_______♟-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,W,0,0")
         pawn_moves = pawn_board.get_moves((8, 5))
-        assert_that(pawn_moves, only_contains((7, 4)))
+        assert_that(pawn_moves, contains_inanyorder((7, 4)))
 
     def test_get_moves_black_pawn_cant_attack_black(self):
         """Check that a black pawn can't attack it's own pieces."""
         pawn_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-______♟♟-_______♟-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,W,0,0")
         pawn_moves = pawn_board.get_moves((8, 5))
-        assert_that(pawn_moves, is_([]))     
+        assert_that(pawn_moves, is_(set([])))     
 
     # TODO: 
     # Add more tests for the following
     # * Cannot attack own colour
-    # * En passent
 
     def test_get_moves_white_knight_opening(self):
         """Check the opening moves of a white knight."""
         knight_moves = self.board.get_moves((2,1))
-        assert_that(knight_moves, only_contains((1, 3), (3, 3)))
+        assert_that(knight_moves, contains_inanyorder((1, 3), (3, 3)))
 
     def test_get_moves_black_knight_opening(self):
         """Check the opening moves of a black knight."""
         knight_moves = self.board.get_moves((7, 8))
-        assert_that(knight_moves, only_contains((6, 6), (8, 6)))
-
+        assert_that(knight_moves, contains_inanyorder((6, 6), (8, 6)))
 
     def test_get_moves_knight_fork_attack(self):
         """Check if a knight at G3 can fork the king and rook, as well as other moves."""
         knight_board = board.Board("♖_♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♘♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
         knight_moves = knight_board.get_moves((3, 7))
-        assert_that(knight_moves, only_contains((1, 8), (5, 8), (1, 6), (5, 6), (2, 5), (4, 5)))        
+        assert_that(knight_moves, contains_inanyorder((1, 8), (5, 8), (1, 6), (5, 6), (2, 5), (4, 5)))        
 
     def test_get_moves_white_bishop_opening(self):
         """Check the opening moves of a white bishop."""
@@ -236,7 +234,7 @@ class TestBoardFunctions(unittest.TestCase):
         """Test get_moves for a white bishop in the middle of the board."""
         bishop_board = board.Board("♖♘_♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♗___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
         bishop_moves = bishop_board.get_moves((5,5))
-        assert_that(bishop_moves, only_contains(
+        assert_that(bishop_moves, contains_inanyorder(
             (4, 6), (3, 7),  # forward left
             (6, 6), (7, 7),  # forward right
             (4, 4), (3, 3),  # backward left
@@ -247,7 +245,7 @@ class TestBoardFunctions(unittest.TestCase):
         """Test get_moves for a black bishop in the middle of the board."""
         bishop_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-___♝____-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚_♞♜,W,0,0")        
         bishop_moves = bishop_board.get_moves((4,5))
-        assert_that(bishop_moves, only_contains(
+        assert_that(bishop_moves, contains_inanyorder(
             (3, 6), #(2, 7),  # forward left
             (5, 6), #(6, 7),  # forward right
             (3, 4), (2, 3), (1, 2),  # backward left
@@ -268,7 +266,7 @@ class TestBoardFunctions(unittest.TestCase):
         """Test get_moves for a white rook in the middle of the board."""
         rook_board = board.Board("♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-_♖______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
         rook_moves = rook_board.get_moves((2,3))
-        assert_that(rook_moves, only_contains(
+        assert_that(rook_moves, contains_inanyorder(
             (2, 4), (2, 5), (2, 6), (2, 7),  # forward
             (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3),  # right
             (1, 3)  # left
@@ -276,11 +274,26 @@ class TestBoardFunctions(unittest.TestCase):
         ))
 
     def test_get_moves_black_rook_free(self):
-        """Test get_moves for a black rook in the middle of the board."""
+        """Test get_moves for a black rook in the middle of the board.
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|♚|♝|♞|_|  
+        G |♟|♟|♟|♟|♟|♟|♟|♟|  
+        F |_|_|_|_|_|_|_|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|_|_|_|_|_|_|_|  
+        C |_|♜|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|♙|♙|♙|♙|  
+        A |♖|♘|♗|♕|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+
         rook_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-_♜______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_,W,0,0")
         rook_moves = rook_board.get_moves((2,3))
-        assert_that(rook_moves, only_contains(
-            (2, 4), (2, 5), (2, 6), (2, 6),  # forward
+        assert_that(rook_moves, contains_inanyorder(
+            (2, 4), (2, 5), (2, 6),  # forward
             (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3),  # right
             (1, 3),  # left
             (2, 2)  # backward
@@ -300,7 +313,7 @@ class TestBoardFunctions(unittest.TestCase):
         """Check the moves of a white queen in the open."""
         queen_board = board.Board("♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-________-___♕____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
         queen_moves = queen_board.get_moves((4,4))
-        assert_that(queen_moves, only_contains(
+        assert_that(queen_moves, contains_inanyorder(
             (4, 5), (4, 6), (4, 7),  # forward
             (5, 5), (6, 6), (7, 7),  # forward right
             (5, 4), (6, 4), (7, 4), (8, 4),  # right
@@ -315,7 +328,7 @@ class TestBoardFunctions(unittest.TestCase):
         """Check the moves of a black queen in the open."""
         queen_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___♛____-________-________-♟♟♟♟♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
         queen_moves = queen_board.get_moves((4,4))    
-        assert_that(queen_moves, only_contains(
+        assert_that(queen_moves, contains_inanyorder(
             (4, 5), (4, 6), # forward
             (5, 5), (6, 6), # forward right
             (5, 4), (6, 4), (7, 4), (8, 4),  # right
@@ -340,7 +353,7 @@ class TestBoardFunctions(unittest.TestCase):
         """Check the moves of a white king in the open."""
         king_board = board.Board("♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-___m♔____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
         king_moves = king_board.get_moves((4,4))
-        assert_that(king_moves, only_contains(
+        assert_that(king_moves, contains_inanyorder(
             (4, 5),  # forward
             (5, 5),  # forward right
             (5, 4),  # right
@@ -355,7 +368,7 @@ class TestBoardFunctions(unittest.TestCase):
         """Check the moves of a black king in front of white pawns."""
         king_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___m♚____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,W,0,0")
         king_moves = king_board.get_moves((4,4))
-        assert_that(king_moves, only_contains(
+        assert_that(king_moves, contains_inanyorder(
             (4, 5),  # forward
             (5, 5),  # forward right
             (5, 4),  # right
@@ -363,42 +376,204 @@ class TestBoardFunctions(unittest.TestCase):
             (3, 5)   # forward, left
         ))
 
+    def test_get_moves_pinned_knight(self):
+        """Check that a pinned knight cannot move (as there is no way for it to still be blocking check if it moves)."""
+        pinned_board = board.Board("♖♘♗♕♔♗_♖-♙♙♙♙♘♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_,W,0,0")
+        knight_moves = pinned_board.get_moves((5,2))
+        assert_that(knight_moves, is_([]))
+
+
+    def test_get_moves_pawn_pinned_by_rook(self):
+        """Test that a pawn pinned vertically by a rook can still move forward normally - in the direction it is pinned.
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|♚|♝|♞|_|
+        G |♟|♟|♟|♟|♟|♟|♟|♟|
+        F |_|_|_|_|_|_|_|_|
+        E |_|_|_|_|♜|_|_|_|
+        D |_|_|_|_|_|_|_|_|
+        C |_|_|_|_|_|_|_|_|
+        B |♙|♙|♙|♙|♙|♙|♙|♙|
+        A |♖|♘|♗|♕|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+
+        """
+        pinned_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_,W,0,0")
+        pawn_moves = pinned_board.get_moves((5, 2))
+        assert_that(pawn_moves, contains_inanyorder((5, 3), (5, 4)))
+
+    def test_get_moves_pawn_pinned_by_rook_2(self):
+        """Test that a pawn pinned vertically by a rook can still move forward normally but cannot attack
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|♚|♝|♞|_|
+        G |♟|♟|♟|_|♟|_|♟|♟|
+        F |_|_|_|_|_|_|_|_|
+        E |_|_|_|_|♜|_|_|_|
+        D |_|_|_|_|_|_|_|_|
+        C |_|_|_|♟|_|♟|_|_|
+        B |♙|♙|♙|♙|♙|♙|♙|♙|
+        A |♖|♘|♗|♕|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        pinned_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-___♟_♟__-________-____♜___-________-♟♟♟_♟_♟♟-♜♞♝♛♚♝♞_,W,0,0")
+        pawn_moves = pinned_board.get_moves((5, 2))
+        assert_that(pawn_moves, contains_inanyorder((5, 3), (5, 4)))
+
+    def test_get_moves_pawn_pinned_by_rook_3(self):
+        """Test that a pawn pinned horizontally by a rook can still move forward normally but cannot attack
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|_|♝|♞|♜|  White pawn has double moved to D5. Black could
+        G |♟|♟|♟|♟|♟|_|♟|♟|  capture via en passant but that would put Black's
+        F |_|_|_|_|_|_|_|_|  king in check. Therefore can only move forward.
+        E |_|_|_|_|_|_|_|_|
+        D |♖|_|_|_|♙|♟|_|♚|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|_|♙|♙|♙|  
+        A |♖|♘|♗|♕|♔|♗|♘|_|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        pinned_board = board.Board("♖♘♗♕♔♗♘_-♙♙♙♙_♙♙♙-________-♖___m♙♟_♚-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,W,0,0")
+        pawn_moves = pinned_board.get_moves((6, 4))
+        assert_that(pawn_moves, contains_inanyorder((6, 3)))
+
+    def test_get_moves_pawn_pinned_by_rook_4(self):
+        """Test that a pawn pinned horizontally by a rook can still move forward normally but cannot attack
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|_|♝|♞|♜|  Black pawn is pinned so cannot move.
+        G |♟|♟|♟|♟|♟|_|♟|♟|  
+        F |_|_|_|_|_|_|_|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |♖|_|_|_|_|♟|_|♚|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|♙|♙|♙|♙|  
+        A |♖|♘|♗|♕|♔|♗|♘|_|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        pinned_board = board.Board("♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-________-♖____♟_♚-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,W,0,0")
+        pawn_moves = pinned_board.get_moves((6, 4))
+        assert_that(pawn_moves, is_(set([])))
+
+    def test_get_moves_pawn_pinned_by_bishop(self):
+        """Test that a pawn pinned by a bishop cannot move
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|♚|♝|♞|♜|  Black pawn is pinned so cannot move.
+        G |♟|♟|♟|♟|♟|♟|♟|♟|  
+        F |_|_|_|_|_|_|_|_|  
+        E |_|_|_|_|_|_|_|♗|
+        D |_|_|_|_|_|_|_|_|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|♙|♙|♙|♙|  
+        A |♖|♘|♗|♕|♔|_|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        pinned_board = board.Board("♖♘♗♕♔_♘♖-♙♙♙♙♙♙♙♙-________-________-_______♗-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_moves = pinned_board.get_moves((6, 7))
+        assert_that(pawn_moves, is_(set([])))
+
+    def test_get_moves_pawn_pinned_by_bishop_2(self):
+        """Test that a pawn pinned by a bishop cannot move unless it can capture attacker
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|♚|♝|♞|♜|  Black pawn is pinned but can capture attacker.
+        G |♟|♟|♟|♟|♟|♟|♟|♟|  
+        F |_|_|_|_|_|_|♗|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|_|_|_|_|_|_|_|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|♙|♙|♙|♙|  
+        A |♖|♘|♗|♕|♔|_|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        pinned_board = board.Board("♖♘♗♕♔_♘♖-♙♙♙♙♙♙♙♙-________-________-________-______♗_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_moves = pinned_board.get_moves((6, 7))
+        assert_that(pawn_moves, contains_inanyorder((7,6)))
+
+    def test_get_moves_pawn_pinned_by_bishop_3(self):
+        """Test that a pawn pinned by a bishop cannot move unless it can capture attacker
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|♚|♝|♞|♜|  Black pawn is pinned but can capture attacker.
+        G |♟|♟|♟|♟|♟|♟|♟|♟|  
+        F |_|_|_|_|♙|_|♗|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|_|_|_|_|_|_|_|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|_|♙|♙|♙|  
+        A |♖|♘|♗|♕|♔|_|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        pinned_board = board.Board("♖♘♗♕♔_♘♖-♙♙♙♙_♙♙♙-________-________-________-____♙_♗_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_moves = pinned_board.get_moves((6, 7))
+        assert_that(pawn_moves, contains_inanyorder((7,6)))
+
     def test_get_attackers(self):
         # Test some white pawns
         attackers_2_3 = self.board._get_attackers((2, 3), board.White)
-        assert_that(attackers_2_3, only_contains((1, 2), (3, 2)))
+        assert_that(attackers_2_3, contains_inanyorder((1, 2), (3, 2)))
 
         # Two pawns and a knight can attack 3,3 (C3)
         attackers_3_3 = self.board._get_attackers((3, 3), board.White)
-        assert_that(attackers_3_3, only_contains((2, 2), (4, 2), (2, 1))) 
+        assert_that(attackers_3_3, contains_inanyorder((2, 2), (4, 2), (2, 1))) 
 
         # Check pawn in front of white rook
         attackers_8_2 = self.board._get_attackers((8, 2), board.White)
-        assert_that(attackers_8_2, only_contains((8, 1))) 
+        assert_that(attackers_8_2, contains_inanyorder((8, 1))) 
 
         # Check black kings pawn E7
         attackers_6_7 = self.board._get_attackers((6, 7), board.Black)
-        assert_that(attackers_6_7, only_contains((5, 8))) 
+        assert_that(attackers_6_7, contains_inanyorder((5, 8))) 
 
         # Check black queens pawn E7
         attackers_3_7 = self.board._get_attackers((3, 7), board.Black)
-        assert_that(attackers_3_7, only_contains((4, 8))) 
+        assert_that(attackers_3_7, contains_inanyorder((4, 8)))
 
-        # Check pawn directly in front of white king
+    def test_pawn_attackers_2(self):
+        """Check pawn directly in front of white king
+        
+        Check that the king, queen, bishop and right knight all attack square B5
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|♚|♝|♞|♜| 
+        G |♟|♟|♟|♟|♟|♟|♟|♟|  
+        F |_|_|_|_|_|_|_|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|_|_|_|_|_|_|_|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|♙|♙|♙|♙|  
+        A |♖|♘|♗|♕|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
         attackers_5_2 = self.board._get_attackers((5, 2), board.White)
-        assert_that(attackers_5_2, only_contains(
+        assert_that(attackers_5_2, contains_inanyorder(
             (4, 1), (5, 1), (6, 1), (7, 1)
-        )) 
-
-
- 
+        ))
 
     # TODO: test more castling combinations, and +ve / -ve testing
     def test_get_castle_moves(self):
         """Test castling left for both Black and White Kings."""
         castle_board = board.Board("♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜,W,0,0")
-        assert_that(castle_board._get_castle_moves((5, 1)), only_contains((3, 1), (7, 1)))
-        assert_that(castle_board._get_castle_moves((5, 8)), only_contains((3, 8), (7, 8)))
+        assert_that(castle_board._get_castle_moves((5, 1)), contains_inanyorder((3, 1), (7, 1)))
+        assert_that(castle_board._get_castle_moves((5, 8)), contains_inanyorder((3, 8), (7, 8)))
 
     def test_white_king_castle_left(self):
         """Test castling left for White King."""
@@ -599,7 +774,9 @@ class TestBoardFunctions(unittest.TestCase):
         # Move a black pawn 'passed' this one
         black_pawn_loc = (4,5)
         board_.move_piece((4,7), black_pawn_loc)
-           
+        
+        print board_.display()
+
         # Pre-move
         from_ = (5,5)
         to_ = (4,6)        
