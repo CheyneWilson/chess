@@ -674,7 +674,8 @@ class TestBoardFunctions(unittest.TestCase):
         assert_that(check_board.is_check(board.White), is_(True))
 
     def test_checkmate_1(self):
-        """Test the '2 move' checkmate.
+        """Test the '2 move' checkmate. King cannot move and no pieces can
+        block.
 
           ________________
         H |♜|♞|♝|_|♚|♝|♞|♜|  
@@ -693,7 +694,8 @@ class TestBoardFunctions(unittest.TestCase):
         assert_that(check_board.is_checkmate(board.White), is_(True))
 
     def test_checkmate_2(self):
-        """Simliar to the '2 move' checkmate, but with a block.
+        """Simliar to the '2 move' checkmate, king cannot move but there is a
+        block.
           ________________
         H |♜|♞|♝|_|♚|♝|♞|♜|  
         G |♟|♟|♟|♟|_|♟|♟|♟|  
@@ -712,7 +714,7 @@ class TestBoardFunctions(unittest.TestCase):
         assert_that(check_board.is_checkmate(board.White), is_(False))
 
     def test_checkmate_3(self):
-        """Simliar to the '2 move' checkmate, but with an escape.
+        """Simliar to the '2 move' checkmate, but king can move to escape.
           ________________
         H |♜|♞|♝|_|♚|♝|♞|♜|  
         G |♟|♟|♟|♟|_|♟|♟|♟|  
@@ -747,11 +749,31 @@ class TestBoardFunctions(unittest.TestCase):
 
         check_board = board.Board("♖♘♗♕♔♗_♖-♙♙♙♙♙__♙-_____♘__-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
         assert_that(check_board.is_checkmate(board.Black), is_(False))
-        assert_that(check_board.is_checkmate(board.White), is_(False))      
+        assert_that(check_board.is_checkmate(board.White), is_(False)) 
+
+    def test_checkmate_5(self):
+        """Simliar to the '2 move' checkmate. There is an empty square to move
+        but that is also threatened.
+          ________________
+        H |♜|♞|♝|_|♚|♝|♞|♜|  
+        G |♟|♟|_|♟|_|♟|♟|♟|  
+        F |_|_|_|_|♟|_|_|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|_|_|_|_|♙|♙|♛|  
+        C |_|_|♟|♙|_|_|_|_|  
+        B |♙|♙|♙|_|♙|_|_|♙|  
+        A |♖|♘|♗|♕|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+
+        check_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-__♟♙____-_____♙♙♛-________-___♟____-♟♟__♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        assert_that(check_board.is_checkmate(board.Black), is_(False))
+        assert_that(check_board.is_checkmate(board.White), is_(True)) 
 
     def test_statemate_1(self):
         """At the start of a game there is no stalemate as each player has 
-        moves.
+        moves and enough pieces for checkmate.
         """
         assert_that(self.board.is_stalemate(board.White), is_(False))
         assert_that(self.board.is_stalemate(board.Black), is_(False))

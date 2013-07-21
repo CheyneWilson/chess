@@ -147,8 +147,6 @@ class Board(object):
                 blocking_squares = self._get_squares(king_loc, attack_vector, capture=False)
 
                 for s in blocking_squares:
-                    # TODO: Find all the pieces that can move into these squares
-                    # TODO: _get_attackers also counts itself... redundant call
                     block_locs = self._get_attackers(s.location, colour, True)
                     for b in block_locs:
                         if not isinstance(self.get_piece(b), King):
