@@ -568,6 +568,230 @@ class TestBoardFunctions(unittest.TestCase):
             (4, 1), (5, 1), (6, 1), (7, 1)
         ))
 
+    def test_is_check_1(self):
+        """Neither king starts off in check. Test for a fresh board."""
+        assert_that(self.board.is_check(board.Black), is_(False))
+        assert_that(self.board.is_check(board.White), is_(False))
+
+    def test_is_check_2(self):
+        """Test white king in check from two black pawns
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|♚|♝|♞|♜|  
+        G |♟|♟|♟|♟|♟|♟|♟|♟|  
+        F |_|_|_|_|_|_|♔|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|_|_|_|_|_|_|_|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|♙|♙|♙|♙|  
+        A |♖|♘|♗|♕|_|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        check_board = board.Board("♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-______♔_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")        
+        assert_that(check_board.is_check(board.Black), is_(False))
+        assert_that(check_board.is_check(board.White), is_(True))
+
+    def test_is_check_3(self):
+        """Test black king in check from white knight
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|_|♝|♞|♜|  
+        G |♟|♟|♟|♟|♟|♟|♟|♟|  
+        F |_|_|_|_|_|_|_|_|  
+        E |_|_|_|_|♚|_|_|♖|
+        D |_|_|_|_|_|_|_|_|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|♙|♙|♙|♙|  
+        A |♖|♘|♗|♕|♔|♗|♘|_|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        check_board = board.Board("♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-________-________-____♚__♖-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,W,0,0")        
+        assert_that(check_board.is_check(board.Black), is_(True))
+        assert_that(check_board.is_check(board.White), is_(False))
+
+    def test_is_check_4(self):
+        """Test black king in check from white queen horizontally
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|_|♝|♞|♜|  
+        G |♟|♟|♟|♟|♟|♟|♟|♟|  
+        F |_|_|_|_|_|_|_|_|  
+        E |_|_|_|_|♚|_|_|♕|
+        D |_|_|_|_|_|_|_|_|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|♙|♙|♙|♙|  
+        A |♖|♘|♗|_|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        check_board = board.Board("♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♚__♕-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,W,0,0")        
+        assert_that(check_board.is_check(board.Black), is_(True))
+        assert_that(check_board.is_check(board.White), is_(False))
+
+    def test_is_check_5(self):
+        """Test black king in check from white queen vertically
+
+        The board looks like:
+           ________________
+        H |♜|♞|♝|♛|_|♝|♞|♜|  
+        G |♟|♟|♟|♟|♟|♟|♟|♟|  
+        F |_|_|_|_|_|_|_|_|  
+        E |_|_|_|_|♚|_|_|_|
+        D |_|_|_|_|_|_|_|_|  
+        C |_|_|_|_|♕|_|_|_|  
+        B |♙|♙|♙|♙|♙|♙|♙|♙|  
+        A |♖|♘|♗|_|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        check_board = board.Board("♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-____♕___-________-____♚___-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,W,0,0")        
+        assert_that(check_board.is_check(board.Black), is_(True))
+        assert_that(check_board.is_check(board.White), is_(False))
+
+    def test_is_check_6(self):
+        """Test white king in check from black knight
+
+        The board looks like:
+           ________________
+        H |♜|_|♝|♛|♚|♝|♞|♜|  
+        G |♟|♟|♟|♟|♟|♟|♟|♟|  
+        F |_|_|♞|_|_|_|_|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|♔|_|_|_|_|_|_|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|♙|♙|♙|♙|  
+        A |♖|♘|♗|♕|_|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        check_board = board.Board("♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-_♔______-________-__♞_____-♟♟♟♟♟♟♟♟-♜_♝♛♚♝♞♜,W,0,0")
+        assert_that(check_board.is_check(board.Black), is_(False))
+        assert_that(check_board.is_check(board.White), is_(True))
+
+    def test_checkmate_1(self):
+        """Test the '2 move' checkmate.
+
+          ________________
+        H |♜|♞|♝|_|♚|♝|♞|♜|  
+        G |♟|♟|♟|♟|_|♟|♟|♟|  
+        F |_|_|_|_|♟|_|_|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|_|_|_|_|♙|♙|♛|  
+        C |_|_|_|_|_|_|_|_|  
+        B |♙|♙|♙|♙|♙|_|_|♙|  
+        A |♖|♘|♗|♕|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        check_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙__♙-________-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        assert_that(check_board.is_checkmate(board.Black), is_(False))
+        assert_that(check_board.is_checkmate(board.White), is_(True))
+
+    def test_checkmate_2(self):
+        """Simliar to the '2 move' checkmate, but with a block.
+          ________________
+        H |♜|♞|♝|_|♚|♝|♞|♜|  
+        G |♟|♟|♟|♟|_|♟|♟|♟|  
+        F |_|_|_|_|♟|_|_|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|_|_|_|_|♙|_|♛|  
+        C |_|♙|_|_|_|_|_|_|  
+        B |♙|_|♙|♙|♙|_|♙|♙|  
+        A |♖|♘|♗|♕|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+
+        check_board = board.Board("♖♘♗♕♔♗♘♖-♙_♙♙♙_♙♙-_♙______-_____♙_♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        assert_that(check_board.is_checkmate(board.Black), is_(False))
+        assert_that(check_board.is_checkmate(board.White), is_(False))
+
+    def test_checkmate_3(self):
+        """Simliar to the '2 move' checkmate, but with an escape.
+          ________________
+        H |♜|♞|♝|_|♚|♝|♞|♜|  
+        G |♟|♟|♟|♟|_|♟|♟|♟|  
+        F |_|_|_|_|♟|_|_|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|_|_|_|_|♙|♙|♛|  
+        C |_|_|_|♙|_|_|_|_|  
+        B |♙|♙|♙|_|♙|_|_|♙|  
+        A |♖|♘|♗|♕|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+
+        check_board = board.Board("♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-___♙____-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        assert_that(check_board.is_checkmate(board.Black), is_(False))
+        assert_that(check_board.is_checkmate(board.White), is_(False)) 
+
+    def test_checkmate_4(self):
+        """Simliar to the '2 move' checkmate, but with a counter capture.
+          ________________
+        H |♜|♞|♝|_|♚|♝|♞|♜|  
+        G |♟|♟|♟|♟|_|♟|♟|♟|  
+        F |_|_|_|_|♟|_|_|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |_|_|_|_|_|♙|♙|♛|  
+        C |_|_|_|_|_|♘|_|_|  
+        B |♙|♙|♙|♙|♙|_|_|♙|  
+        A |♖|♘|♗|♕|♔|♗|_|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+
+        check_board = board.Board("♖♘♗♕♔♗_♖-♙♙♙♙♙__♙-_____♘__-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        assert_that(check_board.is_checkmate(board.Black), is_(False))
+        assert_that(check_board.is_checkmate(board.White), is_(False))      
+
+    def test_statemate_1(self):
+        """At the start of a game there is no stalemate as each player has 
+        moves.
+        """
+        assert_that(self.board.is_stalemate(board.White), is_(False))
+        assert_that(self.board.is_stalemate(board.Black), is_(False))
+
+    def test_statemate_2(self):
+        """White player cannot move any piece.
+          ________________
+        H |♜|♞|♝|_|♚|♝|♞|♜|  
+        G |_|_|_|_|_|♟|♟|_|  
+        F |_|_|_|_|♟|_|_|_|  
+        E |_|_|_|_|_|_|_|_|
+        D |♟|_|♟|_|_|_|_|_|  
+        C |♙|♟|♙|♟|_|♛|_|♟|  
+        B |_|♙|_|♙|_|_|_|♙|  
+        A |_|♘|♗|_|_|_|♔|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           1 2 3 4 5 6 7 8
+        """
+        stale_board = board.Board("_♘♗___♔♖-_♙_♙___♙-♙♟♙♟_♛_♟-♟_♟_____-________-___♟____-_____♟♟_-♜♞♝_♚♝♞♜,W,0,0")
+        assert_that(stale_board.is_stalemate(board.White), is_(True))
+        assert_that(stale_board.is_stalemate(board.Black), is_(False))
+
+    def test_stalemate_3(self):
+        """If a player has only one bishop or knight they cannot checkmate
+         their opponent. If they have two only knights they cannot force
+         checkmate (except rare case with opponent having a lone pawn). 
+         This tests for stalemate where neither player can achieve checkmate.
+        """
+        stale_board = board.Board("_♘____♔_-________-________-________-________-________-________-____♚___,W,0,0")
+        assert_that(stale_board.is_stalemate(board.White), is_(True))
+        assert_that(stale_board.is_stalemate(board.Black), is_(True))        
+
+    def test_stalemate_4(self):
+        """If a player has a pawn, they can promote it. So it is not stalemate.
+        """
+        stale_board = board.Board("______♔_-♙_______-________-________-________-________-________-____♚___,W,0,0")
+        assert_that(stale_board.is_stalemate(board.White), is_(False))
+        assert_that(stale_board.is_stalemate(board.Black), is_(False))  
+
+
     # TODO: test more castling combinations, and +ve / -ve testing
     def test_get_castle_moves(self):
         """Test castling left for both Black and White Kings."""
@@ -755,7 +979,6 @@ class TestBoardFunctions(unittest.TestCase):
         board_.move_piece(from_, to_)
         assert_that(board_.get_piece(from_), is_(None))
         assert_that(board_.get_piece(to_), is_(piece))
-
 
     def test_en_passant(self):
         """Test whether a pawn can capture another via en-passant."""
