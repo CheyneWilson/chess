@@ -412,14 +412,14 @@ class Board(object):
             pawn_2 = WhitePawn(to_)
 
         # Get the squares of any knights that can attack this square
-        dummy_moves, knight_attacks = self._get_knight_bishop_queen_rook_king_moves_2(knight, to_)
+        dummy_moves, knight_attacks = self._get_knight_bishop_queen_rook_king_moves(knight, to_)
         for k in knight_attacks:
             piece = self.get_piece(k)
             if isinstance(piece, Knight):
                 # Opponents knight - an attacker
                 attackers.add(k)
 
-        dummy_moves, rooks_or_queen_attacks = self._get_knight_bishop_queen_rook_king_moves_2(rook, to_)
+        dummy_moves, rooks_or_queen_attacks = self._get_knight_bishop_queen_rook_king_moves(rook, to_)
         for r in rooks_or_queen_attacks:
             piece = self.get_piece(r)
             if isinstance(piece, Rook) or isinstance(piece, Queen):
@@ -429,7 +429,7 @@ class Board(object):
                 if self._is_adjacent(r, to_):
                     attackers.add(r)
 
-        dummy_moves, bishop_or_queen_attacks = self._get_knight_bishop_queen_rook_king_moves_2(bishop, to_)
+        dummy_moves, bishop_or_queen_attacks = self._get_knight_bishop_queen_rook_king_moves(bishop, to_)
         for b in bishop_or_queen_attacks:
             piece = self.get_piece(b)
             if isinstance(piece, Bishop) or isinstance(piece, Queen):
@@ -539,12 +539,12 @@ class Board(object):
             raise ValueError("Square at location {0} is empty".format(from_))
 
         if isinstance(piece, King):
-            moves, attacks = self._get_knight_bishop_queen_rook_king_moves_2(piece, from_)
+            moves, attacks = self._get_knight_bishop_queen_rook_king_moves(piece, from_)
             moves.extend(self._get_castle_moves(from_))  # Add any castling moves
 
             enemy_color = Color.inverse(piece.color)
 
-            #TODO: This could be simplified
+            #TODO: This could be
             safe_moves = []
             safe_attacks = []
             for m in moves:
@@ -572,11 +572,11 @@ class Board(object):
             elif isinstance(piece, Queen) or isinstance(piece, Rook) or \
                     isinstance(piece, Bishop) or isinstance(piece, Knight):
                 # A pinned piece can only move in the vector it is pinned in
-                moves, attacks = self._get_knight_bishop_queen_rook_king_moves_2(piece, from_, pinned_directions)
+                moves, attacks = self._get_knight_bishop_queen_rook_king_moves(piece, from_, pinned_directions)
 
         return moves, attacks
 
-    def _get_knight_bishop_queen_rook_king_moves_2(self, piece, from_, pinned=set([])):
+    def _get_knight_bishop_queen_rook_king_moves(self, piece, from_, pinned=set([])):
         """Returns all of the location any of these pieces can move to from the location specified.
 
 
@@ -649,7 +649,7 @@ class Board(object):
                         # method will not work
 
                         left_x = min(en_passant_loc.x, pawn.location.x)  # The left square
-                        right_x = max(en_passant_loc.y, pawn.location.x)
+                        right_x = max(en_passant_loc.x, pawn.location.x)
 
                         # Search left and right halves to see if we're in a position where capturing
                         # via en passent would put us in check
@@ -678,7 +678,8 @@ class Board(object):
                             # We're pinned
                             return []
 
-                        attacks.append(pawn.en_passant_move(en_passant_dir))
+                        pawn_move_location = Square(en_passant_loc.x, pawn.location.y + pawn.forward)
+                        attacks.append(pawn_move_location)
 
         return attacks
 
@@ -704,8 +705,10 @@ class Board(object):
         return set([])
 
     def _get_pawn_moves(self, pawn, from_, pinned=set([])):
-        """Returns all of the moves that a pawn can make from the given from_ location.
-        """
+        u"""Returns all of the moves that a pawn can make from the given from_ location
+
+        This does not include moves where the pawn captures an ememy piece but does check
+        whether the pawn is pinned or not."""
         moves = []
 
         if (1, 0) in pinned:
@@ -714,16 +717,34 @@ class Board(object):
 
         # Check if the pawn is not pinned or only pinned vertically so can move forward
         if len(pinned) == 0 or (0, 1) in pinned:
-            potential_moves = pawn.moves
-            # Check that the squares are empty
-            for loc in potential_moves:
-                if self.get_piece(loc) is None:
-                    moves.append(loc)
-                else:
-                    # hit another peice
-                    break
-
+            single_move_loc = (from_.x, from_.y + pawn.forward)
+            try:
+                if self.get_piece(single_move_loc) is None:
+                    moves.append(single_move_loc)
+                    double_move_loc = (from_.x, from_.y + 2 * pawn.forward)
+                    if not self._pawn_has_moved(pawn, from_):
+                        if self.get_piece(double_move_loc) is None:
+                            moves.append(double_move_loc)
+            except KeyError:
+                # A side affect of this approach is that if self.get_piece(single_move_loc) is called when a
+                # Pawn is in the final square, a KeyError is thrown because the 'next' square is not on the
+                # board. In a real game, we never make this move, instead the pawn is promoted as soon as it
+                # Reaches the final square. We return an empty list of moves
+                return moves
+                # raise IllegalMoveException("Pawn cannot move, it must be promoted instead.")
+        else:
+            # Pinned diagonally
+            pass
         return moves
+
+    def _pawn_has_moved(self, pawn, from_):
+        u"""Returns True if the pawn has moved, and False otherwise."""
+        if Color.black == pawn.color and from_.y == 7:
+            return False
+        elif Color.white == pawn.color and from_.y == 2:
+            return False
+        else:
+            return True
 
     def _is_en_passant_attack(self, from_):
         """Returns True if an attack can be made from the location from_ via via en passant"""
@@ -927,7 +948,7 @@ class Board(object):
         assert isinstance(self._all_pieces[self._king_location[Color.white]], WhiteKing)
 
     def display(self):
-        """Prints out a unicode representation of the chess board."""
+        u"""Prints out a unicode representation of the chess board. Used mainly in command line testing."""
         WHITE_SQUARE = u"\u25a8"
         BLACK_SQUARE = u"\u25a2"
         line = u""
@@ -958,7 +979,7 @@ class Board(object):
 
     @staticmethod
     def _translate_squares(squares):
-        """Converts to representation is more compatible with JSON notation. """
+        u"""Converts to representation is more compatible with JSON notation. """
         new_squares = []
         for s in squares:
             new_squares.append({u'x': s.x, u'y': s.y})

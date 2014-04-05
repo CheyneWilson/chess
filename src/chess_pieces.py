@@ -1,5 +1,4 @@
-from chess_color2 import Color
-from chess_square import Square
+from chess_color import Color
 
 
 class Piece(object):
@@ -179,7 +178,7 @@ class BlackBishop(Bishop, Piece):
     color = Color.black
 
 
-class Knight(Piece):
+class Knight(object):
     u"""The Knight chess piece.
 
     This should not be called directly, instead a BlackKnight or WhiteKnight
@@ -221,6 +220,7 @@ class Pawn(object):
     limit = 1  # Pawns can only attack/move 1 space (double move is treated special)
     has_moved = False
     value = 1
+    forward = '?'
 
     def __new__(cls, *args, **kwargs):
         if cls is Pawn:
@@ -232,11 +232,6 @@ class Pawn(object):
         u"""Returns the vectors of the directions a pawn can attack in."""
         return frozenset([(-1, self.forward), (1, self.forward)])
 
-    def en_passant_move(self, dir_):
-        x = self.location.x + dir_[0]
-        y = self.location.y + self.forward
-        return Square(x, y)
-
     @staticmethod
     def en_passant():
         u"""Returns the vectors of the directions a pawn can attack via en_passant in."""
@@ -244,15 +239,8 @@ class Pawn(object):
 
     @property
     def moves(self):
-        move_1 = Square(self.location.x, self.location.y + self.forward)
-        if self.location.y == 8 or self.location.y == 1:
-            #Pawn in the last square, cannot move, should be promoted
-            return []
-        if self.has_moved:
-            return [move_1]
-        else:
-            move_2 = Square(self.location.x, self.location.y + 2 * self.forward)
-            return [move_1, move_2]
+        u"""Returns the direction the pawn can move in in the form of an (x,y) move vector."""
+        frozenset([(self.forward, 0)])
 
 
 class WhitePawn(Pawn, Piece):
@@ -300,6 +288,18 @@ class PieceFactory(object):
        color and type.
     """
     # Created primarily for the promote method used to promote pawns
+    # TODO: Work in progress
+    @staticmethod
+    def create2(name, loc=None):
+        types = Piece.__subclasses__()
+        piece_names = [type.__name__ for type in types]
+
+        if name in piece_names:
+            piece = eval(name)  # Yes, eval is dangerous, but we're sanitising it first
+            return piece
+        else:
+            raise TypeError(u"Invlaid piece {name}".format(name=name))
+
     @staticmethod
     def create(piece, color, loc=None):
         """Create a new peice of the color and type

@@ -263,8 +263,9 @@ class TestBoardFunctions(unittest.TestCase):
         assert_that(pawn_moves, contains_inanyorder((8, 1)))
 
         pawn_moves = pawn_board.move_piece(from_, to_)
-
         pawn_moves = pawn_board.get_moves(to_)
+
+        # self.assertRaises(IllegalMoveException, pawn_board.get_movesto_, to_)
         assert_that(pawn_moves, is_([]))
 
     # TODO:
