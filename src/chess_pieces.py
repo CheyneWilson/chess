@@ -251,16 +251,8 @@ class WhitePawn(Pawn, Piece):
     color = Color.white
     forward = 1  # Based off White starting at rows 1,2
 
-    def __init__(self, loc):
-        assert (loc.x)
-        assert (loc.y)
-        self.location = loc
-
-        # has_moved is used for determining if the pawn can double move
-        if loc.y == 2:
-            self.has_moved = False
-        else:
-            self.has_moved = True
+    def __init__(self, has_moved=False):
+        self.has_moved = has_moved
 
 
 class BlackPawn(Pawn, Piece):
@@ -271,16 +263,8 @@ class BlackPawn(Pawn, Piece):
     color = Color.black
     forward = -1  # Based off Black starting at rows 7,8
 
-    def __init__(self, loc):
-        assert (loc.x)
-        assert (loc.y)
-        self.location = loc
-
-        # has_moved is used for determining if the pawn can double move
-        if loc.y == 7:
-            self.has_moved = False
-        else:
-            self.has_moved = True
+    def __init__(self, has_moved=False):
+        self.has_moved = has_moved
 
 
 class PieceFactory(object):
@@ -288,7 +272,7 @@ class PieceFactory(object):
        color and type.
     """
     # Created primarily for the promote method used to promote pawns
-    # TODO: Work in progress
+
     @staticmethod
     def create2(name, loc=None):
         types = Piece.__subclasses__()

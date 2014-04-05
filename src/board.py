@@ -442,7 +442,7 @@ class Board(object):
         if blocker:
             pawn_squares = self._get_pawn_move_to(pawn_2, to_)
         else:
-            pawn_squares = self._get_pawn_attacks(pawn)
+            pawn_squares = self._get_pawn_attacks(pawn, to_)
         for p in pawn_squares:
             piece = self.get_piece(p)
             if isinstance(piece, Pawn):
@@ -567,7 +567,7 @@ class Board(object):
             pinned_directions = self._get_pinned_directions(from_)
             if isinstance(piece, Pawn):
                 moves = self._get_pawn_moves(piece, from_, pinned_directions)
-                attacks = self._get_pawn_attacks(piece, pinned_directions)
+                attacks = self._get_pawn_attacks(piece, from_, pinned_directions)
 
             elif isinstance(piece, Queen) or isinstance(piece, Rook) or \
                     isinstance(piece, Bishop) or isinstance(piece, Knight):
@@ -607,10 +607,11 @@ class Board(object):
         return all_moves, all_attacks
 
     # I don't like the similarity in naming with _get_pawn_attacks (differing only by an s)
-    def _get_pawn_attacks(self, pawn, pinned=set([])):
+    def _get_pawn_attacks(self, pawn, from_, pinned=set([])):
         """Returns the location a pawn can attack diagonnaly in one direction.
 
         pawn   -- The pawn to return the location it can attack
+        from_  -- The location of the pawn
         pinned -- A set of directions this piece is pinned (both  +/- vector)
         """
         attacks = []
@@ -618,7 +619,7 @@ class Board(object):
         for attack_dir in pawn.attacks:
             # Check if the piece can attack normally
             if len(pinned) == 0 or attack_dir in pinned:
-                dummy_locs, enemy_locs = self._get_squares_2(pawn.location, attack_dir, pawn.color, 1)
+                dummy_locs, enemy_locs = self._get_squares_2(from_, attack_dir, pawn.color, 1)
 
                 for enemy_location in enemy_locs:
                     # We can capture this normally
@@ -631,7 +632,7 @@ class Board(object):
             # TODO: Draw out some chess boards in the comments to make this more
             # comprehensible to others reading the code. Will have to use unicode in
             # the source ... should be ok, it's 2013 now and ascii isn't the be all and end all
-            dummy_locs, en_passant_locs = self._get_squares_2(pawn.location, en_passant_dir, pawn.color, 1)
+            dummy_locs, en_passant_locs = self._get_squares_2(from_, en_passant_dir, pawn.color, 1)
             for en_passant_loc in en_passant_locs:
 
                 if len(self.previous_moves) > 0:
@@ -648,15 +649,15 @@ class Board(object):
                         # Since two pieces are in the way, regular _get_pinned direction
                         # method will not work
 
-                        left_x = min(en_passant_loc.x, pawn.location.x)  # The left square
-                        right_x = max(en_passant_loc.x, pawn.location.x)
+                        left_x = min(en_passant_loc.x, from_.x)  # The left square
+                        right_x = max(en_passant_loc.x, from_.x)
 
                         # Search left and right halves to see if we're in a position where capturing
                         # via en passent would put us in check
                         king = None
                         attacker = None
                         for xi in reversed(range(1, left_x)):
-                            piece = self.get_piece((xi, pawn.location.y))
+                            piece = self.get_piece((xi, from_.y))
                             if piece is not None:
                                 if isinstance(piece, King) and piece.color == pawn.color:
                                     king = piece
@@ -666,7 +667,7 @@ class Board(object):
 
                         if attacker is not None or king is not None:
                             for xi in range(right_x + 1, 9):
-                                piece = self.get_piece((xi, pawn.location.y))
+                                piece = self.get_piece((xi, from_.y))
                                 if piece is not None:
                                     if isinstance(piece, King) and piece.color == pawn.color:
                                         king = piece
@@ -678,7 +679,7 @@ class Board(object):
                             # We're pinned
                             return []
 
-                        pawn_move_location = Square(en_passant_loc.x, pawn.location.y + pawn.forward)
+                        pawn_move_location = Square(en_passant_loc.x, from_.y + pawn.forward)
                         attacks.append(pawn_move_location)
 
         return attacks
@@ -826,14 +827,14 @@ class Board(object):
         self._all_pieces[(6, 1)] = WhiteBishop()
         self._all_pieces[(7, 1)] = WhiteKnight()
         self._all_pieces[(8, 1)] = WhiteRook()
-        self._all_pieces[(1, 2)] = WhitePawn(Square(1, 2))
-        self._all_pieces[(2, 2)] = WhitePawn(Square(2, 2))
-        self._all_pieces[(3, 2)] = WhitePawn(Square(3, 2))
-        self._all_pieces[(4, 2)] = WhitePawn(Square(4, 2))
-        self._all_pieces[(5, 2)] = WhitePawn(Square(5, 2))
-        self._all_pieces[(6, 2)] = WhitePawn(Square(6, 2))
-        self._all_pieces[(7, 2)] = WhitePawn(Square(7, 2))
-        self._all_pieces[(8, 2)] = WhitePawn(Square(8, 2))
+        self._all_pieces[(1, 2)] = WhitePawn()
+        self._all_pieces[(2, 2)] = WhitePawn()
+        self._all_pieces[(3, 2)] = WhitePawn()
+        self._all_pieces[(4, 2)] = WhitePawn()
+        self._all_pieces[(5, 2)] = WhitePawn()
+        self._all_pieces[(6, 2)] = WhitePawn()
+        self._all_pieces[(7, 2)] = WhitePawn()
+        self._all_pieces[(8, 2)] = WhitePawn()
 
         # Place all the Black pieces on the board
         self._all_pieces[(1, 8)] = BlackRook()
@@ -844,14 +845,14 @@ class Board(object):
         self._all_pieces[(6, 8)] = BlackBishop()
         self._all_pieces[(7, 8)] = BlackKnight()
         self._all_pieces[(8, 8)] = BlackRook()
-        self._all_pieces[(1, 7)] = BlackPawn(Square(1, 7))
-        self._all_pieces[(2, 7)] = BlackPawn(Square(2, 7))
-        self._all_pieces[(3, 7)] = BlackPawn(Square(3, 7))
-        self._all_pieces[(4, 7)] = BlackPawn(Square(4, 7))
-        self._all_pieces[(5, 7)] = BlackPawn(Square(5, 7))
-        self._all_pieces[(6, 7)] = BlackPawn(Square(6, 7))
-        self._all_pieces[(7, 7)] = BlackPawn(Square(7, 7))
-        self._all_pieces[(8, 7)] = BlackPawn(Square(8, 7))
+        self._all_pieces[(1, 7)] = BlackPawn()
+        self._all_pieces[(2, 7)] = BlackPawn()
+        self._all_pieces[(3, 7)] = BlackPawn()
+        self._all_pieces[(4, 7)] = BlackPawn()
+        self._all_pieces[(5, 7)] = BlackPawn()
+        self._all_pieces[(6, 7)] = BlackPawn()
+        self._all_pieces[(7, 7)] = BlackPawn()
+        self._all_pieces[(8, 7)] = BlackPawn()
 
         # Locate the black and white kings
         self._king_location[Color.white] = Square(5, 1)
