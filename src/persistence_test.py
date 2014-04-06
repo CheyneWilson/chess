@@ -10,7 +10,7 @@ class TestEmptyDatabase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.test_db = 'unittest_1.sqlite'
+        cls.test_db = '../tmp/unittest_1.sqlite'
 
         # Remove previous unit test database
         # This is not done in the teardown because it makes debugging easier
@@ -39,7 +39,7 @@ class TestEmptyDatabase(unittest.TestCase):
 class TestPersistenceFunctions(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.test_db = 'unittest_2.sqlite'
+        cls.test_db = '../tmp/unittest_2.sqlite'
 
         cls.game_1 = {
             u"id": None,
