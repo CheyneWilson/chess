@@ -1,12 +1,11 @@
 # import string
-import json
+# import json
 from chess_color import Color
 from chess_move import Move
 from chess_square import Square
 from chess_pieces import Piece, King, BlackKing, WhiteKing, Queen, WhiteQueen, BlackQueen, Rook, WhiteRook, \
     BlackRook, Bishop, WhiteBishop, BlackBishop, Knight, WhiteKnight, BlackKnight, Pawn, WhitePawn, BlackPawn, \
-    PieceFactory
-
+    InvlaidPieceException
 _HAS_MOVED = 'm'
 _EMPTY_SQUARE = '_'
 
@@ -275,7 +274,8 @@ class Board(object):
 
         # Check to see if anyone has won, if they ha
         if self.winner is not None:
-            raise IllegalMoveException("Cannot move piece, the game already has a winner {winner}".format(winner=self.winner))
+            raise IllegalMoveException("Cannot move piece, the game already has a winner {winner}".format(
+                winner=self.winner))
 
         if legal_moves is not False:
             if to_ in legal_moves:
@@ -321,7 +321,10 @@ class Board(object):
 
                 self._all_pieces.pop(from_, None)
                 self._all_pieces[to_] = piece
-                self.current_player = Color.inverse(self.current_player)
+
+                # Do not change player if the current player still needs to promote their pawn
+                if self.promote_pawn_location is None:
+                    self.current_player = Color.inverse(self.current_player)
 
                 self.previous_moves.append(Move(piece, from_, to_, is_double_move))
 
@@ -366,15 +369,37 @@ class Board(object):
             raise IllegalMoveException("Cannot promote pawn, no pawn has been moved into end row")
         loc = self.promote_pawn_location
         pawn = self.get_piece(loc)
-        assert(isinstance(pawn, Pawn))
-        assert(loc.y == 8 or loc.y == 1)
-        color = pawn.color
+        assert(isinstance(pawn, Pawn))    # Must be a pawn
+        assert(loc.y == 8 or loc.y == 1)  # Must be in the final row
+        if (piece.color is not pawn.color):
+            raise InvlaidPieceException("Cannot promote {pawn_color} pawn to {color} {piece}, it is the wrong color"
+                                        .format(pawn_color=pawn.color, color=piece.color, piece=piece))
 
-        if issubclass(piece, (Queen, Rook, Bishop, Knight)):
-            self._all_pieces[loc] = PieceFactory.create(piece, color)
+        if isinstance(piece, (Queen, Rook, Bishop, Knight)):
+            self._all_pieces[loc] = piece
             self.promote_pawn_location = None  # Clear the promotion
+            self.current_player = Color.inverse(self.current_player)  # Change turn to next player
         else:
             raise TypeError("Cannot promote pawn to {piece}.".format(piece=piece))
+
+    def promotable_pieces(self):
+        u""""Returns a list of pieces that a pawn can be promoted to.
+
+        returns -- a frozen set containing a Queen, Rook, Bishop and Knight with the same color as the
+                   pawn in self.promote_pawn_location. If there is not pawn there, then returns an empty frozenset
+
+        """
+        if self.promote_pawn_location is not None:
+            pawn = self.get_piece(self.promote_pawn_location)
+            if pawn.color is Color.white:
+                return frozenset([WhiteQueen(True), WhiteRook(True), WhiteBishop(True), WhiteKnight(True)])
+            elif pawn.color is Color.black:
+                return frozenset([BlackQueen(True), BlackRook(True), BlackBishop(True), BlackKnight(True)])
+            else:
+                raise InvalidBoardException("Pawn to be promoted has no color.")
+        else:
+            # No pawns to be promoted
+            return frozenset([])
 
     def _get_attackers(self, to_, color, blocker=False):
         """Returns the locations of the pieces of the color specified that
@@ -718,11 +743,11 @@ class Board(object):
 
         # Check if the pawn is not pinned or only pinned vertically so can move forward
         if len(pinned) == 0 or (0, 1) in pinned:
-            single_move_loc = (from_.x, from_.y + pawn.forward)
+            single_move_loc = Square(from_.x, from_.y + pawn.forward)
             try:
                 if self.get_piece(single_move_loc) is None:
                     moves.append(single_move_loc)
-                    double_move_loc = (from_.x, from_.y + 2 * pawn.forward)
+                    double_move_loc = Square(from_.x, from_.y + 2 * pawn.forward)
                     if not self._pawn_has_moved(pawn, from_):
                         if self.get_piece(double_move_loc) is None:
                             moves.append(double_move_loc)
@@ -862,13 +887,8 @@ class Board(object):
         assert isinstance(self._all_pieces[self._king_location[Color.black]], BlackKing)
         assert isinstance(self._all_pieces[self._king_location[Color.white]], WhiteKing)
 
-        # Add all of the empty squares
-#        for x in xrange(1,9):
-#            for y in xrange(3, 7):
-#                self._all_pieces[(x,y)] = None
-
     def __repr__(self):
-        """Returns a string representation of the chess board that can be reconstructed when passed to the constructor."""
+        u"""Returns a string representation of the chess board that can be reconstructed when passed to the constructor."""
         # 1 indexed chessboard, 1 <= x < 9, 1 <= y < 9
         # xrange would be more a more efficient implemenation but this is a
         # minor and in python 3.x we get this benefit implicitly
@@ -932,7 +952,8 @@ class Board(object):
                             if cls.color in self._king_location:
                                 # Cannot handle multiple kings of the the same color, just saying
                                 # We already have a king of this color ... not good
-                                raise InvalidBoardException(u"Multiple kings of the same color '{color}' present.".format(color=cls.color))
+                                raise InvalidBoardException(u"Multiple kings of the color {color} present."
+                                                            .format(color=cls.color))
 
                             self._king_location[cls.color] = loc
                             self._all_pieces[loc] = cls(has_moved)
@@ -976,6 +997,7 @@ class Board(object):
         return line
 
     def display_previous_moves(self):
+        u"""Creates a pretty print version of the previous chess moves taken."""
         return [move.display() for move in self.previous_moves]
 
     @staticmethod
@@ -987,33 +1009,9 @@ class Board(object):
 
         return new_squares
 
-    def display_json(self):
-        """Constructs a JSON representation of chess pieces."""
-        super_board = []
-
-        for y in range(1, 9, 1):
-            super_board.append([])
-            for x in range(1, 9, 1):
-                from_ = Square(x, y)
-                current_piece = self.get_piece(from_)
-                square = {}
-
-                if current_piece is not None:
-                    moves, attacks = self.get_moves_and_attacks(from_)
-                    square['piece'] = current_piece.simple_simbol
-                    square['moves'] = [m.name for m in moves]  # self._translate_squares(moves)  # self._translate_squares(self.get_moves(from_))
-                    square['attacks'] = [a.name for a in attacks]  # self._translate_squares(attacks)
-                else:
-                    square['piece'] = 'empty'
-                    square['moves'] = []
-                    square['attacks'] = []
-                # square['highlight'] = None  # Used in front-end only
-
-                super_board[y - 1].append(square)
-        return super_board  # json.dumps(super_board)
-
     def display_json_2(self):
-        """Constructs a JSON representation of chess pieces."""
+        """Constructs a simplified representation of the chess board and pieces that can be serailized to JSON
+        via the python JSON library."""
         pieces = {}
 
         for loc in self._all_pieces:
@@ -1023,40 +1021,11 @@ class Board(object):
             piece = {}
 
             moves, attacks = self.get_moves_and_attacks(from_)
+            print moves, attacks
             piece['position'] = from_.name
-            piece['piece'] = current_piece.simple_simbol
+            piece['piece'] = current_piece.name
             piece['moves'] = [m.name for m in moves]
             piece['attacks'] = [a.name for a in attacks]
 
             pieces[from_.name] = piece
         return pieces  # json.dumps(super_board)
-
-    def json(self):
-        """Output a json representation of the board
-        """
-        board = []
-        for location in self._all_pieces:
-            x, y = location
-            piece = self._all_pieces[location]
-
-            from_ = Square(x, y)
-            moves, attacks = self.get_moves_and_attacks(from_)
-
-            square = {}
-            square[u'x'] = x
-            square[u'y'] = y
-            square[u'piece'] = piece.name
-            square[u'color'] = piece.color
-            square[u'moved'] = piece.has_moved
-            square[u'moves'] = moves  # []  # board.get_moves(location)
-            square[u'attacks'] = attacks  # []  # TODO: call method
-
-            board.append(square)
-
-        game = {}
-        game[u'current_player'] = self.current_player  # .name
-        game[u'board'] = board
-        game[u'status'] = 'IN_PROGRESS'  # TODO: call method
-        game[u'previous_moves'] = []
-
-        return json.dumps(game)

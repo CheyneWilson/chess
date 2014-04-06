@@ -2,7 +2,7 @@
 # Unit tests for chess. Requires PyHamcrest to be installed.
 # This can be easily done using any packaging tool (such as distribute).
 # See https://code.google.com/p/hamcrest/ for more details on hamcrest matchers
-from board import Board, Color, King, Queen, Bishop, Knight, Rook, Pawn, WhiteKing, WhiteRook, \
+from board import Board, Color, King, Queen, Bishop, Knight, Rook, Pawn, BlackPawn, WhiteKing, WhiteRook, \
     BlackKing, BlackQueen, BlackRook, BlackBishop, BlackKnight, Square, IllegalMoveException
 from hamcrest import is_, assert_that, equal_to, all_of, contains_inanyorder, instance_of
 import unittest
@@ -1399,7 +1399,7 @@ class TestPromotePawns(unittest.TestCase):
         from_ = Square(1, 2)
         to_ = Square(1, 1)
         chess_board.move_piece(from_, to_)
-        chess_board.promote_pawn(Queen)
+        chess_board.promote_pawn(BlackQueen())
         black_queen = chess_board.get_piece(to_)
         assert_that(black_queen, instance_of(BlackQueen))
 
@@ -1425,7 +1425,7 @@ class TestPromotePawns(unittest.TestCase):
         from_ = Square(1, 2)
         to_ = Square(1, 1)
         chess_board.move_piece(from_, to_)
-        chess_board.promote_pawn(Rook)
+        chess_board.promote_pawn(BlackRook())
         black_rook = chess_board.get_piece(to_)
         assert_that(black_rook, instance_of(BlackRook))
 
@@ -1451,7 +1451,7 @@ class TestPromotePawns(unittest.TestCase):
         from_ = Square(1, 2)
         to_ = Square(1, 1)
         chess_board.move_piece(from_, to_)
-        chess_board.promote_pawn(Bishop)
+        chess_board.promote_pawn(BlackBishop())
         black_bishop = chess_board.get_piece(to_)
         assert_that(black_bishop, instance_of(BlackBishop))
 
@@ -1477,7 +1477,7 @@ class TestPromotePawns(unittest.TestCase):
         from_ = Square(1, 2)
         to_ = Square(1, 1)
         chess_board.move_piece(from_, to_)
-        chess_board.promote_pawn(Knight)
+        chess_board.promote_pawn(BlackKnight())
         black_knight = chess_board.get_piece(to_)
         assert_that(black_knight, instance_of(BlackKnight))
 
@@ -1504,7 +1504,7 @@ class TestPromotePawns(unittest.TestCase):
         to_ = Square(1, 1)
         chess_board.move_piece(from_, to_)
         # should raise an exception for an invalid piece
-        self.assertRaises(TypeError, chess_board.promote_pawn, King)
+        self.assertRaises(TypeError, chess_board.promote_pawn, BlackKing)
 
     def test_promote_pawn_to_pawn(self):
         """Tests the promotion of a pawn to a pawn. This is not allowed, so should raise TypeError
@@ -1529,7 +1529,7 @@ class TestPromotePawns(unittest.TestCase):
         to_ = Square(1, 1)
         chess_board.move_piece(from_, to_)
         # should raise an exception for an invalid piece
-        self.assertRaises(TypeError, chess_board.promote_pawn, Pawn)
+        self.assertRaises(TypeError, chess_board.promote_pawn, BlackPawn)
 
     def test_promote_pawn_in_wrong_location(self):
         """Tests the promotion of a pawn to a in the wron location. This is not allowed, so should raise TypeError
@@ -1552,7 +1552,7 @@ class TestPromotePawns(unittest.TestCase):
         chess_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,B,0,0")
 
         # should raise an exception for an invalid piece
-        self.assertRaises(IllegalMoveException, chess_board.promote_pawn, Knight)
+        self.assertRaises(IllegalMoveException, chess_board.promote_pawn, BlackKnight)
 
     def test_move_before_promote(self):
         """Tests that promotion is required before moving to the next move.

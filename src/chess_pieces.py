@@ -1,6 +1,11 @@
 from chess_color import Color
 
 
+class InvlaidPieceException(Exception):
+    u"""Returned if a chess piece is not a legal chess piece."""
+    pass
+
+
 class Piece(object):
     symbol = u'?'
     simple_simbol = u'?'  # Used in JSON representation
@@ -47,7 +52,6 @@ class King(object):
     """
     attacks = frozenset([(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)])  # x,y
     limit = 1  # The King may only move one place via his move vectors
-    has_moved = False
     value = 0
 
     def __new__(cls, *args, **kwargs):
@@ -60,7 +64,7 @@ class WhiteKing(King, Piece):
     u"""The White King chess piece."""
     symbol = u'\u2654'
     simple_simbol = u'WK'
-    name = u'white_king'
+    name = u'WhiteKing'
     color = Color.white
 
     def __init__(self, has_moved=False):
@@ -71,7 +75,7 @@ class BlackKing(King, Piece):
     u"""The Black King chess piece."""
     symbol = u'\u265a'
     simple_simbol = u'BK'
-    name = u'black_king'
+    name = u'BlackKing'
     color = Color.black
 
     def __init__(self, has_moved=False):
@@ -97,16 +101,22 @@ class WhiteQueen(Queen, Piece):
     u"""The White Queen chess piece."""
     symbol = u'\u2655'
     simple_simbol = u'WQ'
-    name = u'white_queen'
+    name = u'WhiteQueen'
     color = Color.white
+
+    def __init__(self, has_moved=False):
+        self.has_moved = has_moved
 
 
 class BlackQueen(Queen, Piece):
     u"""The Black Queen chess piece."""
     symbol = u'\u265b'
     simple_simbol = u'BQ'
-    name = u'black_queen'
+    name = u'BlackQueen'
     color = Color.black
+
+    def __init__(self, has_moved=False):
+        self.has_moved = has_moved
 
 
 class Rook(object):
@@ -116,7 +126,6 @@ class Rook(object):
     should be instanciated.
     """
     attacks = frozenset([(1, 0), (0, 1), (-1, 0), (0, -1)])
-    has_moved = False
     value = 5
 
     def __new__(cls, *args, **kwargs):
@@ -129,7 +138,7 @@ class WhiteRook(Rook, Piece):
     u"""The White Rook chess piece."""
     symbol = u'\u2656'
     simple_simbol = u'WR'
-    name = u'white_rook'
+    name = u'WhiteRook'
     color = Color.white
 
     def __init__(self, has_moved=False):
@@ -140,7 +149,7 @@ class BlackRook(Rook, Piece):
     u"""The Black Rook chess piece."""
     symbol = u'\u265c'
     simple_simbol = u'BR'
-    name = u'black_rook'
+    name = u'BlackRook'
     color = Color.black
 
     def __init__(self, has_moved=False):
@@ -166,16 +175,22 @@ class WhiteBishop(Bishop, Piece):
     u"""The White Bishop chess piece."""
     symbol = u'\u2657'
     simple_simbol = u'WB'
-    name = u'white_bishop'
+    name = u'WhiteBishop'
     color = Color.white
+
+    def __init__(self, has_moved=False):
+        self.has_moved = has_moved
 
 
 class BlackBishop(Bishop, Piece):
     """The Black Bishop chess piece."""
     symbol = u'\u265d'
     simple_simbol = u'BB'
-    name = u'black_bishop'
+    name = u'BlackBishop'
     color = Color.black
+
+    def __init__(self, has_moved=False):
+        self.has_moved = has_moved
 
 
 class Knight(object):
@@ -199,16 +214,22 @@ class WhiteKnight(Knight, Piece):
     u"""The White Knight chess piece."""
     symbol = u'\u2658'
     simple_simbol = u'WN'
-    name = u'white_knight'
+    name = u'WhiteKnight'
     color = Color.white
+
+    def __init__(self, has_moved=False):
+        self.has_moved = has_moved
 
 
 class BlackKnight(Knight, Piece):
     u"""The Black Knight chess piece."""
     symbol = u'\u265e'
     simple_simbol = u'BN'
-    name = u'black_knight'
+    name = u'BlackKnight'
     color = Color.black
+
+    def __init__(self, has_moved=False):
+        self.has_moved = has_moved
 
 
 class Pawn(object):
@@ -218,9 +239,8 @@ class Pawn(object):
     should be instanciated.
     """
     limit = 1  # Pawns can only attack/move 1 space (double move is treated special)
-    has_moved = False
     value = 1
-    forward = '?'
+    forward = None  # Either 1 or -1 depending on subclass
 
     def __new__(cls, *args, **kwargs):
         if cls is Pawn:
@@ -247,7 +267,7 @@ class WhitePawn(Pawn, Piece):
     u"""A White Pawn chess piece."""
     symbol = u'\u2659'
     simple_simbol = u'WP'
-    name = u'white_pawn'
+    name = u'WhitePawn'
     color = Color.white
     forward = 1  # Based off White starting at rows 1,2
 
@@ -259,7 +279,7 @@ class BlackPawn(Pawn, Piece):
     u"""A Black Pawn chess piece."""
     symbol = u'\u265f'
     simple_simbol = u'BP'
-    name = u'black_pawn'
+    name = u'BlackPawn'
     color = Color.black
     forward = -1  # Based off Black starting at rows 7,8
 
@@ -268,62 +288,24 @@ class BlackPawn(Pawn, Piece):
 
 
 class PieceFactory(object):
-    """The peice factory allows the generic creation of chess pieces based of their
-       color and type.
-    """
-    # Created primarily for the promote method used to promote pawns
+    u"""The peice factory allows the generic creation of chess pieces based on their name."""
 
     @staticmethod
-    def create2(name, loc=None):
-        types = Piece.__subclasses__()
-        piece_names = [type.__name__ for type in types]
+    def create(name, has_moved=False):
+        u""" Creates a new piece of the type equal to name.
 
-        if name in piece_names:
-            piece = eval(name)  # Yes, eval is dangerous, but we're sanitising it first
-            return piece
-        else:
-            raise TypeError(u"Invlaid piece {name}".format(name=name))
+        name -- The name of the chess piece, one of: WhiteKing, WhiteQueen, WhiteRook, WhiteBishop, WhiteKnight,
+               WhitePawn, BlackKing, BlackQueen, BlackRook, BlackBishop, BlackKnight, or BlackPawn
+        has_moved -- Boolean, marks whether the chess piece has previously moved or not.
 
-    @staticmethod
-    def create(piece, color, loc=None):
-        """Create a new peice of the color and type
-
-        color -- The color of the piece to create, e.g  Color.black
-        piece -- The type of the piece to create, e.g Rook, or one of its subclasses like WhiteRook
-
-        Returns -- A new piece of the color and type
-        Raises -- A value error if the color or type is not valid
+        returns -- A piece of the class which is the same as the name specified
+        raises  -- InvlaidPieceException is the name is an invalid value.
         """
-
-        if color is Color.white:
-            if issubclass(piece, King):
-                return WhiteKing()
-            elif issubclass(piece, Queen):
-                return WhiteQueen()
-            elif issubclass(piece, Rook):
-                return WhiteRook(loc)
-            elif issubclass(piece, Knight):
-                return WhiteKnight()
-            elif issubclass(piece, Bishop):
-                return WhiteBishop()
-            elif issubclass(piece, Pawn):
-                return WhitePawn(loc)
-            else:
-                raise TypeError(u"Invlaid piece {piece}".format(piece=piece))
-        elif color is Color.black:
-            if issubclass(piece, King):
-                return BlackKing()
-            elif issubclass(piece, Queen):
-                return BlackQueen()
-            elif issubclass(piece, Rook):
-                return BlackRook(loc)
-            elif issubclass(piece, Knight):
-                return BlackKnight()
-            elif issubclass(piece, Bishop):
-                return BlackBishop()
-            elif issubclass(piece, Pawn):
-                return BlackPawn(loc)
-            else:
-                raise TypeError(u"Invlaid piece {piece}".format(piece=piece))
-        else:
-            raise TypeError(u"Invlaid color {color}".format(color=color))
+        types = Piece.__subclasses__()
+        piece_names = [(type.__name__, type) for type in types]
+        d = dict(piece_names)
+        try:
+            piece = d[name]
+        except KeyError:
+            raise InvlaidPieceException("The chess peice {piece} does not exists".format(piece=name))
+        return piece(has_moved)
