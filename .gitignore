@@ -39,3 +39,6 @@ nosetests.xml
 
 # SASS
 .sass-cache
+
+# Temporary items
+tmp/
