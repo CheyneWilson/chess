@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en" > <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang="en" > <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title></title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+	<link rel="stylesheet" type="text/css" href="/style/main.css">
+
+    <!-- Bootstrap core CSS -->
+<!--
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//mgcrea.github.io/angular-strap/static/styles/angular-motion.css">
+    <link rel="stylesheet" href="//mgcrea.github.io/angular-strap/static/styles/bootstrap-additions.css">
+    <link rel="stylesheet" href="//mgcrea.github.io/angular-strap/static/styles/libraries.min.css">
+    <link rel="stylesheet" href="//mgcrea.github.io/angular-strap/static/styles/main.min.css">
+-->
+    <link rel="stylesheet" href="/contrib/bootstrap.min.css">
+    <link rel="stylesheet" href="/contrib/font-awesome.min.css">
+    <link rel="stylesheet" href="/contrib/angular-motion.css">
+    <link rel="stylesheet" href="/contrib/bootstrap-additions.css">
+    <link rel="stylesheet" href="/contrib/libraries.min.css">
+    <link rel="stylesheet" href="/contrib/main.min.css">
+
+</head>
+
+	<body ng-app="chess">
+		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">Project name</a>
+				</div>
+				<div class="navbar-collapse collapse">
+					<form class="navbar-form navbar-right" role="form">
+						<div class="form-group">
+							<input type="text" placeholder="Email" class="form-control">
+						</div>
+						<div class="form-group">
+							<input type="password" placeholder="Password" class="form-control">
+						</div>
+						<button type="submit" class="btn btn-success">Sign in</button>
+					</form>
+				</div><!--/.navbar-collapse -->
+			</div>
+		</div>
+
+
+		<!--[if lt IE 7]>
+			<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+		<![endif]-->
+
+		<!-- Add your site or application content here -->
+
+		<div ng-app="MainCtrl" class="wrapper">
+
+			<div class="container">
+        		<div class="row" ng-controller="DrawBoard">
+          			<div class="col-lg-8">
+						<div class="board">
+
+							<div class="board-row" ng-repeat="row in board">
+								<span ng-repeat="column in row track by $index" class="square" ng-class="{yellow: column.highlight, red: column.attack, blue: column.selected, occupied: column.piece[0] == currentPlayer[0].toUpperCase()}">
+									<img class="piece" ng-src="/img/{{column.piece}}.png" ng-click="highlightMoves($index, $parent.$index)"/>
+
+								</span>
+								<br />
+							</div>
+							<div class="empty" ng-show="!board">
+								<h1>Welcome to my chess game</h1>
+								<p>Create or load a new game from the left hand panel. Enjoy!</p>
+								<p>(The login functionality isn't enabled yet, but it will come)</p>
+							</div>
+							<div class="promote" ng-show="promotablePieces">
+								<h2>Choose piece to promote pawn to:</h2>
+								<span ng-repeat="piece in promotablePieces" class="square occupied">
+									<img class="piece" ng-src="/image/{{piece}}.png" ng-click="promote(piece)" />
+								</span>
+							</div>
+
+							<div class="overlay" ng-show="winner">
+								<h1>Game Over</h1>
+								<h3>{{winner}} player wins!!</h3>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-4">
+			            <h2>Development Panel</h2>
+			            <p>The current player and game can be changed via these attribues.</p>
+			            <hr>
+			            <div ng-controller="ChangeGame">
+							<button type="button" class="btn btn-default" data-html="1" ng-click="newGame()">
+								Start New Game
+							</button>
+							<label>&nbsp; &nbsp;</label>
+							<button type="button" class="btn btn-default" ng-model="selectedIcon" data-placeholder="Load Game"
+								data-html="1" ng-options="icon.value as icon.label for icon in icons" bs-select >
+								Action <span class="caret"></span>
+							</button>
+						</div>
+			            <hr>
+			            <label>Game Id:&nbsp;</label><span>{{gameId}}</span><br />
+			            <label>Current turn:&nbsp;</label><span>{{currentPlayer}}</span><br />
+			            <label>Moves taken:&nbsp;</label>
+						<ol>
+							<li ng-repeat="move in moves" >{{move.value}}</li>
+						</ol>
+	       			</div>
+	       		</div>
+	       	</div>
+		</div>
+	</div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="//code.angularjs.org/1.2.13/angular.min.js" data-semver="1.2.13"></script>
+    <script src="//code.angularjs.org/1.2.13/angular-animate.min.js" data-semver="1.2.13"></script>
+    <script src="//code.angularjs.org/1.2.13/angular-sanitize.min.js" data-semver="1.2.13"></script>
+    <script src="//mgcrea.github.io/angular-strap/dist/angular-strap.js" data-semver="v2.0.0-rc.4"></script>
+    <script src="//mgcrea.github.io/angular-strap/dist/angular-strap.tpl.js" data-semver="v2.0.0-rc.4"></script>
+-->
+	<script type="text/javascript" src="/contrib/angular.min.js" data-semver="1.2.13"></script>
+    <script type="text/javascript" src="/contrib/angular-animate.min.js" data-semver="1.2.13"></script>
+    <script type="text/javascript" src="/contrib/angular-sanitize.min.js" data-semver="1.2.13"></script>
+    <script type="text/javascript" src="/contrib/angular-strap.js" data-semver="v2.0.0-rc.4"></script>
+    <script type="text/javascript" src="/contrib/angular-strap.tpl.js" data-semver="v2.0.0-rc.4"></script>
+
+    <script type="text/javascript" src="js/app.js"></script>
+    <script type="text/javascript" src="js/controllers.js"></script>
+    <!-- <script type="text/javascript" src="/js/new_test.js"></script> -->
+</body>
+</html>
