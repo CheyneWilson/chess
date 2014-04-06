@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="159"
+   height="159"
+   id="svg3673"
+   version="1.1"
+   inkscape:version="0.48.2 r9819"
+   sodipodi:docname="bp.svg"
+   inkscape:export-filename="/Users/cheynewilson/python/chess/src/wb.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs3675" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.979899"
+     inkscape:cx="206.62916"
+     inkscape:cy="72.120336"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1276"
+     inkscape:window-height="756"
+     inkscape:window-x="4"
+     inkscape:window-y="22"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata3678">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-893.36215)">
+    <rect
+       style="fill:#ffffff;fill-opacity:1"
+       id="rect3748"
+       width="21.213203"
+       height="196.97975"
+       x="-15.951736"
+       y="-1088.2225"
+       transform="scale(1,-1)" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1"
+       id="rect3750"
+       width="177.28177"
+       height="17.67767"
+       x="-7.5761442"
+       y="-15.251314"
+       transform="translate(0,893.36215)" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1"
+       id="rect3752"
+       width="42.426407"
+       height="176.27162"
+       x="156.11928"
+       y="877.10071" />
+    <image
+       y="893.36212"
+       x="0"
+       id="image4076"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJ8AAACfCAIAAABoeZy3AAAAA3NCSVQICAjb4U/gAAAKdElEQVR4
+nO2dW0wTwRqAu5d2C4iAoIIxaiQavEcUE4kkmqjBK8GI92tENPUSiA9GookxMX1RQaPxhj4ZHzBR
+icaoD8aoYBStlCrIxQY0VgHrBWmh7e7seainpweJYrs7sx3+73FD+Wf+r7Pdnfl3lpFlWQdQCku6
+AYCKgF2aAbs0A3ZpBuzSDNilGbBLM2CXZsAuzYBdmgG7NAN2aQbs0gzYpRmwSzO82gFkWZYkCSEU
+8kIyx3EcxzEM059YoigihEKIwrIsx3Es26+vuyRJkiSF3KN/ihUOqttFCNXU1Lx9+1aSpNA+PnHi
+xClTpkRHR//1j7u7u6urq+12ewiJi4+PT09PHzly5F+/RrIs19XVvXnzxuPx/GsUPyNHjpw2bVpS
+UlJoH/8HZJXp6ek5dOhQXFxcyC0sLCx0OBz9ifX58+eNGzeGFiU1NbW8vNw/ItXuUU5OzsuXL8NO
+7d9R/eTAsqzRaOT50E8SLMv2cyyyLNufE3ifDB48OCYmpj8fD79Her0+nI/3H7iq+oXX6/X5fKRb
+oTBgl2bALs2AXZoBuzQDdmkG7NIM2KUZsEszEWD3n6afQp6rYhgm5M9qFhzzYeEjy3J/FiH8k6uh
+heB5nmVZSZL6s4oQzpIXTiLAbktLi8ViGT58+J+X9liWbW9vb2trCy1Ka2trdXX1sGHD/myXYRiP
+x/Pq1auvX7+GFggrai9TeL3eo0ePJiYmku6ohli5cqXValU78zKGNSKAIGCXZgj87vI8j2d1UzuI
+oiiKIv64uLPMcdz8+fNnzJiBOS5BeJ5/8eLF48ePOzs7cYfGHG/atGl79+7Nzs6m7+byD9hstuLi
+4tu3b2OOi/t31+PxeL1eORJuFhXEXxWKPy6Zq6oBNXAJAtfMNAN2aQa3XSon6zUL7mtmvV7PcdxA
+u6ryzwvij4vbrtvtdjqdHR0dmOMShGXZjo4Ot9uNPzRuuw0NDZs3b8YcdMCC43d3oJ2HtQMOu5Gy
+1k0fOOxGRUVFR0djeFw1IhAEIT4+XhAEHMEwrCH//Pnz0qVL6enper0eR5e0CsdxgwYN2rdv3/v3
+7zGkXZZlHHb9vH79evXq1QN2EAuCkJWVVVFR0d3djS3n+OzKstzZ2XnmzJnJkycPqEHsH7J79uyx
+2+04sy1jtuvHarXm5eUNkEEsCMKcOXOuX7/ucrnwp5qAXVmWv3//furUqYkTJ1I8iFmWjYmJITJk
+A5Cx68disaxYsSIqKoq+mWdBEDIyMq5evdrV1UUwwyTtyrLsdDrNZnNqaio1lVb+IWsymZqamvw3
++gQhbFeWZYTQ8+fPc3JyjEZjpA9ig8GQkZFx5cqVzs5O0nmVZS3Y9fPly5cjR46MGTMmQgexf8gW
+FBQ0NDQQH7IBtGJXlmWE0JMnT+bNm0faVCikpqaeP3/++/fvpLP4f2jonoRhmLS0tNGjR5NuSCjM
+nDkzMzMznC3K1EBDdnU6HUKISO1g+JCqevwz2rILKAvYpRmwSzNgl2bALs2AXZoBuzQDdmkG7NIM
+2KUZsEszYJdmwC7NgF2aAbs0A3ZpBuzSDNilGbBLM2CXZsAuzYBdmgG7NAN2aQbs0gzYpRmwSzNg
+l2bALs2AXZoBuzQDdpWBZVkNbvqhIbsIoR8/frhcLtINCYVPnz61tbUReWHYnyC9tcMvEEJtbW2F
+hYWxsbGkUxIiubm51dXVoiiSzuX/0IRdhNC3b9+Ki4uHDBlC2lFYrFu3zmazSZJEOqO/IG8XIdTV
+1WU2m1NSUkjbUYCCgoLm5maNCCZv1+PxXLx4cfz48aS9KEZhYeHHjx+1sGsV4a2/fD7f7du3z549
+29jYGDhoNBqNRmOk7AAry7LX6+3u7g7seXPx4sWEhASTyZSYmEj2QpqkXVEUHz58WFJSYrFYAgcF
+QSgqKtq1a9eQIUM0uEdQLxiGQQjduHHj2LFjNptNlmWdTudyuUpLS2NiYrZv3x4bG0tSMKmThiiK
+T58+XbBgQXBj/GqxbSyvFB6Pp7S0dNSoUcEiR40aVVZW5nK5CJ6iydiVJMlqtS5btixYrV6vLygo
+aGpqItKkMHG73WazOTk5ObhHU6dOvXbtWk9PDynBBOxKktTc3JyXlxecCJ7n16xZY7Va8bdHKb5+
+/WoymQwGQ3C/srKy7t+/73/lMH5w20UIORyOHTt2GI3GQAo4jlu0aFFlZaUWrjPDweFw5Ofn9xK8
+ePHiqqoqIrMcWO0ihJxO5/79++Pj4wOdZ1k2MzPz3r17GrlHDJN3795t2LCh1xsBVq9eXVNTg18w
+PrsIoc7OzsOHDw8dOjTQbYZhJkyYUF5e7vP5sLVEbWpra1esWNFro+mtW7e+ffsW8zcYk12EUHd3
+98mTJ3tt0JucnHzu3Dm3242nGdioqqrKzs7mOC64syaTqaWlBadgTPe7kiRVVFRcunSptbU1cNBg
+MOTn52dnZ7vdbiIvMFWP8ePHr1+/3uFw1NbWBg6WlZXFx8cXFhYmJSVhugnG8yWqra1dunTp79HH
+jh07YsQIHP3Ei8Fg6PNlPJMmTbp58ya2i0d8Y7fPiSe73Y6nAZjxer2km6DTaWr1HlAcsEszYJdm
+wC7NgF2sMAyDc0EQh10ZXnr/X3ieZ1kWW0Jw2PX5fPX19R8+fMAQS+M0NTU9e/asvb0dj2DV73d9
+Pt/du3dLSkpsNlvgoNFoFASBYRjqhzXDMD6fr6enR5IknU7ncrlKSkoEQTCZTAkJCWqfpdW1K4ri
+48ePjx8/Xl1dHTgYFxdnMpnWrl0bFRWl/dqaMOE47smTJ6dPn7ZYLP7OulyuEydOREdH5+fnq16X
+o940mCiKlZWV8+fPDw4nCMKBAwc+f/6sXlytIYri5cuX09LSfq/Lcbvdqs5KqmVXFEWLxbJkyZJe
+aiOxbCp8+iy8wlCXo4pdSZLq6+tzc3OD1RoMhp07dzY3N6sRUfv4C69SUlKCBc+ePfvOnTvq1eUo
+b1eSJLvdvmrVqmC1er1+y5YtdXV1ioeLIPzFC0lJScGZWbhw4aNHj1QqXlDYLkLo48ePvcqmeJ5f
+uXKlxWJRNlYk4nQ6f6+sU+/xMiXtIoQ6OjqKioqCn+PjeX7JkiVPnz6N9Io4peizss7/eJnighWz
+63/69uDBg8HP8XEcN3fu3AcPHtBREacULS0tmzZt6rW8v23btsbGRmUTpYxdhNDPnz97PcfHsmx6
+evqtW7dA7e80NjauW7eul+Ddu3e3trYqmC5l7Ho8ngsXLowbNy64rWlpaeXl5V6vFwF9YbVac3Nz
+g0snDQZDcXFxe3s7UuhXTJm5qjdv3ty4caOpqSm4obm5udOnT29ra0O0T0iFRlJSUl5eXmtra+Ah
+Oa/XW1FRMWvWrOXLlysSQhm7vy9seb1es9lsNpsV+f9AaMD6Ls2AXZoBuzQDdmkG7NIM2KUZsEsz
+YJdmwC7NgF2aAbs0A3ZpBuzSDNilGbBLM2CXZsCutlD2AV+wqy30en2vTerCQZl/xHFcbGxspL+z
+QgtER0crOHbpf4J2IANnZpoBuzQDdmkG7NIM2KUZsEszYJdmwC7N8E6nk3QbALX4D41S2fV+FwDW
+AAAAAElFTkSuQmCC
+"
+       height="159"
+       width="159"
+       inkscape:export-filename="/Users/cheynewilson/python/chess/src/br.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1"
+       id="rect3746"
+       width="189.90868"
+       height="20.203051"
+       x="-7.5761442"
+       y="1047.3114" />
+  </g>
+</svg>
