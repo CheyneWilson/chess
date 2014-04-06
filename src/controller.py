@@ -13,7 +13,7 @@ from flask import Flask
 
 app = Flask(__name__)
 
-db = 'games.sqlite'
+db = '../db/games.sqlite'
 
 
 @app.route("/")
