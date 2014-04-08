@@ -349,8 +349,8 @@ class Board(object):
     def _is_adjacent(loc_a, loc_b):
         """Returns True if two squares are horizontally, vertically or diagonally adjacent (side by side).
         """
-        if loc_a.x - loc_b.x <= 1:
-            if loc_a.y - loc_b.y <= 1:
+        if abs(loc_a.x - loc_b.x) <= 1:
+            if abs(loc_a.y - loc_b.y) <= 1:
                 if loc_a != loc_b:
                     return True
         return False
