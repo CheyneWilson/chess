@@ -72,7 +72,7 @@
 						<div class="board">
 
 							<div class="board-row" ng-repeat="row in board">
-								<span ng-repeat="column in row track by $index" class="square" ng-class="{yellow: column.highlight, red: column.attack, blue: column.selected, occupied: column.piece[0] == currentPlayer[0].toUpperCase()}">
+								<span ng-repeat="column in row track by $index" class="square" ng-class="{yellow: column.highlight, red: column.attack, blue: column.selected, occupied: column.active}">
 									<img class="piece" ng-src="/img/{{column.piece}}.png" ng-click="highlightMoves($index, $parent.$index)"/>
 
 								</span>
@@ -86,7 +86,7 @@
 							<div class="promote" ng-show="promotablePieces">
 								<h2>Choose piece to promote pawn to:</h2>
 								<span ng-repeat="piece in promotablePieces" class="square occupied">
-									<img class="piece" ng-src="/image/{{piece}}.png" ng-click="promote(piece)" />
+									<img class="piece" ng-src="/img/{{piece}}.png" ng-click="promote(piece)" />
 								</span>
 							</div>
 
@@ -113,6 +113,7 @@
 			            <hr>
 			            <label>Game Id:&nbsp;</label><span>{{gameId}}</span><br />
 			            <label>Current turn:&nbsp;</label><span>{{currentPlayer}}</span><br />
+			            <label>Code:&nbsp;</label><span>{{code}}</span><br />
 			            <label>Moves taken:&nbsp;</label>
 						<ol>
 							<li ng-repeat="move in moves" >{{move.value}}</li>

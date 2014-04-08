@@ -39,6 +39,7 @@ def new(type):
 
     resp = {
         u'board': board.display_json_2(),
+        u'board_serialized': repr(board),
         u'turn': board.turns_taken,
         u'player': board.current_player,
         u'game_id': game_id,
@@ -76,6 +77,7 @@ def game(game_id):
 
     resp = {
         u'board': board.display_json_2(),
+        u'board_serialized': repr(board),
         u'turn': board.turns_taken,
         u'player': board.current_player,
         u'game_id': game_id,
@@ -106,6 +108,7 @@ def move_piece(game_id, from_, to_):
 
             resp = {
                 u'board': board.display_json_2(),
+                u'board_serialized': repr(board),
                 u'turn': board.turns_taken,
                 u'player': board.current_player,
                 u'game_id': game_id,
