@@ -29,9 +29,6 @@ class Piece(object):
         self.has_moved = True
         self.location = location
 
-    def get_limit(self):
-        return self.limit
-
     @classmethod
     def get_piece_class(cls, symbol):
         u"""Returns class the piece identified by its unicode symbol

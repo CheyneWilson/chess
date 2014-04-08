@@ -6,7 +6,7 @@ class Move(object):
     is_double_move = False  # Did the the pawn moved two squares? Only relevant for pawns
     is_capture = False  # TODO: Set this property as it affects the display string
 
-    def __init__(self, piece, from_, to_, is_double_move=False):
+    def __init__(self, piece, from_, to_, is_double_move=False, is_capture=False, is_castle=False):
         """Initialize a new Move.
 
         piece -- A chess piece
@@ -24,9 +24,12 @@ class Move(object):
         self.from_ = from_
         self.to_ = to_
         self.is_double_move = is_double_move
+        self.is_capture = is_capture
+        self.is_castle = is_castle
 
     def display(self):
         """Returns the display string for the move in ??? notation."""
+        # TODO: Add logic to display castling better
         if self.is_capture:
             operator = "x"
         else:
