@@ -2,7 +2,7 @@
 # import json
 from chess_color import Color
 from chess_move import Move
-from chess_square import Square
+from chess_square import Square, InvalidSquareException
 from chess_pieces import Piece, King, BlackKing, WhiteKing, Queen, WhiteQueen, BlackQueen, Rook, WhiteRook, \
     BlackRook, Bishop, WhiteBishop, BlackBishop, Knight, WhiteKnight, BlackKnight, Pawn, WhitePawn, BlackPawn, \
     InvlaidPieceException
@@ -25,6 +25,17 @@ class InvalidBoardException(Exception):
     pass
 
 
+class MovesAndAttacks(object):
+    u"""Represents all of the moves and attacks a given piece can make"""
+    moves = set([])
+    attacks = set([])
+
+    def __init__(self, moves, attacks):
+        # Using union to force
+        moves.union(moves)
+        attacks.union(attacks)
+
+
 class Board(object):
     u"""A new implemenation of a chessboard."""
     previous_moves = []
@@ -40,23 +51,21 @@ class Board(object):
     #
     # See http://en.wikipedia.org/wiki/Fifty-move_rule
     _stalemate_count = 0
-    _all_pieces = None
     _king_location = None
 
     def __init__(self, board_string=None):
+        Square.resetAllSquares()
         if board_string is None:
             self._new_board()
         else:
             self._create_board_from_repr(board_string)
 
-    def get_piece(self, location):
-        """Returns the piece at the location specified or None if the square
-        is empty.
+    def get_piece(self, from_):
+        u"""Returns the piece at the location specified or None if the square is empty.
+
+        from_ -- the name of the square, e.g A3, or H7
         """
-        if self._valid_location(location):
-            return self._all_pieces.get(location, None)
-        else:
-            raise KeyError()
+        return Square(from_).piece
 
     def is_check(self):
         """Returns True if the King of the active player color is in check.
@@ -69,8 +78,7 @@ class Board(object):
         return False
 
     def is_checkmate(self, color):
-        """Returns True if the King of the color specified is in checkmate.
-        """
+        u"""Returns True if the King of the color specified is in checkmate."""
 
         # color = self.current_player
         king_loc = self._king_location[color]
@@ -78,18 +86,19 @@ class Board(object):
         if blocking_squares is None:
             # Not under attack
             return False
-        if len(self.get_moves(king_loc)) > 0:
+        if len(self.get_moves(king_loc.name)) > 0:
                 # Can move king to safety
                 return False
         else:
-            if blocking_squares is set():
+            if blocking_squares is set([]):
                 # Cannot block, cannot move king, checkmate
                 return True
             else:
                 # Check if we can capture attacker
                 our_attackers = self._get_attackers(enemy_square, color)
                 for loc in our_attackers:  # If we have any...
-                    if isinstance(self.get_piece(loc), King):
+
+                    if isinstance(loc.piece, King):
                         # If it's the king then since we know we can't
                         # legally move, ignore
                         continue
@@ -103,6 +112,7 @@ class Board(object):
                         continue
 
                 # Check if we can block
+
                 for square in blocking_squares:
                     # Find all of our pieces that can move into one of these squares
                     blocking_piece_locs = self._get_attackers(square, color, True)
@@ -113,6 +123,7 @@ class Board(object):
                             return False
 
                 # Can't move, and can't capture, checkmate
+
                 return True
 
     def is_stalemate(self):
@@ -125,9 +136,9 @@ class Board(object):
         has_pawn = False
         white_score = 0
         black_score = 0
-        for loc in self._all_pieces:
-            piece = self._all_pieces[loc]
-            if isinstance(piece, Pawn):
+        for square in Square.all_squares:
+            piece = square.piece
+            if isinstance(square.piece, Pawn):
                 has_pawn = True
             if piece.color == Color.white:
                 white_score += piece.value
@@ -141,11 +152,10 @@ class Board(object):
             return True
 
         # Check whether the 'color' player can move any of their pieces
-        for loc in self._all_pieces:
-            piece = self._all_pieces[loc]
+        for square in Square.all_squares:
+            piece = square.piece
             if piece.color == color:
-                square = Square(*loc)  # Need to cast from tuple to namedTuple loc
-                if len(self.get_moves(square)) != 0:
+                if len(self.get_moves(square.name)) != 0:
                     # This player can move
                     return False
         else:
@@ -169,14 +179,17 @@ class Board(object):
         else:
             return None
 
-    def _get_castle_moves(self, from_):
-        u"""Returns the locations the king located at from_ can castle to."""
-        assert(from_.x)
-        assert(from_.y)
-        # x, y = from_
-        king = self.get_piece(from_)
-        left_rook = self.get_piece((1, from_.y))
-        right_rook = self.get_piece((8, from_.y))
+    def _get_castle_moves(self, from_square):
+        u"""Returns the locations the king located at from_square can castle to.
+
+            from_square -- The location of the king
+        """
+        assert(from_square.x)
+        assert(from_square.y)
+        # x, y = from_square
+        king = from_square.piece
+        left_rook = Square.createFromCoords(1, from_square.y).piece
+        right_rook = Square.createFromCoords(8, from_square.y).piece
 
         moves = set([])
         if king is None or king.has_moved is True:
@@ -186,13 +199,13 @@ class Board(object):
 
         # Castling left?
         if left_rook is not None and left_rook.has_moved is False:
-            left_4 = Square(4, from_.y)
-            left_3 = Square(3, from_.y)
-            left_2 = Square(2, from_.y)
+            left_4 = Square.createFromCoords(4, from_square.y)
+            left_3 = Square.createFromCoords(3, from_square.y)
+            left_2 = Square.createFromCoords(2, from_square.y)
             # Empty squares
-            if self.get_piece(left_2) is None:
-                if self.get_piece(left_3) is None:
-                    if self.get_piece(left_4) is None:
+            if left_2.piece is None:
+                if left_3.piece is None:
+                    if left_4.piece is None:
                         # With no attackers?
                         if self._get_attackers(left_2, enemy_color) == set([]):
                             if self._get_attackers(left_3, enemy_color) == set([]):
@@ -201,11 +214,11 @@ class Board(object):
 
         # Castling right?
         if right_rook is not None and right_rook.has_moved is False:
-            right_6 = Square(6, from_.y)
-            right_7 = Square(7, from_.y)
+            right_6 = Square.createFromCoords(6, from_square.y)
+            right_7 = Square.createFromCoords(7, from_square.y)
             # Empty squares
-            if self.get_piece(right_6) is None:
-                if self.get_piece(right_7) is None:
+            if right_6.piece is None:
+                if right_7.piece is None:
                     # With no attackers?
                     if self._get_attackers(right_6, enemy_color) == set([]):
                         if self._get_attackers(right_7, enemy_color) == set([]):
@@ -215,48 +228,53 @@ class Board(object):
 
     @staticmethod
     def _is_castle_right(from_, to_):
-        """Returns True if the move is to castle right.
+        u"""Returns True if the move is to castle right.
 
         Castling is preformed by first moving the king two squares in the
         direction to castle. The castling rook is then moved to the other
         side of the king. This method returns True if the King has been
         moved two squares to the right, or False otherwise.
         """
-        if to_.x - from_.x == 2:
-            if from_.y == to_.y:
-                return True
+        if isinstance(from_.piece, King):
+            if from_.piece.has_moved is False:
+                if to_.x - from_.x == 2:
+                    if from_.y == to_.y:
+                        return True
         return False
 
     @staticmethod
     def _is_castle_left(from_, to_):
-        """Returns True if the move is to castle left.
+        u"""Returns True if the move is to castle left.
 
         Castling is preformed by first moving the king two squares in the
         direction to castle. The castling rook is then moved to the other
         side of the king. This method returns True if the King has been
         moved two squares to the right, or False otherwise.
         """
-        if to_.x - from_.x == -2:
-            if from_.y == to_.y:
-                return True
+        if isinstance(from_.piece, King):
+            if from_.piece.has_moved is False:
+                if to_.x - from_.x == -2:
+                    if from_.y == to_.y:
+                        return True
         return False
 
     def move_piece(self, from_, to_):
-        """Move a piece from the location from_ to the location to_.
+        """Move a piece from the location from_name to the location to_.
+
+        from_ -- A (case insensitive) string representing the square to move the piece from, eg b7
+        to_   -- A (case insensitive) string representing the square to move the piece to, eg A5
 
         Raises -- A IllegalMoveException if the move is not a legal chess move.
         """
-        assert(from_.x)
-        assert(from_.y)
-        assert(to_.x)
-        assert(to_.y)
 
         if self.promote_pawn_location is not None:
             raise IllegalMoveException("Cannot move piece, previously moved pawn must be promoted first.")
 
-        legal_moves = self.get_moves(from_)
-        piece = self._all_pieces[from_]
+        from_square = Square(from_)
+        to_square = Square(to_)
+        legal_moves = self.get_moves(from_square.name)  # from_square.name handles case sensitivity
 
+        piece = from_square.piece
         if self.current_player != piece.color:
             raise IllegalMoveException("Cannot move piece, it is not {color} player's turn.".format(piece.color))
 
@@ -265,70 +283,61 @@ class Board(object):
             raise IllegalMoveException("Cannot move piece, the game already has a winner {winner}".format(
                 winner=self.winner))
 
-        if legal_moves is not False:
-            if to_ in legal_moves:
-                piece.has_moved = True
-                is_castle = False
+        if to_square.name in legal_moves:  # to_square.name is uppercase while to_name could be any case
+            is_castle = False
 
-                if self._is_en_passant_attack(from_):
-                    # Remove the pawn that moved previously as it has been captured
-                    # via en passant
-                    self._all_pieces[self.previous_moves[-1].to_] = None
-                elif self._is_castle_left(from_, to_):
-                    # Move the rook too
-                    rook_loc = (1, from_.y)
-                    rook = self._all_pieces.pop(rook_loc, None)
-                    self._all_pieces[(4, from_.y)] = rook
-                    is_castle = True
-                elif self._is_castle_right(from_, to_):
-                    # Move the rook too
-                    rook_loc = (8, from_.y)
-                    rook = self._all_pieces.pop(rook_loc, None)
-                    self._all_pieces[(6, from_.y)] = rook
-                    is_castle = True
+            if self._is_en_passant_attack(from_square):
+                # Remove the pawn that moved previously as it has been captured via en passant
+                self.previous_moves[-1].to_.piece = None
+            elif self._is_castle_left(from_square, to_square):
+                # Move the rook too
+                rook = Square.createFromCoords(1, from_square.y).pop()
+                Square.createFromCoords(4, from_square.y).piece = rook
+                is_castle = True
+            elif self._is_castle_right(from_square, to_square):
+                # Move the rook too
+                rook = Square.createFromCoords(8, from_square.y).pop()
+                Square.createFromCoords(6, from_square.y).piece = rook
+                is_castle = True
 
-                # Keep track of where the king is
-                if isinstance(piece, King):
-                    self._king_location[piece.color] = to_
+            # Keep track of where the king is
+            if isinstance(piece, King):
+                self._king_location[piece.color] = to_square
 
-                is_double_move = False  # Marks if a pawn is vulnerable to en passant
-                if isinstance(piece, Pawn):
-                    if abs(from_.y - to_.y) == 2:  # The pawn moved two squares
-                        is_double_move = True
-                    # Keep track of 50 move stalemate
-                    self._stalemate_count = 0
+            is_double_move = False  # Marks if a pawn is vulnerable to en passant
+            if isinstance(piece, Pawn):
+                if abs(from_square.y - to_square.y) == 2:  # The pawn moved two squares
+                    is_double_move = True
+                # Keep track of 50 move stalemate
+                self._stalemate_count = 0
 
-                    # If pawn moves into end zone, it needs to be promoted
-                    if to_.y == 1 or to_.y == 8:
-                        self.promote_pawn_location = to_
+                # If pawn moves into end zone, it needs to be promoted
+                if to_square.y == 1 or to_square.y == 8:
+                    self.promote_pawn_location = to_square
 
-                elif self._all_pieces.get(to_, None) is None:
-                    # No capture
-                    self._stalemate_count += 1
-                else:
-                    # A capture
-                    self._stalemate_count = 0
+            if to_square.piece is None:
+                is_capture = False  # Moved into an empty square, append regular move
+                self._stalemate_count += 1
+            else:
+                is_capture = True  # Captured an enemy piece, mark as a capture
+                self._stalemate_count = 0
 
-                if self.get_piece(to_) is None:
-                    is_capture = False  # Moved into an empty square, append regular move
-                else:
-                    is_capture = True  # Captured an enemy piece, mark as a capture
+            # Finally move the piece
+            to_square.piece = from_square.pop()
+            piece.has_moved = True
 
-                # Move a regular piece
-                self._all_pieces.pop(from_, None)
-                self._all_pieces[to_] = piece
+            # TODO: Could fold the logic into this, as from
+            self.previous_moves.append(Move(piece, from_square, to_square, is_double_move, is_capture, is_castle))
 
-                self.previous_moves.append(Move(piece, from_, to_, is_double_move, is_capture, is_castle))
+            # Do not change player if the current player still needs to promote their pawn
+            if self.promote_pawn_location is None:
+                self.current_player = Color.inverse(self.current_player)
 
-                # Do not change player if the current player still needs to promote their pawn
-                if self.promote_pawn_location is None:
-                    self.current_player = Color.inverse(self.current_player)
+            # These data structures must be kept in sync
+            assert isinstance(self._king_location[Color.black].piece, BlackKing)
+            assert isinstance(self._king_location[Color.white].piece, WhiteKing)
 
-                # These data structures must be kept in sync
-                assert isinstance(self._all_pieces[self._king_location[Color.black]], BlackKing)
-                assert isinstance(self._all_pieces[self._king_location[Color.white]], WhiteKing)
-
-                return
+            return
         # Fall through error
         raise IllegalMoveException("Move of '{0}' from {1} to {2} is not legal.".format(piece, from_, to_))
 
@@ -340,20 +349,10 @@ class Board(object):
         draw at the start of their turn:
         http://en.wikipedia.org/wiki/Fifty-move_rule
         """
-        if self.stalemate_count <= 100:
-            return True
-        else:
+        if self.stalemate_count < 99:  # 50 moves for one, 49 for the other ...
             return False
-
-    @staticmethod
-    def _is_adjacent(loc_a, loc_b):
-        """Returns True if two squares are horizontally, vertically or diagonally adjacent (side by side).
-        """
-        if abs(loc_a.x - loc_b.x) <= 1:
-            if abs(loc_a.y - loc_b.y) <= 1:
-                if loc_a != loc_b:
-                    return True
-        return False
+        else:
+            return True
 
     def promote_pawn(self, piece):
         """Promotes a pawn that has been moved to the last row. Should be called after move_piece.
@@ -364,7 +363,7 @@ class Board(object):
         if self.promote_pawn_location is None:
             raise IllegalMoveException("Cannot promote pawn, no pawn has been moved into end row")
         loc = self.promote_pawn_location
-        pawn = self.get_piece(loc)
+        pawn = loc.piece
         assert(isinstance(pawn, Pawn))    # Must be a pawn
         assert(loc.y == 8 or loc.y == 1)  # Must be in the final row
         if (piece.color is not pawn.color):
@@ -372,7 +371,7 @@ class Board(object):
                                         .format(pawn_color=pawn.color, color=piece.color, piece=piece))
 
         if isinstance(piece, (Queen, Rook, Bishop, Knight)):
-            self._all_pieces[loc] = piece
+            loc.piece = piece
             self.promote_pawn_location = None  # Clear the promotion
             self.current_player = Color.inverse(self.current_player)  # Change turn to next player
         else:
@@ -386,7 +385,7 @@ class Board(object):
 
         """
         if self.promote_pawn_location is not None:
-            pawn = self.get_piece(self.promote_pawn_location)
+            pawn = self.promote_pawn_location.piece
             if pawn.color is Color.white:
                 return frozenset([WhiteQueen(True), WhiteRook(True), WhiteBishop(True), WhiteKnight(True)])
             elif pawn.color is Color.black:
@@ -397,11 +396,10 @@ class Board(object):
             # No pawns to be promoted
             return frozenset([])
 
-    def _get_attackers(self, to_, color, blocker=False, ignore_king=False):
-        """Returns the locations of the pieces of the color specified that
-        can attack the given location.
+    def _get_attackers(self, to_, color, blocker=False):
+        """Returns the locations of the pieces of the color specified that can attack the given location.
 
-        to_    -- A Square(x, y) on the chess board
+        to_    -- A Square.createFromCoords(x, y) on the chess board
         color  -- The color of the attacking pieces
         blocker -- If true, returns the locations of pawns that can move to to_ instead of attack it
         returns -- A set of (x,y) locations of all the pieces of the specified color that can attack the loc provided.
@@ -435,29 +433,26 @@ class Board(object):
         # Get the squares of any knights that can attack this square
         dummy_moves, knight_attacks = self._get_knight_bishop_queen_rook_king_moves(knight, to_)
         for k in knight_attacks:
-            piece = self.get_piece(k)
-            if isinstance(piece, Knight):
+            if isinstance(k.piece, Knight):
                 # Opponents knight - an attacker
                 attackers.add(k)
 
         dummy_moves, rooks_or_queen_attacks = self._get_knight_bishop_queen_rook_king_moves(rook, to_)
         for r in rooks_or_queen_attacks:
-            piece = self.get_piece(r)
-            if isinstance(piece, Rook) or isinstance(piece, Queen):
+            if isinstance(r.piece, Rook) or isinstance(r.piece, Queen):
                 attackers.add(r)
-            elif isinstance(piece, King):
+            elif isinstance(r.piece, King):
                 # King can only attack adjacent squares
-                if self._is_adjacent(r, to_):
+                if r.isAdjacent(to_):
                     attackers.add(r)
 
         dummy_moves, bishop_or_queen_attacks = self._get_knight_bishop_queen_rook_king_moves(bishop, to_)
         for b in bishop_or_queen_attacks:
-            piece = self.get_piece(b)
-            if isinstance(piece, Bishop) or isinstance(piece, Queen):
+            if isinstance(b.piece, Bishop) or isinstance(b.piece, Queen):
                 attackers.add(b)
-            elif isinstance(piece, King):
+            elif isinstance(b.piece, King):
                 # King can only attack adjacent squares
-                if self._is_adjacent(b, to_):
+                if b.isAdjacent(to_):
                     attackers.add(b)
 
         if blocker:
@@ -465,8 +460,7 @@ class Board(object):
         else:
             pawn_squares = self._get_pawn_attacks(pawn, to_)
         for p in pawn_squares:
-            piece = self.get_piece(p)
-            if isinstance(piece, Pawn):
+            if isinstance(p.piece, Pawn):
                 attackers.add(p)
 
         return attackers
@@ -501,10 +495,8 @@ class Board(object):
         """
         assert(from_.x)
         assert(from_.y)
-
-        piece = self.get_piece(from_)
-        assert piece is not None
-        color = piece.color
+        assert from_.piece is not None
+        color = from_.piece.color
 
         # A piece can only be pinned if it's in a line with the king
         king_loc = self._king_location[color]
@@ -529,7 +521,7 @@ class Board(object):
 
         # There is at maximum only 1 attacker an any given direction
         if attack is not None:
-            enemy_piece = self.get_piece(attack)
+            enemy_piece = attack.piece
             if isinstance(enemy_piece, (Bishop, Rook, Queen)):
                 # Check if the enemey pience can attack back
                 if negative_pinned_direction in enemy_piece.attacks:
@@ -539,11 +531,17 @@ class Board(object):
         return set([])
 
     def get_moves(self, from_):
-        u"""Returns a list of all the squares the piece in the given location can attack or move to."""
-        moves, attacks = self.get_moves_and_attacks(from_)
-        return moves.union(attacks)
+        u"""Returns a list of all the squares the piece in the given location can attack or move to.
 
-    def get_moves_and_attacks(self, from_):
+            from_ -- A string like 'A4' which represents the square with the piece to find the moves for
+        """
+        from_square = Square(from_)
+        moves, attacks = self._get_moves_and_attacks(from_square)
+        square_names = set([square.name for square in moves.union(attacks)])
+
+        return square_names
+
+    def _get_moves_and_attacks(self, from_):
         """Returns all of the valid moves for piece in the given location.
 
         from_ -- The location of the piece to get the possible moves for.
@@ -552,10 +550,8 @@ class Board(object):
         This returns all of the legal moves a piece can make. It is a subset
         of the locations a piece can move to, retstricted by other game conditions (like is the king in check).
         """
-        assert(from_.x)
-        assert(from_.y)
+        piece = from_.piece
 
-        piece = self.get_piece(from_)
         if piece is None:
             raise ValueError("Square at location {0} is empty".format(from_))
 
@@ -569,10 +565,17 @@ class Board(object):
             safe_attacks = set([])
             # FIXME: If we are in check, moving / attacking in a direction may not fix things
             for m in moves:
+
                 if len(self._get_attackers(m, enemy_color)) > 0:
                     # Can't move king into check
                     pass
                 else:
+                    # If we're already in check, the king is blocking  a square from the attacker
+                    # If the king moves there, he will still be under attack.
+                    # attacker_squares = self._get_attackers(from_, enemy_color)
+                    # for square in attacker_squares:
+                    # direction = self._get_squares_in_direction(square, direction, color, limit=None, all_squares=False):)
+
                     safe_moves.add(m)
             for a in attacks:
                 if len(self._get_attackers(a, enemy_color)) > 0:
@@ -626,7 +629,7 @@ class Board(object):
                 [enemy_loc] = enemy_attacking_pieces
 
                 # Can we block the attacking piece?
-                v = (enemy_loc[0] - king_loc.x, enemy_loc[1] - king_loc.y)
+                v = (enemy_loc.x - king_loc.x, enemy_loc.y - king_loc.y)
                 attack_vector = self._normalize_vector(v)
 
                 # Find all of the squares that block the path between the enemy piece and king
@@ -641,7 +644,7 @@ class Board(object):
     def _get_knight_bishop_queen_rook_king_moves(self, piece, from_, pinned=set([])):
         """Returns all of the location any of these pieces can move to from the location specified.
            This does not restrict the king from moving into squares that are threatened.
-           Call the higher level method get_moves_and_attacks instead.
+           Call the higher level method _get_moves_and_attacks instead.
 
 
         loc     -- The location of the chess piece to move
@@ -720,21 +723,21 @@ class Board(object):
                         king = None
                         attacker = None
                         for xi in reversed(range(1, left_x)):
-                            piece = self.get_piece((xi, from_.y))
+                            piece = Square.createFromCoords(xi, from_.y).piece
                             if piece is not None:
                                 if isinstance(piece, King) and piece.color == pawn.color:
                                     king = piece
-                                elif piece is not pawn.color and (isinstance(piece, Queen) or isinstance(piece, Rook)):
+                                elif piece.color != pawn.color and (isinstance(piece, Queen) or isinstance(piece, Rook)):
                                     attacker = piece
                                 break
 
                         if attacker is not None or king is not None:
                             for xi in range(right_x + 1, 9):
-                                piece = self.get_piece((xi, from_.y))
+                                piece = Square.createFromCoords(xi, from_.y).piece
                                 if piece is not None:
                                     if isinstance(piece, King) and piece.color == pawn.color:
                                         king = piece
-                                    elif piece is not pawn.color and (isinstance(piece, Queen) or isinstance(piece, Rook)):
+                                    elif piece.color != pawn.color and (isinstance(piece, Queen) or isinstance(piece, Rook)):
                                         attacker = piece
                                     break
 
@@ -742,7 +745,7 @@ class Board(object):
                             # We're pinned
                             return []
 
-                        pawn_move_location = Square(en_passant_loc.x, from_.y + pawn.forward)
+                        pawn_move_location = Square.createFromCoords(en_passant_loc.x, from_.y + pawn.forward)
                         attacks.add(pawn_move_location)
 
         return attacks
@@ -756,16 +759,18 @@ class Board(object):
         assert(to_.x)
         assert(to_.y)
 
-        single_move_loc = Square(to_.x, to_.y - pawn.forward)
-        double_move_loc = Square(to_.x, to_.y - 2 * pawn.forward)
-        if self._valid_location(single_move_loc):
-            piece = self.get_piece(single_move_loc)
-            if isinstance(piece, pawn.__class__):
-                return set([single_move_loc])
-            if self._valid_location(double_move_loc):
-                piece = self.get_piece(double_move_loc)
-                if isinstance(piece, pawn.__class__) and not piece.has_moved:
-                    return set([double_move_loc])
+        single_move_loc = Square.createFromCoords(to_.x, to_.y - pawn.forward)
+
+        if isinstance(single_move_loc.piece, pawn.__class__):
+            return set([single_move_loc])
+
+        try:
+            double_move_loc = Square.createFromCoords(to_.x, to_.y - 2 * pawn.forward)
+            if isinstance(double_move_loc.piece, pawn.__class__) and self._pawn_has_not_moved(pawn, double_move_loc):
+                return set([double_move_loc])
+
+        except InvalidSquareException:
+            pass  # IllegalSquare, fall through
         return set([])
 
     def _get_pawn_moves(self, pawn, from_, pinned=set([])):
@@ -781,40 +786,39 @@ class Board(object):
 
         # Check if the pawn is not pinned or only pinned vertically so can move forward
         if len(pinned) == 0 or (0, 1) in pinned:
-            single_move_loc = Square(from_.x, from_.y + pawn.forward)
             try:
-                if self.get_piece(single_move_loc) is None:
-                    moves.add(single_move_loc)
-                    double_move_loc = Square(from_.x, from_.y + 2 * pawn.forward)
-                    if not self._pawn_has_moved(pawn, from_):
-                        if self.get_piece(double_move_loc) is None:
-                            moves.add(double_move_loc)
-            except KeyError:
-                # A side affect of this approach is that if self.get_piece(single_move_loc) is called when a
-                # Pawn is in the final square, a KeyError is thrown because the 'next' square is not on the
-                # board. In a real game, we never make this move, instead the pawn is promoted as soon as it
-                # Reaches the final square. We return an empty list of moves
-                return moves
-                # raise IllegalMoveException("Pawn cannot move, it must be promoted instead.")
+                single_move_loc = Square.createFromCoords(from_.x, from_.y + pawn.forward)
+            except InvalidSquareException:
+                raise IllegalMoveException("Pawn cannot move, it must be promoted instead.")
+
+            if single_move_loc.piece is None:
+                moves.add(single_move_loc)
+                if self._pawn_has_not_moved(pawn, from_):
+                    double_move_loc = Square.createFromCoords(from_.x, from_.y + 2 * pawn.forward)
+                    if double_move_loc.piece is None:
+                        moves.add(double_move_loc)
+            return moves
+
         else:
             # Pinned diagonally
             pass
         return moves
 
-    def _pawn_has_moved(self, pawn, from_):
+    def _pawn_has_not_moved(self, pawn, from_):
+        # Normally negation is avoided in method names, but this one exception seems warranted
+        # as 'has not moved' is an atribute.
         u"""Returns True if the pawn has moved, and False otherwise."""
         if Color.black == pawn.color and from_.y == 7:
-            return False
-        elif Color.white == pawn.color and from_.y == 2:
-            return False
-        else:
             return True
+        elif Color.white == pawn.color and from_.y == 2:
+            return True
+        else:
+            return False
 
     def _is_en_passant_attack(self, from_):
-        """Returns True if an attack can be made from the location from_ via via en passant"""
-        piece = self.get_piece(from_)
-        # Only pawns can do en passant
-        if isinstance(piece, Pawn):
+        u"""Returns True if an attack can be made from the location from_ via via en passant"""
+
+        if isinstance(from_.piece, Pawn):  # Only pawns can do en passant
             # 1st move has no previous
             if len(self.previous_moves) > 0:
                 # En passant only possible when eneny pawn does double move
@@ -826,13 +830,14 @@ class Board(object):
 
         return False
 
-    def _get_squares_in_direction(self, from_, direction, color, limit=None):
-        """Returns a list of moves, and attacks that can be made from the given square in a specific direction
+    def _get_squares_in_direction(self, from_, direction, color, limit=None, all_squares=False):
+        u"""Returns a list of moves, and attacks that can be made from the given square in a specific direction
 
         from_     -- The location to search from
         direction -- The direction to search in
         color     -- The color of this piece (we attack one enemy piece of the opposite color)
         limit     -- The maxium number of total squares to search/return
+        ignore_blockers -- If this is true, returns all squares
 
         returns   -- An ordered list of squares where there piece can move into empty squares,
                      and 0-1 squares that contains a piece it can attack
@@ -846,88 +851,79 @@ class Board(object):
         dx, dy = direction
         i = 1
         while limit is None or i <= limit:
-            loc = Square(from_.x + i * dx, from_.y + i * dy)
-            i += 1
             try:
-                piece = self.get_piece(loc)  # Will raise a KeyError if we step off the board
-                if piece is None:
-                    moves.add(loc)  # Empty square
-                elif piece.color != color:
+                loc = Square.createFromCoords(from_.x + i * dx, from_.y + i * dy)
+                i += 1
+                if loc.piece is None or all_squares is True:
+                    moves.add(loc)  # Empty square or we're after all squares
+                elif loc.piece.color != color:
                     attack = loc  # We've found an enemy piece
                     break
                 else:
                     # We've found one of our own pieces
                     break
-
-            except KeyError:
-                # We've stepped off the board
+            except InvalidSquareException:
                 break
         return moves, attack
 
-    @staticmethod
-    def _valid_location(loc):
-        """Returns True if the location (x,y) is within chess board."""
-        x, y = loc
-        if 1 <= x <= 8 and 1 <= y <= 8:
-            return True
-        return False
-
     def _new_board(self):
-        """Places all of the pieces on the chessboard in their starting
-        positions and assign white player first turn."""
+        u"""Places all of the pieces on the chessboard in their starting positions and assign
+            white player first turn.
+        """
         self.previous_moves = []
         self.turn = 0
         self._stalemate_count = 0
         self.current_player = Color.white
-        self._all_pieces = dict()
         self._king_location = dict()
 
         # Place all the White pieces on the board
-        self._all_pieces[(1, 1)] = WhiteRook()
-        self._all_pieces[(2, 1)] = WhiteKnight()
-        self._all_pieces[(3, 1)] = WhiteBishop()
-        self._all_pieces[(4, 1)] = WhiteQueen()
-        self._all_pieces[(5, 1)] = WhiteKing()
-        self._all_pieces[(6, 1)] = WhiteBishop()
-        self._all_pieces[(7, 1)] = WhiteKnight()
-        self._all_pieces[(8, 1)] = WhiteRook()
-        self._all_pieces[(1, 2)] = WhitePawn()
-        self._all_pieces[(2, 2)] = WhitePawn()
-        self._all_pieces[(3, 2)] = WhitePawn()
-        self._all_pieces[(4, 2)] = WhitePawn()
-        self._all_pieces[(5, 2)] = WhitePawn()
-        self._all_pieces[(6, 2)] = WhitePawn()
-        self._all_pieces[(7, 2)] = WhitePawn()
-        self._all_pieces[(8, 2)] = WhitePawn()
+        Square('A1').piece = WhiteRook()
+        Square('B1').piece = WhiteKnight()
+        Square('C1').piece = WhiteBishop()
+        Square('D1').piece = WhiteQueen()
+        Square('E1').piece = WhiteKing()
+        Square('F1').piece = WhiteBishop()
+        Square('G1').piece = WhiteKnight()
+        Square('H1').piece = WhiteRook()
+        Square('A2').piece = WhitePawn()
+        Square('B2').piece = WhitePawn()
+        Square('C2').piece = WhitePawn()
+        Square('D2').piece = WhitePawn()
+        Square('E2').piece = WhitePawn()
+        Square('F2').piece = WhitePawn()
+        Square('G2').piece = WhitePawn()
+        Square('H2').piece = WhitePawn()
 
         # Place all the Black pieces on the board
-        self._all_pieces[(1, 8)] = BlackRook()
-        self._all_pieces[(2, 8)] = BlackKnight()
-        self._all_pieces[(3, 8)] = BlackBishop()
-        self._all_pieces[(4, 8)] = BlackQueen()
-        self._all_pieces[(5, 8)] = BlackKing()
-        self._all_pieces[(6, 8)] = BlackBishop()
-        self._all_pieces[(7, 8)] = BlackKnight()
-        self._all_pieces[(8, 8)] = BlackRook()
-        self._all_pieces[(1, 7)] = BlackPawn()
-        self._all_pieces[(2, 7)] = BlackPawn()
-        self._all_pieces[(3, 7)] = BlackPawn()
-        self._all_pieces[(4, 7)] = BlackPawn()
-        self._all_pieces[(5, 7)] = BlackPawn()
-        self._all_pieces[(6, 7)] = BlackPawn()
-        self._all_pieces[(7, 7)] = BlackPawn()
-        self._all_pieces[(8, 7)] = BlackPawn()
+        Square('A8').piece = BlackRook()
+        Square('B8').piece = BlackKnight()
+        Square('C8').piece = BlackBishop()
+        Square('D8').piece = BlackQueen()
+        Square('E8').piece = BlackKing()
+        Square('F8').piece = BlackBishop()
+        Square('G8').piece = BlackKnight()
+        Square('H8').piece = BlackRook()
+        Square('A7').piece = BlackPawn()
+        Square('B7').piece = BlackPawn()
+        Square('C7').piece = BlackPawn()
+        Square('D7').piece = BlackPawn()
+        Square('E7').piece = BlackPawn()
+        Square('F7').piece = BlackPawn()
+        Square('G7').piece = BlackPawn()
+        Square('H7').piece = BlackPawn()
 
         # Locate the black and white kings
-        self._king_location[Color.white] = Square(5, 1)
-        self._king_location[Color.black] = Square(5, 8)
+        self._king_location[Color.white] = Square('E1')
+        self._king_location[Color.black] = Square('E8')
 
         # These data structures must be kept in sync
-        assert isinstance(self._all_pieces[self._king_location[Color.black]], BlackKing)
-        assert isinstance(self._all_pieces[self._king_location[Color.white]], WhiteKing)
+        assert isinstance(self._king_location[Color.black].piece, BlackKing)
+        assert isinstance(self._king_location[Color.white].piece, WhiteKing)
 
     def __repr__(self):
-        u"""Returns a string representation of the chess board that can be reconstructed when passed to the constructor."""
+        u"""Returns a string representation of the chess board that can be reconstructed when passed to the
+            constructor.
+        """
         # 1 indexed chessboard, 1 <= x < 9, 1 <= y < 9
         # xrange would be more a more efficient implemenation but this is a
         # minor and in python 3.x we get this benefit implicitly
@@ -935,7 +931,7 @@ class Board(object):
 
         for y in range(1, 9):
             for x in range(1, 9):
-                piece = self._all_pieces.get((x, y))
+                piece = Square.createFromCoords(x, y).piece
                 if piece is not None:
                     # Encode the state information that the piece 'has moved', so cannot castle
                     # This is encoded before the piece because it makes re-parsing easier
@@ -954,7 +950,7 @@ class Board(object):
         return board_repr.encode('utf-8')
 
     def _create_board_from_repr(self, board_string):
-        """Creates a new board from the board described by board_string."""
+        u"""Creates a new board from the board described by board_string."""
         unicode_board_string = board_string.decode('utf-8')
         [piece_string, player_color_code, turn, _stalemate_count] = unicode_board_string.split(u',')
 
@@ -964,7 +960,6 @@ class Board(object):
 
         self.turn = int(turn)
         self._stalemate_count = int(_stalemate_count)
-        self._all_pieces = dict()
         self._king_location = dict()
 
         row_strings = piece_string.split(u'-')
@@ -979,14 +974,14 @@ class Board(object):
                     has_moved = True
                 else:
                     x += 1
-                    loc = Square(x, y)
+                    loc = Square.createFromCoords(x, y)
                     if symbol == _EMPTY_SQUARE:
                         pass
                     else:
                         cls = Piece.get_piece_class(symbol)
 
                         if issubclass(cls, Pawn):
-                            self._all_pieces[loc] = cls(loc)
+                            loc.piece = cls(loc)
                         elif issubclass(cls, King):
                             if cls.color in self._king_location:
                                 # Cannot handle multiple kings of the the same color, just saying
@@ -995,18 +990,18 @@ class Board(object):
                                                             .format(color=cls.color))
 
                             self._king_location[cls.color] = loc
-                            self._all_pieces[loc] = cls(has_moved)
+                            loc.piece = cls(has_moved)
                         elif issubclass(cls, Rook):
-                            self._all_pieces[loc] = cls(has_moved)
+                            loc.piece = cls(has_moved)
                         elif issubclass(cls, Knight) or issubclass(cls, Bishop) or issubclass(cls, Queen):
-                            self._all_pieces[loc] = cls()
+                            loc.piece = cls()
                         else:
                             raise ValueError(u"Invalid chess piece {0}".format(symbol))
                     has_moved = False
 
         # These data structures must be kept in sync
-        assert isinstance(self._all_pieces[self._king_location[Color.black]], BlackKing)
-        assert isinstance(self._all_pieces[self._king_location[Color.white]], WhiteKing)
+        assert isinstance(self._king_location[Color.black].piece, BlackKing)
+        assert isinstance(self._king_location[Color.white].piece, WhiteKing)
 
     def display(self):
         u"""Prints out a unicode representation of the chess board. Used mainly in command line testing."""
@@ -1018,7 +1013,7 @@ class Board(object):
             # Row number
             line += u"{0} ".format(y)
             for x in range(1, 9, 1):
-                current_piece = self._all_pieces.get((x, y))
+                current_piece = Square.createFromCoords(x, y).piece
                 if current_piece is not None:
                     # Display the piece on the square it occupies.
                     line += u"{0} ".format(current_piece.symbol)
@@ -1039,41 +1034,30 @@ class Board(object):
         u"""Creates a pretty print version of the previous chess moves taken."""
         return [move.display() for move in self.previous_moves]
 
-    @staticmethod
-    def _translate_squares(squares):
-        u"""Converts to representation is more compatible with JSON notation. """
-        new_squares = []
-        for s in squares:
-            new_squares.append({u'x': s.x, u'y': s.y})
-
-        return new_squares
-
-    def display_json_2(self):
-        """Constructs a simplified representation of the chess board and pieces that can be serailized to JSON
+    def display_json(self):
+        u"""Constructs a simplified representation of the chess board and pieces that can be serailized to JSON
         via the python JSON library."""
         pieces = {}
 
-        for loc in self._all_pieces:
-            from_ = Square(*loc)
+        for square in Square.all_squares:
 
-            current_piece = self.get_piece(from_)
-            piece = {}
+            display_piece = {}
 
-            moves, attacks = self.get_moves_and_attacks(from_)
-            piece['position'] = from_.name
-            piece['piece'] = current_piece.name
-            piece['moves'] = [m.name for m in moves]
-            piece['attacks'] = [a.name for a in attacks]
+            moves, attacks = self._get_moves_and_attacks(square)
+            display_piece['position'] = square.name
+            display_piece['piece'] = square.piece.name
+            display_piece['moves'] = [m.name for m in moves]
+            display_piece['attacks'] = [a.name for a in attacks]
 
             # Only highlight the current players pieces, but don't highlight if they need to promote a pawn,
             # just highlight that pawn
-            piece['active'] = False
-            if current_piece.color == self.current_player:
+            display_piece['active'] = False
+            if square.piece.color == self.current_player:
                 if self.promote_pawn_location is None:
-                    piece['active'] = True
-                elif self.promote_pawn_location == from_:
+                    display_piece['active'] = True
+                elif self.promote_pawn_location == square:
                     # It will always be the current players turn
-                    piece['active'] = True
+                    display_piece['active'] = True
 
-            pieces[from_.name] = piece
+            pieces[square.name] = display_piece
         return pieces  # json.dumps(super_board)

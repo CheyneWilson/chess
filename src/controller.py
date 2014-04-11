@@ -4,7 +4,7 @@
 import json
 import pickle
 
-from board import Board, Square
+from board import Board
 from board import IllegalMoveException
 from chess_pieces import PieceFactory
 from persistence import Persistence
@@ -38,7 +38,7 @@ def new(type):
     game_id = persistence.save_new_game(white_player_id, black_player_id, pickle.dumps(board))
 
     resp = {
-        u'board': board.display_json_2(),
+        u'board': board.display_json(),
         u'board_serialized': repr(board),
         u'turn': board.turns_taken,
         u'player': board.current_player,
@@ -76,7 +76,7 @@ def game(game_id):
     board = pickle.loads(game.board)
 
     resp = {
-        u'board': board.display_json_2(),
+        u'board': board.display_json(),
         u'board_serialized': repr(board),
         u'turn': board.turns_taken,
         u'player': board.current_player,
@@ -101,13 +101,11 @@ def move_piece(game_id, from_, to_):
     if (game is not None):
         try:
             board = pickle.loads(game.board)
-            from_square = Square.fromName(from_)
-            to_square = Square.fromName(to_)
-            board.move_piece(from_square, to_square)
+            board.move_piece(from_, to_)
             persistence.update_game(game_id, pickle.dumps(board), board.winner)
 
             resp = {
-                u'board': board.display_json_2(),
+                u'board': board.display_json(),
                 u'board_serialized': repr(board),
                 u'turn': board.turns_taken,
                 u'player': board.current_player,
@@ -152,7 +150,7 @@ def promote_piece(game_id, piece_code):
             persistence.update_game(game_id, pickle.dumps(board), board.winner)
 
             resp = {
-                u'board': board.display_json_2(),
+                u'board': board.display_json(),
                 u'turn': board.turns_taken,
                 u'player': board.current_player,
                 u'game_id': game_id,
