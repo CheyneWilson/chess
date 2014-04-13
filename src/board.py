@@ -111,9 +111,8 @@ class Board(object):
                         # If it's the king then since we know we can't
                         # legally move, ignore
                         continue
-                    elif len(self._get_pinned_directions(loc)) == 0:
-                        # Can capture the piece putting the king in
-                        # check
+                    elif self._pinned(loc) is None:
+                        # Can capture the piece putting the king incheck
                         return False
                     else:
                         # Can't be pinned by piece causing check
@@ -474,47 +473,46 @@ class Board(object):
 
         return attackers
 
+    def _pinned(self, from_):
+        u"""Returns the Square containing the piece that is pinning this one or None if not pinned.
+
+        from_  -- The square to check if the piece inside is pinned.
+        """
+
+        color = from_.piece.color
+        king_loc = self._king_location[color]
+        pinned_direction = king_loc.direction(from_)
+        if pinned_direction is None:
+            return None  # Not in line with king, can't be pinned
+
+        # Get a list of squares, starting near the king and in a line away
+        squares = king_loc.squares_in_direction(pinned_direction)
+        maybe_pinned = False
+        for s in squares:
+            if s.piece is None:
+                continue  # blank square, keep looking
+            else:
+                if s == from_:
+                    maybe_pinned = True
+                elif maybe_pinned:
+                    # Is the piece found an attacker..?
+                    if pinned_direction in s.piece.attacks and s.piece.limit != 1:
+                        return s
+                    else:
+                        return None
+                else:
+                    return None  # Found another piece betwen us and the king, therefore not pinned
+
     def _get_pinned_directions(self, from_):
-        u"""Returns the directions a piece is pinned or an empty set if it is not pinned.
+        u"""Returns the directions a pinned is able to move or None if not pinned
 
             from_ -- The location of the piece to check for.
         """
-        assert(from_.x)
-        assert(from_.y)
-        assert from_.piece is not None
-        color = from_.piece.color
-
-        # A piece can only be pinned if it's in a line with the king
-        king_loc = self._king_location[color]
-
-        # Since only queen, rook and bishop can pin
-        # pinned_vector must normalze to one of (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (1, -1)
-        vector = king_loc.direction(from_)
-
-        if vector is None:
-            # Can't be pinned
-            return set([])
-
-        x, y = vector
-        pinned_direction = (x, y)
-        negative_pinned_direction = (-x, -y)
-
-        # We're only pinned if there is an attacker in this direction
-        # An execption to this is a pawn may be prevented from attacking
-        # via en passant, but that is a rare case and the logic is handled
-        # there to reduce general complexity
-        moves, attack = self._get_squares_in_direction(from_, pinned_direction, color)
-
-        # There is at maximum only 1 attacker an any given direction
-        if attack is not None:
-            enemy_piece = attack.piece
-            if isinstance(enemy_piece, (Bishop, Rook, Queen)):
-                # Check if the enemey pience can attack back
-                if negative_pinned_direction in enemy_piece.attacks:
-                    # TODO: THIS LOCK WILL FAIL FOR PAWNS (false positive), should check if they can attack
-                    return set([pinned_direction, negative_pinned_direction])
-
-        return set([])
+        pinning_square = self._pinned(from_)
+        if pinning_square is None:
+            return None
+        else:
+            return set([pinning_square.direction(from_), from_.direction(pinning_square)])
 
     def get_moves(self, from_):
         u"""Returns a list of all the squares the piece in the given location can attack or move to.
@@ -560,14 +558,10 @@ class Board(object):
         if self.is_check():
             # King in check, can only move piece if it captures the attacker or blocks it
             blocking_squares, enemy_square = self._get_blocking_squares()
+            moves = moves.intersection(blocking_squares)
+            attacks = attacks.intersection(set([enemy_square]))
 
-            legal_moves = moves.intersection(blocking_squares)
-            legal_attacks = attacks.intersection(set([enemy_square]))
-
-            return legal_moves, legal_attacks
-        else:
-            # King not in check, can move all pieces normally
-            return moves, attacks
+        return moves, attacks
 
     def _get_king_moves_and_attacks(self, king_square):
         u"""Returns all of the moves that a king can make.
@@ -654,7 +648,7 @@ class Board(object):
             # Must be captured or blocked
             return set([]), set([])
 
-    def _get_knight_bishop_queen_rook_king_moves(self, piece, from_, pinned=set([])):
+    def _get_knight_bishop_queen_rook_king_moves(self, piece, from_, pinned=None):
         """Returns all of the location any of these pieces can move to from the location specified.
            This does not restrict the king from moving into squares that are threatened.
            Call the higher level method _get_moves_and_attacks instead.
@@ -672,12 +666,13 @@ class Board(object):
         all_attacks = set([])
         all_moves = set([])
 
-        if len(pinned) != 0:
+        if pinned is None:
+            move_vectors = piece.attacks
+        else:
             # A piece cannot be pinned in more than one direction
             # If the piece is pinned vertically (or any other direction), it can still move in that direction
             move_vectors = pinned.intersection(piece.attacks)
-        else:
-            move_vectors = piece.attacks
+
         for direction in move_vectors:
             moves, attack = self._get_squares_in_direction(from_, direction, piece.color, piece.limit)
             if attack is not None:
@@ -686,8 +681,8 @@ class Board(object):
 
         return all_moves, all_attacks
 
-    def _get_pawn_attacks(self, pawn, from_, pinned=set([])):
-        """Returns the location a pawn can attack diagonnaly in one direction.
+    def _get_pawn_attacks(self, pawn, from_, pinned=None):
+        u"""Returns the location a pawn can attack diagonnaly in one direction.
 
         pawn   -- The pawn to return the location it can attack
         from_  -- The location of the pawn
@@ -697,7 +692,7 @@ class Board(object):
 
         for attack_dir in pawn.attacks:
             # Check if the piece can attack normally
-            if len(pinned) == 0 or attack_dir in pinned:
+            if pinned is None or attack_dir in pinned:
                 dummy_locs, enemy_loc = self._get_squares_in_direction(from_, attack_dir, pawn.color, 1)
 
                 if enemy_loc is not None:
@@ -784,19 +779,15 @@ class Board(object):
             pass  # IllegalSquare, fall through
         return set([])
 
-    def _get_pawn_moves(self, pawn, from_, pinned=set([])):
+    def _get_pawn_moves(self, pawn, from_, pinned=None):
         u"""Returns all of the moves that a pawn can make from the given from_ location
 
         This does not include moves where the pawn captures an enemy piece but does check
         whether the pawn is pinned or not."""
         moves = set([])
 
-        if (1, 0) in pinned:
-            # Pinned horizontally, therefore cannot move or attack
-            return moves
-
         # Check if the pawn is not pinned or only pinned vertically so can move forward
-        if len(pinned) == 0 or (0, 1) in pinned:
+        if pinned is None or (0, 1) in pinned:
             try:
                 single_move_loc = Square.createFromCoords(from_.x, from_.y + pawn.forward)
             except InvalidSquareException:
@@ -809,7 +800,9 @@ class Board(object):
                     if double_move_loc.piece is None:
                         moves.add(double_move_loc)
             return moves
-
+        elif (1, 0) in pinned:
+            # Pinned horizontally, therefore cannot move or attack
+            return moves
         else:
             # Pinned diagonally
             pass
@@ -853,6 +846,9 @@ class Board(object):
         returns   -- An ordered list of squares where there piece can move into empty squares,
                      and 0-1 squares that contains a piece it can attack
         """
+        # TODO: This should be modified to use the method on Square
+        # We're repeating logic, but the logic here is too specific
+        # Or at very leasy, need to rename this
         assert(from_.x)
         assert(from_.y)
 

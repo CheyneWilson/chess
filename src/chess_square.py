@@ -66,6 +66,28 @@ class Square(object):
                     return True
         return False
 
+    def squares_in_direction(self, direction):
+        u"""Returns all of the squares in the direction (x, y) tuple given, from this Square to the board edge.
+
+        The direction is a (x, y) tuple representing a compass direction like north, east, south-west, etc.
+        North is (0, 1), Northeast is (1, 1), Southwest is (-1, -1), etc
+        """
+        x, y = direction
+        assert(x == 0 or abs(x) == 1)
+        assert(y == 0 or abs(y) == 1)
+
+        squares = []
+        i = 1
+        while True:
+            try:
+                loc = Square.createFromCoords(self.x + i * x, self.y + i * y)
+                i += 1
+                squares.append(loc)
+
+            except InvalidSquareException:
+                break  # Hit the edge of the baord
+        return squares
+
     def direction(self, to_):
         u"""The direction from this square to to_ is normalized to have x and y components of 0 or 1.
 

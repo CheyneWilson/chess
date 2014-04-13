@@ -1420,24 +1420,27 @@ class TestSpecificScenarios(unittest.TestCase):
 
         assert_that(checkmate, is_(True))
 
-    # def test_error(self):
-    #     u"""The king is not in check, we should be able to move all pieces normally.
-    #        ________________
-    #     8 |♜|♞|♝|♘|♚|_|_|♜|
-    #     7 |♟|♟|♟|♟|_|♟|♟|♟|
-    #     6 |_|_|_|_|_|♞|_|_|
-    #     5 |_|_|♝|_|_|_|_|_|
-    #     4 |_|_|_|_|_|_|_|_|
-    #     3 |_|_|_|♟|_|_|_|_|
-    #     2 |♙|♙|♙|♗|_|♙|♙|♙|
-    #     1 |♖|♘|_|♕|♔|♗|♘|♖|
-    #        ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
-    #        A B C D E F G H
+    def test_blackbishop_can_move(self):
+        u"""While manually testing this scenario came up, where the bishop could not move tho it should be able to.
 
-    #     """
-    #     chess_board = Board("♖♘_♕♔♗♘♖-♙♙♙♗_♙♙♙-___♟____-________-__♝_____-_____♞__-♟♟♟♟_♟♟♟-♜♞♝♘♚__♜,B,0,0")
-    #     # f1 = Square('f1')
-    #     # print chess_board.get_moves(f1)
+           ________________
+        8 |_|♕|♝|♛|♚|♝|_|♜|
+        7 |_|_|♟|_|♟|♟|♟|_|
+        6 |_|♟|_|_|_|♞|_|_|
+        5 |_|_|_|♟|_|_|_|♟|
+        4 |_|_|_|♙|_|_|_|_|
+        3 |_|_|_|_|_|_|_|_|
+        2 |♙|♙|♙|_|♙|♙|♙|♙|
+        1 |♖|♘|♗|_|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           A B C D E F G H
+        """
+        chess_board = Board("♖♘♗_♔♗♘♖-♙♙♙_♙♙♙♙-________-___♙____-___♟___♟-_♟___♞__-__♟_♟♟♟_-_♕♝♛♚♝_♜,B,0,0")
+
+        moves = chess_board.get_moves('c8')
+        assert_that(moves, is_(set(['A6', 'B7', 'D7', 'E6', 'F5', 'G4', 'H3'])))
+        # print chess_board._get_pinned_directions(from_)
+        # print chess_board.get_moves('c8')
 
 
 class TestLegalMoves(unittest.TestCase):
@@ -2025,6 +2028,96 @@ class TestDisplayFunctions(unittest.TestCase):
         # Check that the board contains the same pieces
         assert_that(result_json[u'board'], contains_inanyorder(*expected_json[u'board']))
 
+
+class TestPinnedBy(unittest.TestCase):
+
+    def test_pinned_by_rook(self):
+        u"""Check that a pinned knight cannot move (as there is no way for it to still be blocking check if it moves)
+
+        The board looks like:
+           ________________
+        8 |♜|♞|♝|♛|♚|♝|♞|_|
+        7 |♟|♟|♟|♟|♟|♟|♟|♟|
+        6 |_|_|_|_|_|_|_|_|
+        5 |_|_|_|_|♜|_|_|_|
+        4 |_|_|_|_|_|_|_|_|
+        3 |_|_|_|_|_|_|_|_|
+        2 |♙|♙|♙|♙|♘|♙|♙|♙|
+        1 |♖|♘|♗|♕|♔|♗|_|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           A B C D E F G H
+
+        """
+        pinned_board = Board("♖♘♗♕♔♗_♖-♙♙♙♙♘♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_,W,0,0")
+        e2 = Square('e2')
+        pinned_by = pinned_board._pinned(e2)
+        assert_that(pinned_by, is_(Square('e5')))
+
+    def test_not_pinned(self):
+        u"""The bishop should not be pinned because the queen is also protecting the king
+
+        The board looks like:
+           ________________
+        8 |♜|♞|♝|♛|♚|♝|♞|♜|
+        7 |♟|♟|♟|♟|♟|♟|♟|♟|
+        6 |_|_|_|_|_|_|_|_|
+        5 |_|_|_|_|_|_|_|_|
+        4 |_|_|_|_|_|_|_|_|
+        3 |_|_|_|_|_|_|_|_|
+        2 |♙|_|♙|_|♙|♙|♙|♙|
+        1 |♜|_|♗|♕|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           A B C D E F G H
+
+        """
+        pinned_board = Board("♜_♗♕♔♗♘♖-♙_♙_♙♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,B,0,0")
+        c1 = Square('c1')
+        pinned = pinned_board._pinned(c1)
+        assert_that(pinned, is_(None))
+
+    def test_pinned_by_rook_2(self):
+        u"""The bishop should be pinned by the rook in a1.
+
+        The board looks like:
+           ________________
+        8 |♜|♞|♝|♛|♚|♝|♞|♜|
+        7 |♟|♟|♟|♟|♟|♟|♟|♟|
+        6 |_|_|_|_|_|_|_|_|
+        5 |_|_|_|_|_|_|_|_|
+        4 |_|_|_|_|_|_|_|_|
+        3 |_|_|_|_|_|_|_|_|
+        2 |♙|_|♙|_|♙|♙|♙|♙|
+        1 |♜|_|♗|_|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           A B C D E F G H
+
+        """
+        pinned_board = Board("♜_♗_♔♗♘♖-♙_♙_♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,B,0,0")
+        c1 = Square('c1')
+        pinned = pinned_board._pinned(c1)
+        assert_that(pinned, is_(Square('a1')))
+
+    def test_pinned_by_bishop(self):
+        u"""The pawn should be pinned by the bishop at h4
+
+        The board looks like:
+           ________________
+        8 |♜|♞|♝|♛|♚|♝|♞|♜|
+        7 |♟|♟|♟|♟|♟|♟|♟|♟|
+        6 |_|_|_|_|_|_|_|_|
+        5 |_|_|_|_|_|_|_|_|
+        4 |_|_|_|_|_|_|_|♝|
+        3 |_|_|_|_|_|_|_|_|
+        2 |♙|_|♙|_|♙|♙|♙|♙|
+        1 |_|_|♗|_|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           A B C D E F G H
+
+        """
+        pinned_board = Board("♜_♗_♔♗♘♖-♙_♙_♙♙♙♙-________-_______♝-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,B,0,0")
+        f2 = Square('f2')
+        pinned = pinned_board._pinned(f2)
+        assert_that(pinned, is_(Square('h4')))
 
 if __name__ == '__main__':
         unittest.main()
