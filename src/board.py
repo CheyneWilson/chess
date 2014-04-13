@@ -53,8 +53,17 @@ class Board(object):
     _stalemate_count = 0
     _king_location = None
 
+    def prePickle(self):
+        u"""Pickle does not persist class variables, we must do that ourselves."""
+        self._all_squares = Square.all_squares
+
+    def postPickle(self):
+        u"""Pickle does not persist class variables, we must do that ourselves."""
+        # TODO: Can these be moved into __setstate__ and __getstate__
+        # That 'may' not let us call the square object
+        Square.all_squares = self._all_squares
+
     def __init__(self, board_string=None):
-        Square.resetAllSquares()
         if board_string is None:
             self._new_board()
         else:
@@ -399,8 +408,8 @@ class Board(object):
     def _get_attackers(self, to_, color, blocker=False):
         """Returns the locations of the pieces of the color specified that can attack the given location.
 
-        to_    -- A Square.createFromCoords(x, y) on the chess board
-        color  -- The color of the attacking pieces
+        to_    -- A Square on the chess board
+        color  -- The color of the attacking pieces.
         blocker -- If true, returns the locations of pawns that can move to to_ instead of attack it
         returns -- A set of (x,y) locations of all the pieces of the specified color that can attack the loc provided.
         """
@@ -465,29 +474,6 @@ class Board(object):
 
         return attackers
 
-    @staticmethod
-    def _normalize_vector(vector):
-        """Reduce length of the x and y parts of the veror to 1 while
-        maintaining the same direction (if possible).
-
-        vector  -- A tuple of the form (x, y)
-        returns -- one of (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1),
-                (1,-1) or if the vector cannot be normalized then returns None
-        """
-        x, y = vector
-
-        if x == 0:
-            y = y / abs(y)
-        elif y == 0:
-            x = x / abs(x)
-        elif x == y or x == -y:
-            x = x / abs(x)
-            y = y / abs(y)
-        else:
-            # Can't be normalized
-            return None
-        return (x, y)
-
     def _get_pinned_directions(self, from_):
         u"""Returns the directions a piece is pinned or an empty set if it is not pinned.
 
@@ -500,11 +486,11 @@ class Board(object):
 
         # A piece can only be pinned if it's in a line with the king
         king_loc = self._king_location[color]
-        pinned_vector = (from_.x - king_loc.x, from_.y - king_loc.y)
 
         # Since only queen, rook and bishop can pin
         # pinned_vector must normalze to one of (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (1, -1)
-        vector = self._normalize_vector(pinned_vector)
+        vector = king_loc.direction(from_)
+
         if vector is None:
             # Can't be pinned
             return set([])
@@ -556,34 +542,7 @@ class Board(object):
             raise ValueError("Square at location {0} is empty".format(from_))
 
         if isinstance(piece, King):
-            moves, attacks = self._get_knight_bishop_queen_rook_king_moves(piece, from_)
-            moves = moves.union(self._get_castle_moves(from_))  # Add any castling moves
-
-            enemy_color = Color.inverse(piece.color)
-
-            safe_moves = set([])
-            safe_attacks = set([])
-            # FIXME: If we are in check, moving / attacking in a direction may not fix things
-            for m in moves:
-
-                if len(self._get_attackers(m, enemy_color)) > 0:
-                    # Can't move king into check
-                    pass
-                else:
-                    # If we're already in check, the king is blocking  a square from the attacker
-                    # If the king moves there, he will still be under attack.
-                    # attacker_squares = self._get_attackers(from_, enemy_color)
-                    # for square in attacker_squares:
-                    # direction = self._get_squares_in_direction(square, direction, color, limit=None, all_squares=False):)
-
-                    safe_moves.add(m)
-            for a in attacks:
-                if len(self._get_attackers(a, enemy_color)) > 0:
-                    # Can't move king into check
-                    pass
-                else:
-                    safe_attacks.add(a)
-            return safe_moves, safe_attacks
+            return self._get_king_moves_and_attacks(from_)
         else:
             # Check if this piece is pinned, and then pass the limited move vector to
             # the _get_*piece*_moves methods. They need to be restricted in what they
@@ -610,6 +569,61 @@ class Board(object):
             # King not in check, can move all pieces normally
             return moves, attacks
 
+    def _get_king_moves_and_attacks(self, king_square):
+        u"""Returns all of the moves that a king can make.
+
+        The moves a king can make are highly restricted by the other pieces on the board.
+        This method restricts the moves to those that do not put the king in check.
+
+        king_square -- The square the king is in
+        """
+        king = king_square.piece
+
+        # Get all moves, these may be illegal, putting king in check
+        moves, attacks = self._get_knight_bishop_queen_rook_king_moves(king, king_square)
+        # Add any castling moves, these are all legal
+        moves = moves.union(self._get_castle_moves(king_square))
+
+        enemy_color = Color.inverse(king.color)
+        threatened = set([])
+        if self.is_check():
+            # The king is likely blocking the square(s) behind it from the attacker(s)
+            # We must count the square(s) as unsafe, because if the king moves there
+            # he will still be in check
+
+            enemy_squares = self._get_attackers(king_square, enemy_color)
+            for square in enemy_squares:
+                x, y = square.direction(king_square)
+                if square.piece.limit != 1:
+                    try:
+                        behind = Square.createFromCoords(king_square.x + x, king_square.y + y)
+                        threatened.add(behind)
+                    except InvalidSquareException:
+                        continue
+
+        safe_moves = set([])
+        safe_attacks = set([])
+
+        for m in moves:
+
+            if len(self._get_attackers(m, enemy_color)) > 0:
+                pass                 # Can't move king into check
+            elif m in threatened:
+                # If we're already in check, the king is blocking  a square from the attacker
+                # If the king moves there, he will still be under attack.
+                pass  # Can't move king into check
+            else:
+
+                safe_moves.add(m)
+        for a in attacks:
+            if len(self._get_attackers(a, enemy_color)) > 0:
+                pass  # Can't move king into check
+            elif a in threatened:
+                pass  # Can't move king into check
+            else:
+                safe_attacks.add(a)
+        return safe_moves, safe_attacks
+
     def _get_blocking_squares(self):
         u"""Returns two sets, one of the locations that a piece can move to, to block check, the other the location of the attacking piece.
 
@@ -629,8 +643,7 @@ class Board(object):
                 [enemy_loc] = enemy_attacking_pieces
 
                 # Can we block the attacking piece?
-                v = (enemy_loc.x - king_loc.x, enemy_loc.y - king_loc.y)
-                attack_vector = self._normalize_vector(v)
+                attack_vector = king_loc.direction(enemy_loc)
 
                 # Find all of the squares that block the path between the enemy piece and king
                 return self._get_squares_in_direction(king_loc, attack_vector, color)
@@ -758,13 +771,11 @@ class Board(object):
         """
         assert(to_.x)
         assert(to_.y)
-
-        single_move_loc = Square.createFromCoords(to_.x, to_.y - pawn.forward)
-
-        if isinstance(single_move_loc.piece, pawn.__class__):
-            return set([single_move_loc])
-
         try:
+            single_move_loc = Square.createFromCoords(to_.x, to_.y - pawn.forward)
+            if isinstance(single_move_loc.piece, pawn.__class__):
+                return set([single_move_loc])
+
             double_move_loc = Square.createFromCoords(to_.x, to_.y - 2 * pawn.forward)
             if isinstance(double_move_loc.piece, pawn.__class__) and self._pawn_has_not_moved(pawn, double_move_loc):
                 return set([double_move_loc])
@@ -877,6 +888,7 @@ class Board(object):
         self._king_location = dict()
 
         # Place all the White pieces on the board
+        Square.resetAllSquares()
         Square('A1').piece = WhiteRook()
         Square('B1').piece = WhiteKnight()
         Square('C1').piece = WhiteBishop()
@@ -951,6 +963,7 @@ class Board(object):
 
     def _create_board_from_repr(self, board_string):
         u"""Creates a new board from the board described by board_string."""
+        Square.resetAllSquares()
         unicode_board_string = board_string.decode('utf-8')
         [piece_string, player_color_code, turn, _stalemate_count] = unicode_board_string.split(u',')
 
@@ -1008,10 +1021,8 @@ class Board(object):
         WHITE_SQUARE = u"\u25a8"
         BLACK_SQUARE = u"\u25a2"
         line = u""
-        # 1 indexed chessboard, 1 <= x < 9
-        for y in range(8, 0, -1):  # TODO: Should use range reversed
-            # Row number
-            line += u"{0} ".format(y)
+        for y in reversed(range(1, 9)):
+            line += u"{0} ".format(y)  # Row number
             for x in range(1, 9, 1):
                 current_piece = Square.createFromCoords(x, y).piece
                 if current_piece is not None:
@@ -1019,8 +1030,7 @@ class Board(object):
                     line += u"{0} ".format(current_piece.symbol)
                 else:
                     # Paint empty squares black / white like a chess board.
-                    # The bottom-right-hand corner (if visible) must be a white
-                    # square.
+                    # The bottom-right-hand corner (if visible) must be a white square.
                     if (x + y) % 2 == 0:
                         line += WHITE_SQUARE + u" "
                     else:

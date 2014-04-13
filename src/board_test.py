@@ -1412,7 +1412,7 @@ class TestSpecificScenarios(unittest.TestCase):
 
         checkmate = chess_board.is_checkmate(Color.black)
         # h8 = Square('h8')
-        g8 = Square('g8')
+        # g8 = Square('g8')
 
         # print chess_board._get_attackers(h8, Color.white, ignore_king=True)
         # print chess_board._get_moves_and_attacks(g8)

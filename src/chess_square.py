@@ -4,18 +4,15 @@ class InvalidSquareException(Exception):
 
 class Square(object):
     u"""Represents the coordinates of any square on the chess board."""
-    all_squares = {}  # Keys represent squares, values are the pieces that occupy them
-
     def __init__(self, name):
         self.x = ord(name[0].upper()) - ord(u'A') + 1
         self.y = int(name[1])
         self.name = name.upper()
         if Square._isValidSquare(self.x, self.y):
             pass
-            # return Square(x, y)
         else:
             raise InvalidSquareException(
-                # u"Square ({name}) is not within 8 x 8 board, it must be between A1 and H8".format(name=name)
+                u"Square ({name}) is not within 8 x 8 board, it must be between A1 and H8".format(name=name)
             )
 
     @staticmethod
@@ -68,6 +65,31 @@ class Square(object):
                 if self != square:
                     return True
         return False
+
+    def direction(self, to_):
+        u"""The direction from this square to to_ is normalized to have x and y components of 0 or 1.
+
+        Normalization involves keeping the ratio of x and y components the same (so the direction is the same,
+        but reducing the magnitured of the x and y components to either 1 or 0 each.
+
+        to_     -- Another Square
+        returns -- One of (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (1,-1)
+                   or if the vector cannot be reduced to one of these None
+        """
+        x = to_.x - self.x
+        y = to_.y - self.y
+
+        if x == 0:
+            y = y / abs(y)
+        elif y == 0:
+            x = x / abs(x)
+        elif abs(x) == abs(y):
+            x = x / abs(x)
+            y = y / abs(y)
+        else:
+            # Can't be normalized (ratio)
+            return None
+        return (x, y)
 
     def __hash__(self):
         return hash((self.x, self.y))
