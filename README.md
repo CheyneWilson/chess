@@ -1,26 +1,50 @@
-chess
+Chess
 =====
 
-A python implementation of chess
+The aim of this project is to create a framework where various algorithms can be created to play chess and experimented with. This is still very much a work-in-progress with the following main outstanding items:
 
-This is still very much a work-in-progress with the following main outstanding items:
- 1. Refactor unit tests to be more 'unit-y', add more negative tests (invalid operations).
- 2. Refactor some of the methods / attribues to clearly delinate intended access levels.
- 3. Review all of the docstrings and tidy them up.
- 4. Create 'Game' class which wraps up the board and allows a player to play.
- 5. Add a console UI
- 6. Add a web based UI
- 7. Create 'RandomAgent' - an agent that does random moves.
+ 1. Set up session based authentication for multiplayer over http(s)
+ 2. Enable a basic chat client
+ 3. Create 'RandomAgent' - the 1st agent that does random moves.
+ 4. Support pgn format
+ 5. Support reading in a a list of moves to recreate a board state
 
-Development Setup 
+Development Setup
+====
+Requires Python 2.7
+
+Install pip
 ----
-0. Requirements:
-    a. python 2.7 (for PyLint)
-1. Install hamcrest using distribute
-    a. Install Distribute (https://pypi.python.org/pypi/distribute)
-       If your shell has the `curl` program you can do:
-        $ curl -O http://python-distribute.org/distribute_setup.py
-        $ python distribute_setup.py
-    b. Install hamcrest
-       With Distribute installed hamcrest can be installed by running: 
-        $ easy_install PyHamcrest
+(http://www.pip-installer.org/en/latest/installing.html)
+
+To install or upgrade pip, securely download [get-pip.py] (https://raw.github.com/pypa/pip/master/contrib/get-pip.py)
+
+Then run the following (which may require administrator access):
+
+`python get-pip.py`
+
+Install Virtualenv
+----
+(http://www.virtualenv.org/en/latest/virtualenv.html#installation)
+Run `pip install virtualenv`
+
+Setup Environment
+----
+Run the following commands:
+
+`virtualenv env`
+
+`source env/bin/activate`
+
+`pip install -r etc/requirements.txt`
+
+Web Server configuration
+----
+A web server needs to be configured to serve the www directory.
+
+It also needs to map /rest/ to the running controller.
+
+Running the controller
+----
+The controller runs all of the backend services. It is started as follows
+`python controller.py`
