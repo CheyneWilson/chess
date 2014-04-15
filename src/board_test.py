@@ -1439,8 +1439,25 @@ class TestSpecificScenarios(unittest.TestCase):
 
         moves = chess_board.get_moves('c8')
         assert_that(moves, is_(set(['A6', 'B7', 'D7', 'E6', 'F5', 'G4', 'H3'])))
-        # print chess_board._get_pinned_directions(from_)
-        # print chess_board.get_moves('c8')
+
+    def test_en_passant(self):
+        u""" White pawn double-moved from D2 to D4. Black pawn at E4 should be able to capture.
+           ________________
+        8 |♜|♞|♝|♛|♚|♝|♞|♜|
+        7 |♟|♟|_|♟|_|♟|♟|♟|
+        6 |_|_|_|_|_|_|_|_|
+        5 |_|_|♟|_|_|♙|_|_|
+        4 |_|_|_|♙|♟|_|♙|_|
+        3 |_|_|_|_|_|_|_|_|
+        2 |♙|♙|♙|_|♙|_|_|♙|
+        1 |♖|♘|♗|♕|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           A B C D E F G H
+        """
+
+        # TODO: Encode last move into board repr below
+        chess_board = Board("♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-________-___♙♟_♙_-__♟__♙__-________-♟♟_♟_♟♟♟-♜♞♝♛♚♝♞♜,B,0,1")
+        chess_board.move_piece('E4', 'D3')
 
 
 class TestLegalMoves(unittest.TestCase):

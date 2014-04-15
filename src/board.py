@@ -296,7 +296,7 @@ class Board(object):
 
             if self._is_en_passant_attack(from_square):
                 # Remove the pawn that moved previously as it has been captured via en passant
-                self.previous_moves[-1].to_.piece = None
+                self.previous_moves[-1].to_.pop()  # Must pop piece instead of set to None
             elif self._is_castle_left(from_square, to_square):
                 # Move the rook too
                 rook = Square.createFromCoords(1, from_square.y).pop()
