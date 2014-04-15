@@ -26,6 +26,7 @@ Then run the following (which may require administrator access):
 Install Virtualenv
 ----
 (http://www.virtualenv.org/en/latest/virtualenv.html#installation)
+
 Run `pip install virtualenv`
 
 Setup Environment
