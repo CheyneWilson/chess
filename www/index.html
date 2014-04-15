@@ -100,15 +100,20 @@
 			            <h2>Development Panel</h2>
 			            <p>The current player and game can be changed via these attribues.</p>
 			            <hr>
-			            <div ng-controller="ChangeGame">
-							<button type="button" class="btn btn-default" data-html="1" ng-click="newGame()">
-								Start New Game
-							</button>
+			            <div>
+			            	<span ng-controller="NewGameOptions">
+								<button type="button" class="btn btn-default" data-html="1"
+										data-template="modal/newgame.html" bs-modal="modal" data-placement="center">
+									Start New Game
+								</button>
+							 </span>
 							<label>&nbsp; &nbsp;</label>
-							<button type="button" class="btn btn-default" ng-model="selectedIcon" data-placeholder="Load Game"
-								data-html="1" ng-options="icon.value as icon.label for icon in icons" bs-select >
-								Action <span class="caret"></span>
-							</button>
+							<span ng-controller="ChangeGame">
+								<button type="button" class="btn btn-default" ng-model="selectedIcon" data-placeholder="Load Game"
+									data-html="1" ng-options="icon.value as icon.label for icon in icons" bs-select >
+									Action <span class="caret"></span>
+								</button>
+							</span>
 						</div>
 			            <hr>
 			            <label>Game Id:&nbsp;</label><span>{{gameId}}</span><br />

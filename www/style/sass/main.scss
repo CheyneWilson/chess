@@ -121,3 +121,13 @@ body {
 	}
 }
 
+.new-game-options {
+	.modal-body button {
+		display: block;
+		margin: 0 auto;
+	}
+	&.modal.center .modal-dialog {
+	    max-width: 300px;
+	    min-width: 300px;
+	}
+}

@@ -1,0 +1,30 @@
+<div class="new-game-options modal ng-scope top am-fade-and-slide-top" tabindex="-1" role="dialog" style="display: block;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="$hide()">×</button>
+                <h4 class="modal-title">Start New Game</h4>
+            </div>
+            <div class="modal-body">
+                <button type="button" class="btn btn-default" ng-model="selectedIcon"
+                     data-title="Play against another person on the same computer." bs-tooltip="" ng-click="hotSeatGame(this);">
+                     Hot Seat
+                </button>
+                <br />
+                <button type="button" class="btn btn-default" ng-model="selectedIcon"
+                     data-title="Play against another person over the internet." bs-tooltip="" ng-click="onlineGame(this);">
+                     Online
+                </button>
+                <br />
+                <button type="button" class="btn btn-default" ng-model="selectedIcon"
+                     data-title="Play against a computer opponent that makes moves randomly. (It's quite stupid)" bs-tooltip=""
+                     ng-click="randomAiGame(this);">
+                     Random AI
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="$hide()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
