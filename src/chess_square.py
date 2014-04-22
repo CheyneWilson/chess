@@ -5,9 +5,9 @@ class InvalidSquareException(Exception):
 class Square(object):
     u"""Represents the coordinates of any square on the chess board."""
     def __init__(self, name):
-        self.x = ord(name[0].upper()) - ord(u'A') + 1
-        self.y = int(name[1])
         self.name = name.upper()
+        self.x, self.y = Square.coordsFromName(self.name)
+        self.piece = None
         if Square._isValidSquare(self.x, self.y):
             pass
         else:
@@ -16,38 +16,54 @@ class Square(object):
             )
 
     @staticmethod
-    def createFromCoords(x, y):
-        u"""Instanciates a new Square from x, y notation
+    def nameFromCoords(x, y):
+        u"""Maps x,y coordinates like A4 to x,y coordinates like (1, 4).
 
-        returns -- A new instance of a square instance representing this board position.
+        The white player starts on rows with y values 1, and 2, while the black players pieces start on rows 7 and 8.
+        x coordinates increment left to right.
+
+        x  --  The square from left to right
+        y  --  The square from bottom to top, starting from white players side
+
+        Returns  -- The name of the square
+        Raises   -- InvalidSquareException if the square is not on the chess board
+
         """
-        if Square._isValidSquare(x, y):
+        if 1 <= x <= 8 and 1 <= y <= 8:
             name = chr(ord(u'A') + x - 1) + str(y)
-            return Square(name)
+            return name
         else:
-            raise InvalidSquareException(u"Square coordinates ({x}, {y}) must be between (1, 1) and (8, 8)".format(
-                x=x, y=y)
+            raise InvalidSquareException(
+                "The square ({x}, {y}), does not exist on a chess board. X and Y must be between 1 and 8 (inclusive).".
+                format(x=x, y=y)
             )
 
     @staticmethod
-    def resetAllSquares():
-        u"""Clears all of the pieces in all squares (sets to None)."""
-        Square.all_squares = {}
+    def coordsFromName(name):
+        u"""Maps square names like H6 to x,y coordinates like (8, 6)
 
-    @property
-    def piece(self):
-        u"""Returns the piece in this square or None if there is no piece"""
-        # TODO: Raise custom exception if _board is none, explaining how to init.
-        return Square.all_squares.get(self, None)
+        The white player starts on rows with y values 1, and 2, while the black players pieces start on rows 7 and 8.
+        x coordinates increment left to right.
 
-    @piece.setter
-    def piece(self, value):
-        Square.all_squares[self] = value
+        name    -- The name of the Square
+        Returns -- x, y coordinates of this square
+        Raises  -- InvalidSquareException if the square is not on the chess board
+
+        """
+        x = ord(name[0].upper()) - ord(u'A') + 1
+        y = int(name[1])
+
+        if 1 <= x <= 8 and 1 <= y <= 8:
+            return x, y
+        else:
+            raise InvalidSquareException(
+                "The square {name}, does not exist on a chess board. ".format(name=name)
+            )
 
     def pop(self):
         u"""Removes the current peice from this square and returns it"""
         piece = self.piece
-        del Square.all_squares[self]
+        self.piece = None
         return piece
 
     @staticmethod
@@ -58,35 +74,14 @@ class Square(object):
         else:
             return False
 
-    def isAdjacent(self, square):
+    def isAdjacent(self, square_name):
         u"""Returns True if two squares are horizontally, vertically or diagonally adjacent (side by side)."""
-        if abs(self.x - square.x) <= 1:
-            if abs(self.y - square.y) <= 1:
-                if self != square:
+        if self.name != square_name:
+            x, y = self.coordsFromName(square_name)
+            if abs(self.x - x) <= 1:
+                if abs(self.y - y) <= 1:
                     return True
         return False
-
-    def squares_in_direction(self, direction):
-        u"""Returns all of the squares in the direction (x, y) tuple given, from this Square to the board edge.
-
-        The direction is a (x, y) tuple representing a compass direction like north, east, south-west, etc.
-        North is (0, 1), Northeast is (1, 1), Southwest is (-1, -1), etc
-        """
-        x, y = direction
-        assert(x == 0 or abs(x) == 1)
-        assert(y == 0 or abs(y) == 1)
-
-        squares = []
-        i = 1
-        while True:
-            try:
-                loc = Square.createFromCoords(self.x + i * x, self.y + i * y)
-                i += 1
-                squares.append(loc)
-
-            except InvalidSquareException:
-                break  # Hit the edge of the baord
-        return squares
 
     def direction(self, to_):
         u"""The direction from this square to to_ is normalized to have x and y components of 0 or 1.
@@ -94,12 +89,13 @@ class Square(object):
         Normalization involves keeping the ratio of x and y components the same (so the direction is the same,
         but reducing the magnitured of the x and y components to either 1 or 0 each.
 
-        to_     -- Another Square
+        to_     -- The name of another Square
         returns -- One of (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (1,-1)
                    or if the vector cannot be reduced to one of these None
         """
-        x = to_.x - self.x
-        y = to_.y - self.y
+        to_square = Square(to_)
+        x = to_square.x - self.x
+        y = to_square.y - self.y
 
         if x == 0:
             y = y / abs(y)
@@ -112,21 +108,3 @@ class Square(object):
             # Can't be normalized (ratio)
             return None
         return (x, y)
-
-    def __hash__(self):
-        return hash((self.x, self.y))
-
-    def __eq__(self, other):
-        return (self.x, self.y) == (other.x, other.y)
-
-    def __ne__(self, other):
-        return (self.x, self.y) != (other.x, other.y)
-
-    def __iter__(self):
-        return iter([self.x, self.y])
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return str((self.x, self.y))

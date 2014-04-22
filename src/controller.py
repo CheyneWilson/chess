@@ -34,7 +34,6 @@ def new(type):
     board = Board()
 
     persistence = Persistence(db)
-    board.prePickle()
     game_id = persistence.save_new_game(white_player_id, black_player_id, pickle.dumps(board))
 
     resp = {
@@ -74,7 +73,6 @@ def game(game_id):
     persistence = Persistence(db)
     game = persistence.load_game(game_id)
     board = pickle.loads(game.board)
-    board.postPickle()
 
     resp = {
         u'board': board.display_json(),
@@ -102,9 +100,7 @@ def move_piece(game_id, from_, to_):
     if (game is not None):
         try:
             board = pickle.loads(game.board)
-            board.postPickle()
             board.move_piece(from_, to_)
-            board.prePickle()
             persistence.update_game(game_id, pickle.dumps(board), board.winner)
 
             resp = {
@@ -147,10 +143,8 @@ def promote_piece(game_id, piece_code):
     if (game is not None):
         try:
             board = pickle.loads(game.board)
-            board.postPickle()
             piece = PieceFactory.create(piece_code)
             board.promote_pawn(piece)
-            board.prePickle()
             persistence.update_game(game_id, pickle.dumps(board), board.winner)
 
             resp = {
@@ -190,4 +184,3 @@ def get_game(pid):
 
 if __name__ == "__main__":
     app.run(debug=True)
-    # new('a')

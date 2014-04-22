@@ -14,12 +14,6 @@ class Move(object):
         to_   -- The location the piece moved to
         is_double_move -- True if a pawn has moved two squares in one turn
         """
-        assert(from_.x)
-        assert(from_.y)
-        assert(from_.name)
-        assert(to_.x)
-        assert(to_.y)
-        assert(to_.name)
         self.piece = piece
         self.from_ = from_
         self.to_ = to_
@@ -34,4 +28,12 @@ class Move(object):
             operator = "x"
         else:
             operator = " "
-        return self.from_.name + operator + self.to_.name
+        return self.from_ + operator + self.to_
+
+    def algebraic_notation(self):
+        """Returns the move in Algebraic Chess Notation
+
+            http://en.wikipedia.org/wiki/Algebraic_chess_notation
+        """
+        # TODO: This is kinda tricky, as we need to minimize the notations, therefore must check more about the board
+        pass

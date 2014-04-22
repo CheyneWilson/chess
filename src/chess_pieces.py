@@ -304,5 +304,16 @@ class PieceFactory(object):
         try:
             piece = d[name]
         except KeyError:
-            raise InvlaidPieceException("The chess peice {piece} does not exists".format(piece=name))
+            raise InvlaidPieceException("The chess piece {piece} does not exist.".format(piece=name))
+        return piece(has_moved)
+
+    @staticmethod
+    def createFromSymbol(symbol, has_moved):
+        types = Piece.__subclasses__()
+        symbols = [(type.symbol, type) for type in types]
+        d = dict(symbols)
+        try:
+            piece = d[symbol]
+        except KeyError:
+            raise InvlaidPieceException("The chess piece {symbol} does not exist.".format(symbol=symbol))
         return piece(has_moved)
