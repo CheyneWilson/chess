@@ -59,16 +59,9 @@ class Board(object):
         If both are specified then this method raises an exception.
 
         """
-        if square_name is None:
-            square_name = Square.nameFromCoords(x, y)
-        else:
-            if (x is not None) or (y is not None):
-                raise Exception("Only square_name or x,y coords should be defined")
 
-        square = self._all_squares.get(square_name, None)
-        if square is None:
-            square = Square(square_name)
-            self._all_squares[square_name] = square
+        key = Square(square_name=square_name, x=x, y=y).name
+        square = self._all_squares.get(key, None)
 
         return square
 
@@ -225,30 +218,30 @@ class Board(object):
 
         # Castling left?
         if left_rook is not None and left_rook.has_moved is False:
-            left_square_name_4 = Square.nameFromCoords(x=4, y=king_square.y)
-            left_square_name_3 = Square.nameFromCoords(x=3, y=king_square.y)
-            left_square_name_2 = Square.nameFromCoords(x=2, y=king_square.y)
+            left_square_4 = self.square(x=4, y=king_square.y)
+            left_square_3 = self.square(x=3, y=king_square.y)
+            left_square_2 = self.square(x=2, y=king_square.y)
             # Empty squares
-            if self.square(left_square_name_2).piece is None:
-                if self.square(left_square_name_3).piece is None:
-                    if self.square(left_square_name_4).piece is None:
+            if left_square_4.piece is None:
+                if left_square_3.piece is None:
+                    if left_square_2.piece is None:
                         # With no attackers?
-                        if self._get_attackers(left_square_name_2, enemy_color) == set([]):
-                            if self._get_attackers(left_square_name_3, enemy_color) == set([]):
-                                if self._get_attackers(left_square_name_3, enemy_color) == set([]):
-                                    moves.add(left_square_name_3)
+                        if self._get_attackers(left_square_2.name, enemy_color) == set([]):
+                            if self._get_attackers(left_square_3.name, enemy_color) == set([]):
+                                if self._get_attackers(left_square_4.name, enemy_color) == set([]):
+                                    moves.add(left_square_3.name)
 
         # Castling right?
         if right_rook is not None and right_rook.has_moved is False:
-            right_square_name_6 = Square.nameFromCoords(x=6, y=king_square.y)
-            right_square_name_7 = Square.nameFromCoords(x=7, y=king_square.y)
+            right_square_6 = self.square(x=6, y=king_square.y)
+            right_square_7 = self.square(x=7, y=king_square.y)
             # Empty squares
-            if self.square(right_square_name_6).piece is None:
-                if self.square(right_square_name_7).piece is None:
+            if right_square_6.piece is None:
+                if right_square_7.piece is None:
                     # With no attackers?
-                    if self._get_attackers(right_square_name_6, enemy_color) == set([]):
-                        if self._get_attackers(right_square_name_7, enemy_color) == set([]):
-                            moves.add(right_square_name_7)
+                    if self._get_attackers(right_square_6.name, enemy_color) == set([]):
+                        if self._get_attackers(right_square_7.name, enemy_color) == set([]):
+                            moves.add(right_square_7.name)
 
         return moves
 
@@ -966,45 +959,46 @@ class Board(object):
         self._king_location = dict()
 
         # Place all the White pieces on the board
-        self.square('A1').piece = WhiteRook()
-        self.square('B1').piece = WhiteKnight()
-        self.square('C1').piece = WhiteBishop()
-        self.square('D1').piece = WhiteQueen()
-        self.square('E1').piece = WhiteKing()
-        self.square('F1').piece = WhiteBishop()
-        self.square('G1').piece = WhiteKnight()
-        self.square('H1').piece = WhiteRook()
-        self.square('A2').piece = WhitePawn()
-        self.square('B2').piece = WhitePawn()
-        self.square('C2').piece = WhitePawn()
-        self.square('D2').piece = WhitePawn()
-        self.square('E2').piece = WhitePawn()
-        self.square('F2').piece = WhitePawn()
-        self.square('G2').piece = WhitePawn()
-        self.square('H2').piece = WhitePawn()
+        self._all_squares['A1'] = Square('A1', piece=WhiteRook())
+        self._all_squares['B1'] = Square('B1', piece=WhiteKnight())
+        self._all_squares['C1'] = Square('C1', piece=WhiteBishop())
+        self._all_squares['D1'] = Square('D1', piece=WhiteQueen())
+        self._all_squares['E1'] = Square('E1', piece=WhiteKing())
+        self._all_squares['F1'] = Square('F1', piece=WhiteBishop())
+        self._all_squares['G1'] = Square('G1', piece=WhiteKnight())
+        self._all_squares['H1'] = Square('H1', piece=WhiteRook())
+        self._all_squares['A2'] = Square('A2', piece=WhitePawn())
+        self._all_squares['B2'] = Square('B2', piece=WhitePawn())
+        self._all_squares['C2'] = Square('C2', piece=WhitePawn())
+        self._all_squares['D2'] = Square('D2', piece=WhitePawn())
+        self._all_squares['E2'] = Square('E2', piece=WhitePawn())
+        self._all_squares['F2'] = Square('F2', piece=WhitePawn())
+        self._all_squares['G2'] = Square('G2', piece=WhitePawn())
+        self._all_squares['H2'] = Square('H2', piece=WhitePawn())
 
         # Place all the Black pieces on the board
-        self.square('A8').piece = BlackRook()
-        self.square('B8').piece = BlackKnight()
-        self.square('C8').piece = BlackBishop()
-        self.square('D8').piece = BlackQueen()
-        self.square('E8').piece = BlackKing()
-        self.square('F8').piece = BlackBishop()
-        self.square('G8').piece = BlackKnight()
-        self.square('H8').piece = BlackRook()
-        self.square('A7').piece = BlackPawn()
-        self.square('B7').piece = BlackPawn()
-        self.square('C7').piece = BlackPawn()
-        self.square('D7').piece = BlackPawn()
-        self.square('E7').piece = BlackPawn()
-        self.square('F7').piece = BlackPawn()
-        self.square('G7').piece = BlackPawn()
-        self.square('H7').piece = BlackPawn()
+        self._all_squares['A8'] = Square('A8', piece=BlackRook())
+        self._all_squares['B8'] = Square('B8', piece=BlackKnight())
+        self._all_squares['C8'] = Square('C8', piece=BlackBishop())
+        self._all_squares['D8'] = Square('D8', piece=BlackQueen())
+        self._all_squares['E8'] = Square('E8', piece=BlackKing())
+        self._all_squares['F8'] = Square('F8', piece=BlackBishop())
+        self._all_squares['G8'] = Square('G8', piece=BlackKnight())
+        self._all_squares['H8'] = Square('H8', piece=BlackRook())
+        self._all_squares['A7'] = Square('A7', piece=BlackPawn())
+        self._all_squares['B7'] = Square('B7', piece=BlackPawn())
+        self._all_squares['C7'] = Square('C7', piece=BlackPawn())
+        self._all_squares['D7'] = Square('D7', piece=BlackPawn())
+        self._all_squares['E7'] = Square('E7', piece=BlackPawn())
+        self._all_squares['F7'] = Square('F7', piece=BlackPawn())
+        self._all_squares['G7'] = Square('G7', piece=BlackPawn())
+        self._all_squares['H7'] = Square('H7', piece=BlackPawn())
 
         # Initiliaze all of the other squares
         for x in range(1, 9):
             for y in range(3, 7):
-                self.square(x=x, y=y)
+                square = Square(x=x, y=y)
+                self._all_squares[square.name] = square
 
         # Locate the black and white kings
         self._king_location[Color.white] = 'E1'
@@ -1071,11 +1065,14 @@ class Board(object):
                     # square_name = Square.nameFromCoords(x, y)
 
                     if symbol == _EMPTY_SQUARE:
-                        self.square(x=x, y=y)
+                        square = Square(x=x, y=y)
+                        self._all_squares[square.name] = square
                     else:
                         # cls = Piece.get_piece_class(symbol)
                         piece = PieceFactory.createFromSymbol(symbol, has_moved)
-                        self.square(x=x, y=y).piece = piece
+                        square = Square(x=x, y=y)
+                        square.piece = piece
+                        self._all_squares[square.name] = square
                         if isinstance(piece, King):
                             if piece.color in self._king_location:
                                 # Cannot handle multiple kings of the the same color, just saying

@@ -4,19 +4,33 @@ class InvalidSquareException(Exception):
 
 class Square(object):
     u"""Represents the coordinates of any square on the chess board."""
-    def __init__(self, name):
-        self.name = name.upper()
-        self.x, self.y = Square.coordsFromName(self.name)
-        self.piece = None
-        if Square._isValidSquare(self.x, self.y):
-            pass
+
+    def __init__(self, square_name=None, x=None, y=None, piece=None):
+        u"""Returns the square on a chess board.
+
+        square_name -- The name of the chess square
+        x -- The x-coordinate of the chess square, 1-indexed, left to right
+        y -- The y-coordinate of the chess square, 1-indexed, white pieces start on 1 and 2, black on 7 and 8
+        piece -- A chess piece to place in this square
+
+        The square can be by specifying EITHER the name of the square OR the x, y coordinates.
+        If both are specified then this method raises an exception.
+        """
+        if square_name is None:
+            square_name = Square._nameFromCoords(x, y)
+
         else:
-            raise InvalidSquareException(
-                u"Square ({name}) is not within 8 x 8 board, it must be between A1 and H8".format(name=name)
-            )
+            if (x is not None) or (y is not None):
+                raise InvalidSquareException(u"Only square_name or x,y coords should be defined")
+            x, y = Square._coordsFromName(square_name)
+
+        self.name = square_name.upper()
+        self.x = x
+        self.y = y
+        self.piece = piece
 
     @staticmethod
-    def nameFromCoords(x, y):
+    def _nameFromCoords(x, y):
         u"""Maps x,y coordinates like A4 to x,y coordinates like (1, 4).
 
         The white player starts on rows with y values 1, and 2, while the black players pieces start on rows 7 and 8.
@@ -39,7 +53,7 @@ class Square(object):
             )
 
     @staticmethod
-    def coordsFromName(name):
+    def _coordsFromName(name):
         u"""Maps square names like H6 to x,y coordinates like (8, 6)
 
         The white player starts on rows with y values 1, and 2, while the black players pieces start on rows 7 and 8.
@@ -77,7 +91,7 @@ class Square(object):
     def isAdjacent(self, square_name):
         u"""Returns True if two squares are horizontally, vertically or diagonally adjacent (side by side)."""
         if self.name != square_name:
-            x, y = self.coordsFromName(square_name)
+            x, y = self._coordsFromName(square_name)
             if abs(self.x - x) <= 1:
                 if abs(self.y - y) <= 1:
                     return True
