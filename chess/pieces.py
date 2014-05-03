@@ -1,4 +1,4 @@
-from chess_color import Color
+from color import Color
 
 
 class InvlaidPieceException(Exception):
@@ -62,7 +62,7 @@ class WhiteKing(King, Piece):
     symbol = u'\u2654'
     simple_simbol = u'WK'
     name = u'WhiteKing'
-    color = Color.white
+    color = Color.WHITE
 
     def __init__(self, has_moved=False):
         self.has_moved = has_moved
@@ -73,7 +73,7 @@ class BlackKing(King, Piece):
     symbol = u'\u265a'
     simple_simbol = u'BK'
     name = u'BlackKing'
-    color = Color.black
+    color = Color.BLACK
 
     def __init__(self, has_moved=False):
         self.has_moved = has_moved
@@ -99,7 +99,7 @@ class WhiteQueen(Queen, Piece):
     symbol = u'\u2655'
     simple_simbol = u'WQ'
     name = u'WhiteQueen'
-    color = Color.white
+    color = Color.WHITE
 
     def __init__(self, has_moved=False):
         self.has_moved = has_moved
@@ -110,7 +110,7 @@ class BlackQueen(Queen, Piece):
     symbol = u'\u265b'
     simple_simbol = u'BQ'
     name = u'BlackQueen'
-    color = Color.black
+    color = Color.BLACK
 
     def __init__(self, has_moved=False):
         self.has_moved = has_moved
@@ -136,7 +136,7 @@ class WhiteRook(Rook, Piece):
     symbol = u'\u2656'
     simple_simbol = u'WR'
     name = u'WhiteRook'
-    color = Color.white
+    color = Color.WHITE
 
     def __init__(self, has_moved=False):
         self.has_moved = has_moved
@@ -147,7 +147,7 @@ class BlackRook(Rook, Piece):
     symbol = u'\u265c'
     simple_simbol = u'BR'
     name = u'BlackRook'
-    color = Color.black
+    color = Color.BLACK
 
     def __init__(self, has_moved=False):
         self.has_moved = has_moved
@@ -173,7 +173,7 @@ class WhiteBishop(Bishop, Piece):
     symbol = u'\u2657'
     simple_simbol = u'WB'
     name = u'WhiteBishop'
-    color = Color.white
+    color = Color.WHITE
 
     def __init__(self, has_moved=False):
         self.has_moved = has_moved
@@ -184,7 +184,7 @@ class BlackBishop(Bishop, Piece):
     symbol = u'\u265d'
     simple_simbol = u'BB'
     name = u'BlackBishop'
-    color = Color.black
+    color = Color.BLACK
 
     def __init__(self, has_moved=False):
         self.has_moved = has_moved
@@ -212,7 +212,7 @@ class WhiteKnight(Knight, Piece):
     symbol = u'\u2658'
     simple_simbol = u'WN'
     name = u'WhiteKnight'
-    color = Color.white
+    color = Color.WHITE
 
     def __init__(self, has_moved=False):
         self.has_moved = has_moved
@@ -223,7 +223,7 @@ class BlackKnight(Knight, Piece):
     symbol = u'\u265e'
     simple_simbol = u'BN'
     name = u'BlackKnight'
-    color = Color.black
+    color = Color.BLACK
 
     def __init__(self, has_moved=False):
         self.has_moved = has_moved
@@ -265,7 +265,7 @@ class WhitePawn(Pawn, Piece):
     symbol = u'\u2659'
     simple_simbol = u'WP'
     name = u'WhitePawn'
-    color = Color.white
+    color = Color.WHITE
     forward = 1  # Based off White starting at rows 1,2
 
     def __init__(self, has_moved=False):
@@ -277,7 +277,7 @@ class BlackPawn(Pawn, Piece):
     symbol = u'\u265f'
     simple_simbol = u'BP'
     name = u'BlackPawn'
-    color = Color.black
+    color = Color.BLACK
     forward = -1  # Based off Black starting at rows 7,8
 
     def __init__(self, has_moved=False):

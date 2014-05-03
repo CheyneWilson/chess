@@ -78,7 +78,7 @@ class Board(object):
         color = self.current_player
         square_name = self._king_location[color]
 
-        enemy_color = Color.inverse(color)
+        enemy_color = color.inverse()
         if len(self._get_attackers(square_name, enemy_color)) > 0:
             return True
         return False
@@ -144,9 +144,9 @@ class Board(object):
                 continue
             if isinstance(piece, Pawn):
                 has_pawn = True
-            if piece.color == Color.white:
+            if piece.color == Color.WHITE:
                 white_score += piece.value
-            elif piece.color == Color.black:
+            elif piece.color == Color.BLACK:
                 black_score += piece.value
             else:
                 raise ValueError()
@@ -176,10 +176,10 @@ class Board(object):
     @property
     def winner(self):
         u"""Returns the color of the winning player, draw if the game is a stalemate or None if no-one has won yet."""
-        if self.is_checkmate(Color.black):
-            return Color.white
-        elif self.is_checkmate(Color.white):
-            return Color.black
+        if self.is_checkmate(Color.BLACK):
+            return Color.WHITE
+        elif self.is_checkmate(Color.WHITE):
+            return Color.BLACK
         elif self.is_stalemate():
             return u"Draw"  # TODO: Do we need another state?
         else:
@@ -214,7 +214,7 @@ class Board(object):
         if king is None or king.has_moved is True:
             return moves
 
-        enemy_color = Color.inverse(king.color)
+        enemy_color = king.color.inverse()
 
         # Castling left?
         if left_rook is not None and left_rook.has_moved is False:
@@ -354,11 +354,11 @@ class Board(object):
 
             # Do not change player if the current player still needs to promote their pawn
             if self.promote_pawn_location is None:
-                self.current_player = Color.inverse(self.current_player)
+                self.current_player = self.current_player.inverse()
 
             # These data structures must be kept in sync
-            assert isinstance(self.square(self._king_location[Color.black]).piece, BlackKing)
-            assert isinstance(self.square(self._king_location[Color.white]).piece, WhiteKing)
+            assert isinstance(self.square(self._king_location[Color.BLACK]).piece, BlackKing)
+            assert isinstance(self.square(self._king_location[Color.WHITE]).piece, WhiteKing)
 
             return
         # Fall through error
@@ -401,7 +401,7 @@ class Board(object):
         if isinstance(piece, (Queen, Rook, Bishop, Knight)):
             square.piece = piece
             self.promote_pawn_location = None  # Clear the promotion
-            self.current_player = Color.inverse(self.current_player)  # Change turn to next player
+            self.current_player = self.current_player.inverse()  # Change turn to next player
         else:
             raise TypeError("Cannot promote pawn to {piece}.".format(piece=piece))
 
@@ -414,9 +414,9 @@ class Board(object):
         """
         if self.promote_pawn_location is not None:
             pawn = self.promote_pawn_location.piece
-            if pawn.color is Color.white:
+            if pawn.color is Color.WHITE:
                 return frozenset([WhiteQueen(True), WhiteRook(True), WhiteBishop(True), WhiteKnight(True)])
-            elif pawn.color is Color.black:
+            elif pawn.color is Color.BLACK:
                 return frozenset([BlackQueen(True), BlackRook(True), BlackBishop(True), BlackKnight(True)])
             else:
                 raise InvalidBoardException("Pawn to be promoted has no color.")
@@ -444,13 +444,13 @@ class Board(object):
         assert(len(to_) == 2)
         attackers = set([])
 
-        if color is Color.black:
+        if color is Color.BLACK:
             knight = WhiteKnight()
             rook = WhiteRook()
             bishop = WhiteBishop()
             pawn = WhitePawn(to_)
             pawn_2 = BlackPawn(to_)
-        elif color is Color.white:
+        elif color is Color.WHITE:
             knight = BlackKnight()
             rook = BlackRook()
             bishop = BlackBishop()
@@ -612,7 +612,7 @@ class Board(object):
         # Add any castling moves, these are all legal
         moves = moves.union(self._get_castle_moves(from_))
 
-        enemy_color = Color.inverse(king.color)
+        enemy_color = king.color.inverse()
         threatened = set([])
         if self.is_check():
             # The king is likely blocking the square(s) behind it from the attacker(s)
@@ -663,7 +663,7 @@ class Board(object):
         color = self.current_player
         king_square_name = self._king_location[color]
         king_square = self.square(king_square_name)
-        enemy_color = Color.inverse(color)
+        enemy_color = color.inverse()
         enemy_attacking_pieces = self._get_attackers(king_square_name, enemy_color)
 
         if len(enemy_attacking_pieces) == 0:
@@ -856,9 +856,9 @@ class Board(object):
         # as 'has not moved' is an atribute.
         square = self.square(from_)
         assert(isinstance(square.piece, Pawn))
-        if square.piece.color == Color.black and square.y == 7:
+        if square.piece.color == Color.BLACK and square.y == 7:
             return True
-        elif square.piece.color == Color.white and square.y == 2:
+        elif square.piece.color == Color.WHITE and square.y == 2:
             return True
         else:
             return False
@@ -955,7 +955,7 @@ class Board(object):
         self._previous_moves = []
         self.turn = 0
         self._stalemate_count = 0
-        self.current_player = Color.white
+        self.current_player = Color.WHITE
         self._king_location = dict()
 
         # Place all the White pieces on the board
@@ -1001,12 +1001,12 @@ class Board(object):
                 self._all_squares[square.name] = square
 
         # Locate the black and white kings
-        self._king_location[Color.white] = 'E1'
-        self._king_location[Color.black] = 'E8'
+        self._king_location[Color.WHITE] = 'E1'
+        self._king_location[Color.BLACK] = 'E8'
 
         # These data structures must be kept in sync
-        assert isinstance(self.square(self._king_location[Color.black]).piece, BlackKing)
-        assert isinstance(self.square(self._king_location[Color.white]).piece, WhiteKing)
+        assert isinstance(self.square(self._king_location[Color.BLACK]).piece, BlackKing)
+        assert isinstance(self.square(self._king_location[Color.WHITE]).piece, WhiteKing)
 
     def __repr__(self):
         u"""Returns a string representation of the chess board that can be reconstructed when passed to the
@@ -1034,7 +1034,7 @@ class Board(object):
             if y < 8:
                 board_string += u'-'
 
-        board_repr = u'{0},{1},{2},{3}'.format(board_string, Color.code(self.current_player), self.turn, self._stalemate_count)
+        board_repr = u'{0},{1},{2},{3}'.format(board_string, self.current_player.code(), self.turn, self._stalemate_count)
         return board_repr.encode('utf-8')
 
     def _create_board_from_repr(self, board_string):
@@ -1085,8 +1085,8 @@ class Board(object):
                     has_moved = False
 
         # These data structures must be kept in sync
-        assert isinstance(self.square(self._king_location[Color.black]).piece, BlackKing)
-        assert isinstance(self.square(self._king_location[Color.white]).piece, WhiteKing)
+        assert isinstance(self.square(self._king_location[Color.BLACK]).piece, BlackKing)
+        assert isinstance(self.square(self._king_location[Color.WHITE]).piece, WhiteKing)
 
     def display(self):
         u"""Prints out a unicode representation of the chess board. Used mainly in command line testing."""

@@ -1,30 +1,30 @@
-class Color(object):
-    black = u'black'
-    white = u'white'
+from enum import Enum
 
-    @staticmethod
-    def code(color):
-        """Retuns the Color mapped to the code. Used with one of the serialaztion methods."""
-        if color == Color.black:
-            return 'B'
-        elif color == Color.white:
-            return 'W'
-        # This should never happen
-        raise ValueError("Invalid color code")
+
+class Color(Enum):
+    WHITE = 1
+    BLACK = 2
 
     @staticmethod
     def decode(code):
-        """Creates a new Color instance based off the color code. Used for serialaztion for historic reasons."""
+        """Creates a new Color instance based off the color code. Used for serialization."""
         if code == 'B':
-            return Color.black
+            return Color.BLACK
         elif code == 'W':
-            return Color.white
+            return Color.WHITE
         raise ValueError("Invalid color code '{0}.".format(code))
 
-    @staticmethod
-    def inverse(color):
-        if color == Color.black:
-            return Color.white
-        elif color == Color.white:
-            return Color.black
-        raise ValueError("Invalid color code '{0}.".format(color))
+    def inverse(self):
+        if self is Color.BLACK:
+            return Color.WHITE
+        elif self is Color.WHITE:
+            return Color.BLACK
+        assert(False, "Should not be able to end up here")
+
+    def code(self):
+        """Retuns the Color mapped to the code. Used with one of the serialaztion methods."""
+        if self == Color.BLACK:
+            return 'B'
+        elif self == Color.WHITE:
+            return 'W'
+        assert(False, "Should not be able to end up here")

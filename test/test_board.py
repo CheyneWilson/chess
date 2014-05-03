@@ -17,148 +17,148 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_create_new_board(self):
         # Make sure that it is White player's turn to move
-        white_player = Color.white
+        white_player = Color.WHITE
         assert_that(self.board.current_player, equal_to(white_player))
 
         # Make sure a new board places all the pieces in the correct locations
         # Using 'internal' method get_piece check all of the White pieces
         assert_that(all_of(
             self.board.get_piece('A1'), is_(Rook)),
-            self.board.get_piece('A1').color, is_(Color.white)
+            self.board.get_piece('A1').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('B1'), is_(Knight)),
-            self.board.get_piece('B1').color, is_(Color.white)
+            self.board.get_piece('B1').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('C1'), is_(Bishop)),
-            self.board.get_piece('C1').color, is_(Color.white)
+            self.board.get_piece('C1').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('D1'), is_(King)),
-            self.board.get_piece('D1').color, is_(Color.white)
+            self.board.get_piece('D1').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('E1'), is_(Queen)),
-            self.board.get_piece('E1').color, is_(Color.white)
+            self.board.get_piece('E1').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('F1'), is_(Bishop)),
-            self.board.get_piece('F1').color, is_(Color.white)
+            self.board.get_piece('F1').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('G1'), is_(Knight)),
-            self.board.get_piece('G1').color, is_(Color.white)
+            self.board.get_piece('G1').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('H1'), is_(Rook)),
-            self.board.get_piece('H1').color, is_(Color.white)
+            self.board.get_piece('H1').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('A2'), is_(Pawn)),
-            self.board.get_piece('A2').color, is_(Color.white)
+            self.board.get_piece('A2').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('B2'), is_(Pawn)),
-            self.board.get_piece('B2').color, is_(Color.white)
+            self.board.get_piece('B2').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('B2'), is_(Pawn)),
-            self.board.get_piece('B2').color, is_(Color.white)
+            self.board.get_piece('B2').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('C2'), is_(Pawn)),
-            self.board.get_piece('C2').color, is_(Color.white)
+            self.board.get_piece('C2').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('D2'), is_(Pawn)),
-            self.board.get_piece('D2').color, is_(Color.white)
+            self.board.get_piece('D2').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('E2'), is_(Pawn)),
-            self.board.get_piece('E2').color, is_(Color.white)
+            self.board.get_piece('E2').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('F2'), is_(Pawn)),
-            self.board.get_piece('F2').color, is_(Color.white)
+            self.board.get_piece('F2').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('G2'), is_(Pawn)),
-            self.board.get_piece('G2').color, is_(Color.white)
+            self.board.get_piece('G2').color, is_(Color.WHITE)
         )
         assert_that(all_of(
             self.board.get_piece('H2'), is_(Pawn)),
-            self.board.get_piece('H2').color, is_(Color.white)
+            self.board.get_piece('H2').color, is_(Color.WHITE)
         )
 
         # Using 'internal' method get_piece check all of the Black pieces
         assert_that(all_of(
             self.board.get_piece('A8'), is_(Rook)),
-            self.board.get_piece('A8').color, is_(Color.black)
+            self.board.get_piece('A8').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('B8'), is_(Knight)),
-            self.board.get_piece('B8').color, is_(Color.black)
+            self.board.get_piece('B8').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('C8'), is_(Bishop)),
-            self.board.get_piece('C8').color, is_(Color.black)
+            self.board.get_piece('C8').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('D8'), is_(King)),
-            self.board.get_piece('D8').color, is_(Color.black)
+            self.board.get_piece('D8').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('E8'), is_(Queen)),
-            self.board.get_piece('E8').color, is_(Color.black)
+            self.board.get_piece('E8').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('F8'), is_(Bishop)),
-            self.board.get_piece('F8').color, is_(Color.black)
+            self.board.get_piece('F8').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('G8'), is_(Knight)),
-            self.board.get_piece('G8').color, is_(Color.black)
+            self.board.get_piece('G8').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('H8'), is_(Rook)),
-            self.board.get_piece('H8').color, is_(Color.black)
+            self.board.get_piece('H8').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('A7'), is_(Pawn)),
-            self.board.get_piece('A7').color, is_(Color.black)
+            self.board.get_piece('A7').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('B7'), is_(Pawn)),
-            self.board.get_piece('B7').color, is_(Color.black)
+            self.board.get_piece('B7').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('B7'), is_(Pawn)),
-            self.board.get_piece('B7').color, is_(Color.black)
+            self.board.get_piece('B7').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('C7'), is_(Pawn)),
-            self.board.get_piece('C7').color, is_(Color.black)
+            self.board.get_piece('C7').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('D7'), is_(Pawn)),
-            self.board.get_piece('D7').color, is_(Color.black)
+            self.board.get_piece('D7').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('E7'), is_(Pawn)),
-            self.board.get_piece('E7').color, is_(Color.black)
+            self.board.get_piece('E7').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('F7'), is_(Pawn)),
-            self.board.get_piece('F7').color, is_(Color.black)
+            self.board.get_piece('F7').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('G7'), is_(Pawn)),
-            self.board.get_piece('G7').color, is_(Color.black)
+            self.board.get_piece('G7').color, is_(Color.BLACK)
         )
         assert_that(all_of(
             self.board.get_piece('H7'), is_(Pawn)),
-            self.board.get_piece('H7').color, is_(Color.black)
+            self.board.get_piece('H7').color, is_(Color.BLACK)
         )
 
         # Check all the other squares are empty
@@ -571,8 +571,8 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
         check_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙__♙-________-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
-        assert_that(check_board.is_checkmate(Color.black), is_(False))
-        assert_that(check_board.is_checkmate(Color.white), is_(True))
+        assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
+        assert_that(check_board.is_checkmate(Color.WHITE), is_(True))
 
     def test_checkmate_2(self):
         """Simliar to the '2 move' checkmate, king cannot move but there is a
@@ -591,8 +591,8 @@ class TestBoardFunctions(unittest.TestCase):
         """
 
         check_board = Board("♖♘♗♕♔♗♘♖-♙_♙♙♙_♙♙-_♙______-_____♙_♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
-        assert_that(check_board.is_checkmate(Color.black), is_(False))
-        assert_that(check_board.is_checkmate(Color.white), is_(False))
+        assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
+        assert_that(check_board.is_checkmate(Color.WHITE), is_(False))
 
     def test_checkmate_3(self):
         """Simliar to the '2 move' checkmate, but king can move to escape.
@@ -610,8 +610,8 @@ class TestBoardFunctions(unittest.TestCase):
         """
 
         check_board = Board("♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-___♙____-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
-        assert_that(check_board.is_checkmate(Color.black), is_(False))
-        assert_that(check_board.is_checkmate(Color.white), is_(False))
+        assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
+        assert_that(check_board.is_checkmate(Color.WHITE), is_(False))
 
     def test_checkmate_4(self):
         """Simliar to the '2 move' checkmate, but with a counter capture.
@@ -629,8 +629,8 @@ class TestBoardFunctions(unittest.TestCase):
         """
 
         check_board = Board("♖♘♗♕♔♗_♖-♙♙♙♙♙__♙-_____♘__-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
-        assert_that(check_board.is_checkmate(Color.black), is_(False))
-        assert_that(check_board.is_checkmate(Color.white), is_(False))
+        assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
+        assert_that(check_board.is_checkmate(Color.WHITE), is_(False))
 
     def test_checkmate_5(self):
         u"""Simliar to the '2 move' checkmate. There is an empty square to move but that is also threatened.
@@ -648,8 +648,8 @@ class TestBoardFunctions(unittest.TestCase):
         """
 
         check_board = Board("♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-__♟♙____-_____♙♙♛-________-___♟____-♟♟__♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
-        assert_that(check_board.is_checkmate(Color.black), is_(False))
-        assert_that(check_board.is_checkmate(Color.white), is_(True))
+        assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
+        assert_that(check_board.is_checkmate(Color.WHITE), is_(True))
 
     def test_checkmate_5_b(self):
         u"""This is based off test_checkmate_5 which was failing. Tests the individual parts of this method
@@ -676,16 +676,16 @@ class TestBoardFunctions(unittest.TestCase):
         assert_that(attacker, is_('H4'))
         assert_that(blockers, is_(set(['F2', 'G3'])))
 
-        king_loc = check_board._king_location[Color.white]
+        king_loc = check_board._king_location[Color.WHITE]
         king_moves = check_board.get_moves(king_loc)
         assert_that(len(king_moves), is_(0))
 
         # Check if the black attacking queen can be captured
-        white_attackers = check_board._get_attackers(attacker, Color.white)
+        white_attackers = check_board._get_attackers(attacker, Color.WHITE)
         assert_that(len(white_attackers), is_(0))
 
-        # assert_that(check_board.is_checkmate(Color.black), is_(False))
-        # assert_that(check_board.is_checkmate(Color.white), is_(True))
+        # assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
+        # assert_that(check_board.is_checkmate(Color.WHITE), is_(True))
 
     def test_statemate_1(self):
         u"""At the start of a game there is no stalemate as each player has moves and enough pieces for checkmate."""
@@ -1003,7 +1003,7 @@ class TestSpecificScenarios(unittest.TestCase):
         # Checkmate with white queen
         chess_board.move_piece('F3', 'F7')
 
-        assert_that(chess_board.winner, is_(Color.white))
+        assert_that(chess_board.winner, is_(Color.WHITE))
         # print chess_board.display()
 
     def test_knight_can_capture_attacker(self):
@@ -1069,11 +1069,11 @@ class TestSpecificScenarios(unittest.TestCase):
         """
         chess_board = Board("____♔_♘♖-♙♙♙___♙♙-__♘_____-__♟_____-_♟____♗_-________-♟___m♖___-___m♖__m♚_,B,0,1")
 
-        checkmate = chess_board.is_checkmate(Color.black)
+        checkmate = chess_board.is_checkmate(Color.BLACK)
         # h8 = Square('H8')
         # g8 = Square('G8')
 
-        # print chess_board._get_attackers(h8, Color.white, ignore_king=True)
+        # print chess_board._get_attackers(h8, Color.WHITE, ignore_king=True)
         print chess_board._get_moves_and_attacks('G8')
         # from_, direction, color, limit=None, ignore_king=False):
 
@@ -1480,19 +1480,19 @@ class TestDirectionSearch(unittest.TestCase):
         up = (0, 1)
         down = (0, -1)
 
-        up_moves, up_attack = rook_board._get_squares_in_direction(from_, up, Color.white)
+        up_moves, up_attack = rook_board._get_squares_in_direction(from_, up, Color.WHITE)
         assert_that(up_attack, is_('B7'))
         assert_that(up_moves, is_(set(['B4', 'B5', 'B6'])))
 
-        down_moves, down_attack = rook_board._get_squares_in_direction(from_, down, Color.white)
+        down_moves, down_attack = rook_board._get_squares_in_direction(from_, down, Color.WHITE)
         assert_that(down_attack, is_(None))
         assert_that(down_moves, is_(set([])))
 
-        left_moves, left_attack = rook_board._get_squares_in_direction(from_, left, Color.white)
+        left_moves, left_attack = rook_board._get_squares_in_direction(from_, left, Color.WHITE)
         assert_that(left_attack, is_(None))
         assert_that(left_moves, is_(set(['A3'])))
 
-        right_moves, right_attack = rook_board._get_squares_in_direction(from_, right, Color.white)
+        right_moves, right_attack = rook_board._get_squares_in_direction(from_, right, Color.WHITE)
         assert_that(right_attack, is_(None))
         assert_that(right_moves, is_(
             set(['C3', 'D3', 'E3', 'F3', 'G3', 'H3'])
@@ -2175,31 +2175,31 @@ class TestGetAttackers(unittest.TestCase):
     def test_get_attackers(self):
         # Check black queens pawn E7
         chessboard = Board()
-        attackers_3_7 = chessboard._get_attackers('C7', Color.black)
+        attackers_3_7 = chessboard._get_attackers('C7', Color.BLACK)
         assert_that(attackers_3_7, contains_inanyorder('D8'))
 
     def test_get_attackers_1_a(self):
         # Test some white pawns
         chessboard = Board()
-        attackers_2_3 = chessboard._get_attackers('B3', Color.white)
+        attackers_2_3 = chessboard._get_attackers('B3', Color.WHITE)
         assert_that(attackers_2_3, contains_inanyorder('A2', 'C2'))
 
     def test_get_attackers_1_b(self):
         # Two pawns and a knight can attack 3,3 (C3)
         chessboard = Board()
-        attackers_3_3 = chessboard._get_attackers('C3', Color.white)
+        attackers_3_3 = chessboard._get_attackers('C3', Color.WHITE)
         assert_that(attackers_3_3, contains_inanyorder('B1', 'B2', 'D2'))
 
     def test_get_attackers_1_c(self):
         # Check pawn in front of white rook
         chessboard = Board()
-        attackers_8_2 = chessboard._get_attackers('H2', Color.white)
+        attackers_8_2 = chessboard._get_attackers('H2', Color.WHITE)
         assert_that(attackers_8_2, contains_inanyorder('H1'))
 
     def test_get_attackers_1_e(self):
         # Check black kings pawn E7
         chessboard = Board()
-        attackers_6_7 = chessboard._get_attackers('F7', Color.black)
+        attackers_6_7 = chessboard._get_attackers('F7', Color.BLACK)
         assert_that(attackers_6_7, contains_inanyorder('E8'))
 
     def test_pawn_attackers_2(self):
@@ -2209,7 +2209,7 @@ class TestGetAttackers(unittest.TestCase):
 
         """
         chessboard = Board()
-        attackers_5_2 = chessboard._get_attackers('E2', Color.white)
+        attackers_5_2 = chessboard._get_attackers('E2', Color.WHITE)
         assert_that(attackers_5_2, contains_inanyorder(
             'D1', 'E1', 'F1', 'G1'
         ))
