@@ -75,7 +75,7 @@ class Square(object):
             )
 
     def pop(self):
-        u"""Removes the current peice from this square and returns it"""
+        u"""Removes the current piece from this square and returns it"""
         piece = self.piece
         self.piece = None
         return piece
