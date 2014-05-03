@@ -199,7 +199,7 @@ angular.module('chess').factory('myService', ["$http", "$q",
             // gameInfo: {},
             newGame: function(gameType) {
                 var thisService = this;
-                var url = '//www.chess.dev/rest/new/' + gameType;
+                var url = '/rest/new/' + gameType;
                 promise = restCall(url);
                 promise.then(function(gameInfo) {
                     for (var key in gameInfo) {
@@ -210,7 +210,7 @@ angular.module('chess').factory('myService', ["$http", "$q",
             },
             movePiece: function(from, to) {
                 var thisService = this;
-                var url = '//www.chess.dev/rest/game/' + thisService.gameId + '/from/' + from + '/to/' + to;
+                var url = '/rest/game/' + thisService.gameId + '/from/' + from + '/to/' + to;
                 promise = restCall(url);
                 promise.then(function(gameInfo) {
                     for (var key in gameInfo) {
@@ -221,7 +221,7 @@ angular.module('chess').factory('myService', ["$http", "$q",
             },
             loadGame: function(gameId) {
                 var thisService = this;
-                var url = '//www.chess.dev/rest/game/' + gameId;
+                var url = '/rest/game/' + gameId;
                 promise = restCall(url);
                 promise.then(function(gameInfo) {
                     for (var key in gameInfo) {
@@ -231,7 +231,7 @@ angular.module('chess').factory('myService', ["$http", "$q",
                 return promise;
             },
             listGames: function() {
-                var url = '//www.chess.dev/rest/list';
+                var url = '/rest/list';
                 var deferred = $q.defer();
                 var thisService = this;
                 $http.get(url).success(function(data, status, headers, config) {
@@ -257,7 +257,7 @@ angular.module('chess').factory('myService', ["$http", "$q",
             },
             promote: function(piece) {
                 var thisService = this;
-                var url = '//www.chess.dev/rest/game/' + thisService.gameId + '/promote/' + piece;
+                var url = '/rest/game/' + thisService.gameId + '/promote/' + piece;
                 promise = restCall(url);
                 promise.then(function(gameInfo) {
                     for (var key in gameInfo) {

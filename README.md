@@ -49,3 +49,11 @@ Running the controller
 ----
 The controller runs all of the backend services. It is started as follows
 `python controller.py`
+
+Running tests
+----
+From the root directory all tests can be run as follows:
+`python -m unittest discover -s tests`
+
+Specific tests can be run as follows:
+`python -m tests.board_test`

@@ -1,4 +1,4 @@
-from persistence import Persistence
+from chess.persistence import Persistence
 from hamcrest import is_, assert_that, contains_inanyorder
 from sqlite3 import ProgrammingError
 import os

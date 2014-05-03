@@ -2,7 +2,7 @@
 # Unit tests for chess. Requires PyHamcrest to be installed.
 # This can be easily done using any packaging tool (such as distribute).
 # See https://code.google.com/p/hamcrest/ for more details on hamcrest matchers
-from board import Board, Color, King, Queen, Bishop, Knight, Rook, Pawn, BlackPawn, WhiteKing, WhiteRook, \
+from chess.board import Board, Color, King, Queen, Bishop, Knight, Rook, Pawn, BlackPawn, WhiteKing, WhiteRook, \
     BlackKing, BlackQueen, BlackRook, BlackBishop, BlackKnight, IllegalMoveException, \
     WhiteKnight, WhitePawn
 from hamcrest import is_, assert_that, equal_to, all_of, contains_inanyorder, instance_of

@@ -1,7 +1,7 @@
-from chess_color import Color
-from chess_move import Move
-from chess_square import Square, InvalidSquareException
-from chess_pieces import PieceFactory, King, BlackKing, WhiteKing, Queen, WhiteQueen, BlackQueen, Rook, WhiteRook, \
+from color import Color
+from move import Move
+from square import Square, InvalidSquareException
+from pieces import PieceFactory, King, BlackKing, WhiteKing, Queen, WhiteQueen, BlackQueen, Rook, WhiteRook, \
     BlackRook, Bishop, WhiteBishop, BlackBishop, Knight, WhiteKnight, BlackKnight, Pawn, WhitePawn, BlackPawn, \
     InvlaidPieceException
 _HAS_MOVED = 'm'
