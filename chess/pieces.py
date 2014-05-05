@@ -14,7 +14,6 @@ class Piece(object):
     # If none then it can move an unlimted amount in a direction
     limit = None
     value = None  # Tradional chess values - used to determince some statemate
-    has_moved = False
 
     def __str__(self):
         u"""Return a utf-8 encoded string representation of this chess piece."""
@@ -50,6 +49,7 @@ class King(object):
     attacks = frozenset([(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)])  # x,y
     limit = 1  # The King may only move one place via his move vectors
     value = 0
+    has_moved = False
 
     def __new__(cls, *args, **kwargs):
         if cls is King:
@@ -101,9 +101,6 @@ class WhiteQueen(Queen, Piece):
     name = u'WhiteQueen'
     color = Color.WHITE
 
-    def __init__(self, has_moved=False):
-        self.has_moved = has_moved
-
 
 class BlackQueen(Queen, Piece):
     u"""The Black Queen chess piece."""
@@ -111,9 +108,6 @@ class BlackQueen(Queen, Piece):
     simple_simbol = u'BQ'
     name = u'BlackQueen'
     color = Color.BLACK
-
-    def __init__(self, has_moved=False):
-        self.has_moved = has_moved
 
 
 class Rook(object):
@@ -124,6 +118,7 @@ class Rook(object):
     """
     attacks = frozenset([(1, 0), (0, 1), (-1, 0), (0, -1)])
     value = 5
+    has_moved = False
 
     def __new__(cls, *args, **kwargs):
         if cls is Rook:
@@ -175,9 +170,6 @@ class WhiteBishop(Bishop, Piece):
     name = u'WhiteBishop'
     color = Color.WHITE
 
-    def __init__(self, has_moved=False):
-        self.has_moved = has_moved
-
 
 class BlackBishop(Bishop, Piece):
     """The Black Bishop chess piece."""
@@ -185,9 +177,6 @@ class BlackBishop(Bishop, Piece):
     simple_simbol = u'BB'
     name = u'BlackBishop'
     color = Color.BLACK
-
-    def __init__(self, has_moved=False):
-        self.has_moved = has_moved
 
 
 class Knight(object):
@@ -214,9 +203,6 @@ class WhiteKnight(Knight, Piece):
     name = u'WhiteKnight'
     color = Color.WHITE
 
-    def __init__(self, has_moved=False):
-        self.has_moved = has_moved
-
 
 class BlackKnight(Knight, Piece):
     u"""The Black Knight chess piece."""
@@ -224,9 +210,6 @@ class BlackKnight(Knight, Piece):
     simple_simbol = u'BN'
     name = u'BlackKnight'
     color = Color.BLACK
-
-    def __init__(self, has_moved=False):
-        self.has_moved = has_moved
 
 
 class Pawn(object):
@@ -268,9 +251,6 @@ class WhitePawn(Pawn, Piece):
     color = Color.WHITE
     forward = 1  # Based off White starting at rows 1,2
 
-    def __init__(self, has_moved=False):
-        self.has_moved = has_moved
-
 
 class BlackPawn(Pawn, Piece):
     u"""A Black Pawn chess piece."""
@@ -279,9 +259,6 @@ class BlackPawn(Pawn, Piece):
     name = u'BlackPawn'
     color = Color.BLACK
     forward = -1  # Based off Black starting at rows 7,8
-
-    def __init__(self, has_moved=False):
-        self.has_moved = has_moved
 
 
 class PieceFactory(object):
@@ -305,7 +282,11 @@ class PieceFactory(object):
             piece = d[name]
         except KeyError:
             raise InvlaidPieceException("The chess piece {piece} does not exist.".format(piece=name))
-        return piece(has_moved)
+
+        if hasattr(piece, 'has_moved'):
+            return piece(has_moved)
+        else:
+            return piece()
 
     @staticmethod
     def createFromSymbol(symbol, has_moved):
@@ -316,4 +297,8 @@ class PieceFactory(object):
             piece = d[symbol]
         except KeyError:
             raise InvlaidPieceException("The chess piece {symbol} does not exist.".format(symbol=symbol))
-        return piece(has_moved)
+
+        if hasattr(piece, 'has_moved'):
+            return piece(has_moved)
+        else:
+            return piece()

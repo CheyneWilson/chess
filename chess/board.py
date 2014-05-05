@@ -1,11 +1,10 @@
+# -*- coding: UTF-8 -*-
 from color import Color
 from move import Move
 from square import Square, InvalidSquareException
 from pieces import PieceFactory, King, BlackKing, WhiteKing, Queen, WhiteQueen, BlackQueen, Rook, WhiteRook, \
     BlackRook, Bishop, WhiteBishop, BlackBishop, Knight, WhiteKnight, BlackKnight, Pawn, WhitePawn, BlackPawn, \
     InvlaidPieceException
-_HAS_MOVED = 'm'
-_EMPTY_SQUARE = '_'
 
 
 class IllegalMoveException(Exception):
@@ -36,17 +35,21 @@ class MovesAndAttacks(object):
 
 class Board(object):
     u"""A new implemenation of a chessboard."""
-    def __init__(self, board_string=None):
+
+    _HAS_MOVED = 'm'
+    _EMPTY_SQUARE = '_'
+
+    def __init__(self, board_string=None, current_player=None):
         self._stalemate_count = 0
         self._king_location = {}
         self._all_squares = {}
         self._previous_moves = []
-        self.current_player = None
+        self.current_player = current_player
         self.promote_pawn_location = None
         if board_string is None:
             self._new_board()
         else:
-            self._create_board_from_repr(board_string)
+            self._to_python(board_string)
 
     def square(self, square_name=None, x=None, y=None):
         u"""Returns the square on a chess board.
@@ -448,14 +451,14 @@ class Board(object):
             knight = WhiteKnight()
             rook = WhiteRook()
             bishop = WhiteBishop()
-            pawn = WhitePawn(to_)
-            pawn_2 = BlackPawn(to_)
+            pawn = WhitePawn()
+            pawn_2 = BlackPawn()
         elif color is Color.WHITE:
             knight = BlackKnight()
             rook = BlackRook()
             bishop = BlackBishop()
-            pawn = BlackPawn(to_)
-            pawn_2 = WhitePawn(to_)
+            pawn = BlackPawn()
+            pawn_2 = WhitePawn()
 
         # Get the squares of any knights that can attack this square
         dummy_moves, knight_square_names = self._get_knight_bishop_queen_rook_king_moves(knight, to_)
@@ -1027,48 +1030,46 @@ class Board(object):
                         if piece.has_moved is False:
                             pass
                         else:
-                            board_string += _HAS_MOVED
+                            board_string += self._HAS_MOVED
                     board_string += piece.symbol
                 else:
-                    board_string += _EMPTY_SQUARE
+                    board_string += self._EMPTY_SQUARE
             if y < 8:
                 board_string += u'-'
 
-        board_repr = u'{0},{1},{2},{3}'.format(board_string, self.current_player.code(), self.turn, self._stalemate_count)
-        return board_repr.encode('utf-8')
+        return board_string.encode('utf-8')
 
-    def _create_board_from_repr(self, board_string):
-        u"""Creates a new board from the board described by board_string."""
-        unicode_board_string = board_string.decode('utf-8')
-        [piece_string, player_color_code, turn, _stalemate_count] = unicode_board_string.split(u',')
+    def _to_python(self, board_string):
+        u"""Converts a board string into a board instance.
 
-        self._previous_moves = []
+            board_string -- A string representing the rows in a chess board, from A1 to A8, then B1 to B8, all the
+                            way to H1 to H8. Rows are separated by dash '-' symbols. Empty squares are marked by
+                            underscore symbols '-', and pieces are marked by their unicode character such as '♖'.
+                            Finally, some meta-data may proceed pieces. A 'm' before a rook 'm♖' or king 'm♚' indicates
+                            this piece has moved, so cannot castle this game.
 
-        self.current_player = Color.decode(player_color_code)
+                            An example for a new game is:
+                            ♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜
+        """
 
-        self.turn = int(turn)
-        self._stalemate_count = int(_stalemate_count)
-        self._king_location = dict()
+        self._board = {}
+        self._king_location = {}
 
-        row_strings = piece_string.split(u'-')
+        row_strings = board_string.split(u'-')
         y = 0
         for row in row_strings:
             y += 1
             x = 0
             has_moved = False
             for symbol in row:
-                if symbol == _HAS_MOVED:
-                    # This is meta data, it isn't a piece, so don't increment x
-                    has_moved = True
+                if symbol == Board._HAS_MOVED:
+                    has_moved = True  # This is meta data, it isn't a piece, so don't increment x
                 else:
                     x += 1
-                    # square_name = Square.nameFromCoords(x, y)
-
-                    if symbol == _EMPTY_SQUARE:
+                    if symbol == Board._EMPTY_SQUARE:
                         square = Square(x=x, y=y)
                         self._all_squares[square.name] = square
                     else:
-                        # cls = Piece.get_piece_class(symbol)
                         piece = PieceFactory.createFromSymbol(symbol, has_moved)
                         square = Square(x=x, y=y)
                         square.piece = piece
@@ -1080,11 +1081,10 @@ class Board(object):
                                 raise InvalidBoardException(u"Multiple kings of the color {color} present."
                                                             .format(color=piece.color))
                             else:
-                                self._king_location[piece.color] = self.square(x=x, y=y).name
+                                self._king_location[piece.color] = square.name
 
                     has_moved = False
 
-        # These data structures must be kept in sync
         assert isinstance(self.square(self._king_location[Color.BLACK]).piece, BlackKing)
         assert isinstance(self.square(self._king_location[Color.WHITE]).piece, WhiteKing)
 

@@ -183,13 +183,13 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_moved_white_pawn(self):
         """Check that a white pawn that has moved can only move one space (when nothing to attack)."""
-        pawn_board = Board("♖♘♗♕♔♗♘♖-♙♙_♙♙♙♙♙-__♙_____-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_board = Board(u"♖♘♗♕♔♗♘♖-♙♙_♙♙♙♙♙-__♙_____-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         pawn_moves = pawn_board.get_moves('C3')
         assert_that(pawn_moves, contains_inanyorder('C4'))
 
     def test_get_moves_white_pawn_attacks_both(self):
         """Check that a white pawn with 3 Black pieces in front can attack the two pieces on the sides only"""
-        pawn_board = Board("♖♘♗♕♔♗♘♖-♙♙♙_♙♙♙♙-________-________-________-___♙___-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙_♙♙♙♙-________-________-________-___♙___-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         pawn_moves = pawn_board.get_moves('D6')
         assert_that(pawn_moves, contains_inanyorder('C7', 'E7'))
 
@@ -210,7 +210,7 @@ class TestBoardFunctions(unittest.TestCase):
               A B C D E F G H
 
         """
-        pawn_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙__-________-______♙♙-_______♟-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙__-________-______♙♙-_______♟-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.WHITE)
         pawn_moves = pawn_board.get_moves('H5')
         assert_that(pawn_moves, contains_inanyorder('G4'))
 
@@ -230,7 +230,7 @@ class TestBoardFunctions(unittest.TestCase):
               ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
               A B C D E F G H
         """
-        pawn_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-______♟♟-_______♟-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,W,0,0")
+        pawn_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-______♟♟-_______♟-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.WHITE)
         pawn_moves = pawn_board.get_moves('H5')
         assert_that(pawn_moves, is_(set([])))
 
@@ -253,7 +253,7 @@ class TestBoardFunctions(unittest.TestCase):
               ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
               A B C D E F G H
         """
-        pawn_board = Board("♖♘♗♕♔♗__-♙♙♙♙♙♙♙♟-________-________-________-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,B,0,0")
+        pawn_board = Board(u"♖♘♗♕♔♗__-♙♙♙♙♙♙♙♟-________-________-________-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         pawn_moves = pawn_board.get_moves('H2')
         assert_that(pawn_moves, contains_inanyorder('H1'))
 
@@ -277,7 +277,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_knight_fork_attack(self):
         """Check if a knight at G3 can fork the king and rook, as well as other moves."""
-        knight_board = Board("♖_♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♘♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        knight_board = Board(u"♖_♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♘♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         knight_moves = knight_board.get_moves('C7')
         assert_that(knight_moves, contains_inanyorder(
             'A8', 'E8', 'A6', 'E6', 'B5', 'D5'
@@ -295,7 +295,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_white_bishop_free(self):
         """Test get_moves for a white bishop in the middle of the board."""
-        bishop_board = Board("♖♘_♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♗___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        bishop_board = Board(u"♖♘_♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♗___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         bishop_moves = bishop_board.get_moves('E5')
         assert_that(bishop_moves, contains_inanyorder(
             'D6', 'C7',  # forward left
@@ -306,7 +306,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_black_bishop_free(self):
         """Test get_moves for a black bishop in the middle of the board."""
-        bishop_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-___♝____-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚_♞♜,W,0,0")
+        bishop_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-___♝____-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚_♞♜", Color.WHITE)
         bishop_moves = bishop_board.get_moves('D5')
         assert_that(bishop_moves, contains_inanyorder(
             'C6',  # (2, 7),  # forward left
@@ -342,7 +342,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
 
         """
-        rook_board = Board("♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-_♖______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        rook_board = Board(u"♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-_♖______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         rook_moves = rook_board.get_moves('B3')
 
         assert_that(rook_moves, contains_inanyorder(
@@ -369,7 +369,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
 
-        rook_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-_♜______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_,B,0,0")
+        rook_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-_♜______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_", Color.BLACK)
         rook_moves = rook_board.get_moves('B3')
         assert_that(rook_moves, contains_inanyorder(
             'B4', 'B5', 'B6',  # backward
@@ -390,7 +390,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_white_queen_free(self):
         """Check the moves of a white queen in the open."""
-        queen_board = Board("♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-________-___♕____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        queen_board = Board(u"♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-________-___♕____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         queen_moves = queen_board.get_moves('D4')
         assert_that(queen_moves, contains_inanyorder(
             'D5', 'D6', 'D7',  # forward
@@ -405,7 +405,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_black_queen_free(self):
         """Check the moves of a black queen in the open."""
-        queen_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___♛____-________-________-♟♟♟♟♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        queen_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___♛____-________-________-♟♟♟♟♟♟♟♟-♜♞♝_♚♝♞♜", Color.WHITE)
         queen_moves = queen_board.get_moves('D4')
         assert_that(queen_moves, contains_inanyorder(
             'D5', 'D6',  # forward
@@ -430,7 +430,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_white_king_free(self):
         """Check the moves of a white king in the open."""
-        king_board = Board("♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-___m♔____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        king_board = Board(u"♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-___m♔____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         king_moves = king_board.get_moves('D4')
         assert_that(king_moves, contains_inanyorder(
             'D5',  # forward
@@ -445,7 +445,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_black_king_partially_free(self):
         """Check the moves of a black king in front of white pawns."""
-        king_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___m♚____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,W,0,0")
+        king_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___m♚____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.WHITE)
         king_moves = king_board.get_moves('D4')
         assert_that(king_moves, contains_inanyorder(
             'D5',  # forward
@@ -475,7 +475,7 @@ class TestBoardFunctions(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        check_board = Board("♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-______♔_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        check_board = Board(u"♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-______♔_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         assert_that(check_board.is_check(), is_(True))
 
     def test_is_check_3(self):
@@ -494,7 +494,7 @@ class TestBoardFunctions(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        check_board = Board("♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-________-________-____♚__♖-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,B,0,0")
+        check_board = Board(u"♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-________-________-____♚__♖-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.BLACK)
         assert_that(check_board.is_check(), is_(True))
 
     def test_is_check_4(self):
@@ -513,7 +513,7 @@ class TestBoardFunctions(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        check_board = Board("♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♚__♕-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,B,0,0")
+        check_board = Board(u"♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♚__♕-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.BLACK)
         assert_that(check_board.is_check(), is_(True))
 
     def test_is_check_5(self):
@@ -532,7 +532,7 @@ class TestBoardFunctions(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        check_board = Board("♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-____♕___-________-____♚___-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,B,0,0")
+        check_board = Board(u"♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-____♕___-________-____♚___-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.BLACK)
         assert_that(check_board.is_check(), is_(True))
 
     def test_is_check_6(self):
@@ -551,7 +551,7 @@ class TestBoardFunctions(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        check_board = Board("♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-_♔______-________-__♞_____-♟♟♟♟♟♟♟♟-♜_♝♛♚♝♞♜,W,0,0")
+        check_board = Board(u"♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-_♔______-________-__♞_____-♟♟♟♟♟♟♟♟-♜_♝♛♚♝♞♜", Color.WHITE)
         assert_that(check_board.is_check(), is_(True))
 
     def test_checkmate_1(self):
@@ -570,7 +570,7 @@ class TestBoardFunctions(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        check_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙__♙-________-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        check_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙__♙-________-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜", Color.WHITE)
         assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
         assert_that(check_board.is_checkmate(Color.WHITE), is_(True))
 
@@ -590,7 +590,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
 
-        check_board = Board("♖♘♗♕♔♗♘♖-♙_♙♙♙_♙♙-_♙______-_____♙_♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        check_board = Board(u"♖♘♗♕♔♗♘♖-♙_♙♙♙_♙♙-_♙______-_____♙_♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜", Color.WHITE)
         assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
         assert_that(check_board.is_checkmate(Color.WHITE), is_(False))
 
@@ -609,7 +609,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
 
-        check_board = Board("♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-___♙____-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        check_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-___♙____-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜", Color.WHITE)
         assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
         assert_that(check_board.is_checkmate(Color.WHITE), is_(False))
 
@@ -628,7 +628,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
 
-        check_board = Board("♖♘♗♕♔♗_♖-♙♙♙♙♙__♙-_____♘__-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        check_board = Board(u"♖♘♗♕♔♗_♖-♙♙♙♙♙__♙-_____♘__-_____♙♙♛-________-___♟____-♟♟♟_♟♟♟♟-♜♞♝_♚♝♞♜", Color.WHITE)
         assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
         assert_that(check_board.is_checkmate(Color.WHITE), is_(False))
 
@@ -647,7 +647,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
 
-        check_board = Board("♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-__♟♙____-_____♙♙♛-________-___♟____-♟♟__♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        check_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-__♟♙____-_____♙♙♛-________-___♟____-♟♟__♟♟♟♟-♜♞♝_♚♝♞♜", Color.WHITE)
         assert_that(check_board.is_checkmate(Color.BLACK), is_(False))
         assert_that(check_board.is_checkmate(Color.WHITE), is_(True))
 
@@ -668,7 +668,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
 
-        check_board = Board("♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-__♟♙____-_____♙♙♛-________-___♟____-♟♟__♟♟♟♟-♜♞♝_♚♝♞♜,W,0,0")
+        check_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-__♟♙____-_____♙♙♛-________-___♟____-♟♟__♟♟♟♟-♜♞♝_♚♝♞♜", Color.WHITE)
 
         # Check that we know the correct blocking squares
         # TODO: This should become it's own set of test cases
@@ -705,7 +705,7 @@ class TestBoardFunctions(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        stale_board = Board("_♘♗___♔♖-_♙_♙___♙-♙♟♙♟_♛_♟-♟_♟_____-________-___♟____-_____♟♟_-♜♞♝_♚♝♞♜,W,0,0")
+        stale_board = Board(u"_♘♗___♔♖-_♙_♙___♙-♙♟♙♟_♛_♟-♟_♟_____-________-___♟____-_____♟♟_-♜♞♝_♚♝♞♜", Color.WHITE)
         assert_that(stale_board.is_stalemate(), is_(True))
 
     def test_stalemate_3(self):
@@ -714,20 +714,19 @@ class TestBoardFunctions(unittest.TestCase):
          checkmate (except rare case with opponent having a lone pawn).
          This tests for stalemate where neither player can achieve checkmate.
         """
-        stale_board = Board("_♘____♔_-________-________-________-________-________-________-____♚___,W,0,0")
+        stale_board = Board(u"_♘____♔_-________-________-________-________-________-________-____♚___", Color.WHITE)
         assert_that(stale_board.is_stalemate(), is_(True))
 
     def test_stalemate_4(self):
         """If a player has a pawn, they can promote it. So it is not stalemate.
         """
-        stale_board = Board("______♔_-♙_______-________-________-________-________-________-____♚___,W,0,0")
+        stale_board = Board(u"______♔_-♙_______-________-________-________-________-________-____♚___", Color.WHITE)
         assert_that(stale_board.is_stalemate(), is_(False))
 
     def test_board_repr_1(self):
         """Serialize a board, restore it and re-serialize it, it is the same as the original?"""
-        board_string = self.board.__repr__()
         board_string = repr(self.board)
-        new_board = Board(board_string)
+        new_board = Board(board_string.decode('utf-8'))
         new_board_string = repr(new_board)
         assert_that(board_string, equal_to(new_board_string))
 
@@ -902,7 +901,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("♖♘♗♕_♗♘♖-♙♙♙♙♙_♙♙-________-________-♜____♙_♔-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_,B,0,0")
+        chess_board = Board(u"♖♘♗♕_♗♘♖-♙♙♙♙♙_♙♙-________-________-♜____♙_♔-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_", Color.BLACK)
 
         # Move the black pawn a doulbe step
         chess_board.move_piece('E7', 'E5')
@@ -929,7 +928,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("♖♘♗♕_♗♘♖-♙♙♙♙♙_♙♙-________-________-_____♙_♔-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,B,0,0")
+        chess_board = Board(u"♖♘♗♕_♗♘♖-♙♙♙♙♙_♙♙-________-________-_____♙_♔-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
 
         # Move the black pawn a doulbe step
         chess_board.move_piece('E7', 'E5')
@@ -1021,7 +1020,8 @@ class TestSpecificScenarios(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
            """
-        chess_board = Board("_m♖___♗♘♖-♙__m♔___♙-______♘_-________-___♝____-___♟♟♙__-____m♚__♟-♜♕_♛_♝♞♕,B,0,0")
+        chess_board = Board(u"_m♖___♗♘♖-♙__m♔___♙-______♘_-________-___♝____-___♟♟♙__-____m♚__♟-♜♕_♛_♝♞♕", Color.BLACK)
+
         knight_moves = chess_board.get_moves('G8')
         assert_that(knight_moves, is_(set(['F6'])))
 
@@ -1041,7 +1041,7 @@ class TestSpecificScenarios(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("♖♘♗_♔_♘♖-♙♙♙__♙♙♙-________-__♛_____-________-_____♞_♝-♟♟♟__♕__-♜♞_♖___m♚,B,0,0")
+        chess_board = Board(u"♖♘♗_♔_♘♖-♙♙♙__♙♙♙-________-__♛_____-________-_____♞_♝-♟♟♟__♕__-♜♞_♖___m♚", Color.BLACK)
 
         king_moves = chess_board.get_moves('H8')
         assert_that(king_moves, is_(set([])))
@@ -1067,8 +1067,7 @@ class TestSpecificScenarios(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        chess_board = Board("____♔_♘♖-♙♙♙___♙♙-__♘_____-__♟_____-_♟____♗_-________-♟___m♖___-___m♖__m♚_,B,0,1")
-
+        chess_board = Board(u"____♔_♘♖-♙♙♙___♙♙-__♘_____-__♟_____-_♟____♗_-________-♟___m♖___-___m♖__m♚_", Color.BLACK)
         checkmate = chess_board.is_checkmate(Color.BLACK)
         # h8 = Square('H8')
         # g8 = Square('G8')
@@ -1094,7 +1093,7 @@ class TestSpecificScenarios(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        chess_board = Board("♖♘♗_♔♗♘♖-♙♙♙_♙♙♙♙-________-___♙____-___♟___♟-_♟___♞__-__♟_♟♟♟_-_♕♝♛♚♝_♜,B,0,0")
+        chess_board = Board(u"♖♘♗_♔♗♘♖-♙♙♙_♙♙♙♙-________-___♙____-___♟___♟-_♟___♞__-__♟_♟♟♟_-_♕♝♛♚♝_♜", Color.BLACK)
 
         moves = chess_board.get_moves('C8')
         assert_that(moves, is_(set(['A6', 'B7', 'D7', 'E6', 'F5', 'G4', 'H3'])))
@@ -1115,7 +1114,7 @@ class TestSpecificScenarios(unittest.TestCase):
         """
 
         # TODO: Encode last move into board repr below
-        chess_board = Board("♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-________-___♙♟_♙_-__♟__♙__-________-♟♟_♟_♟♟♟-♜♞♝♛♚♝♞♜,B,0,1")
+        chess_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-________-___♙♟_♙_-__♟__♙__-________-♟♟_♟_♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('E4', 'D3')
 
 
@@ -1146,7 +1145,7 @@ class TestLegalMoves(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("♖♘♗♕♔♗_♖-♙♙♙♙_♙♙♙-____♘___-________-____♛___-________-♟♟♟♟♟♟♟_-♜♞♝_♚♝♞♜,B,0,0")
+        chess_board = Board(u"♖♘♗♕♔♗_♖-♙♙♙♙_♙♙♙-____♘___-________-____♛___-________-♟♟♟♟♟♟♟_-♜♞♝_♚♝♞♜", Color.BLACK)
         e3_knight_moves = chess_board.get_moves('E3')
         assert_that(e3_knight_moves, is_(set([])))
 
@@ -1172,7 +1171,7 @@ class TestPromotePawns(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,B,0,0")
+        chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
         chess_board.promote_pawn(BlackQueen())
         black_queen = chess_board.get_piece('A1')
@@ -1196,7 +1195,7 @@ class TestPromotePawns(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,B,0,0")
+        chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
         chess_board.promote_pawn(BlackRook())
         black_rook = chess_board.get_piece('A1')
@@ -1220,7 +1219,7 @@ class TestPromotePawns(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,B,0,0")
+        chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
         chess_board.promote_pawn(BlackBishop())
         black_bishop = chess_board.get_piece('A1')
@@ -1244,7 +1243,7 @@ class TestPromotePawns(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,B,0,0")
+        chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
         chess_board.promote_pawn(BlackKnight())
         black_knight = chess_board.get_piece('A1')
@@ -1268,7 +1267,7 @@ class TestPromotePawns(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,B,0,0")
+        chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
         # should raise an exception for an invalid piece
         self.assertRaises(TypeError, chess_board.promote_pawn, BlackKing)
@@ -1291,7 +1290,7 @@ class TestPromotePawns(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,B,0,0")
+        chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
         # should raise an exception for an invalid piece
         self.assertRaises(TypeError, chess_board.promote_pawn, BlackPawn)
@@ -1314,7 +1313,7 @@ class TestPromotePawns(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,B,0,0")
+        chess_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
 
         # should raise an exception for an invalid piece
         self.assertRaises(IllegalMoveException, chess_board.promote_pawn, BlackKnight)
@@ -1337,7 +1336,7 @@ class TestPromotePawns(unittest.TestCase):
            A B C D E F G H
         """
 
-        chess_board = Board("_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜,B,0,0")
+        chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
 
         # should raise an exception for because the previous peice has not been promoted
@@ -1360,7 +1359,7 @@ class TestCastlingFunctions(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        castle_board = Board("♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜,W,0,0")
+        castle_board = Board(u"♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜", Color.WHITE)
         assert_that(castle_board._get_castle_moves('E1'), contains_inanyorder('C1', 'G1'))
         assert_that(castle_board._get_castle_moves('E8'), contains_inanyorder('C8', 'G8'))
 
@@ -1380,7 +1379,7 @@ class TestCastlingFunctions(unittest.TestCase):
            A B C D E F G H
 
         """
-        castle_board = Board("♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜,W,0,0")
+        castle_board = Board(u"♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜", Color.WHITE)
         white_king = castle_board.get_piece('E1')
         white_rook = castle_board.get_piece('A1')
         assert_that(white_king, is_(WhiteKing))
@@ -1391,7 +1390,7 @@ class TestCastlingFunctions(unittest.TestCase):
 
     def test_white_king_castle_right(self):
         """Test castling right for White King."""
-        castle_board = Board("♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜,W,0,0")
+        castle_board = Board(u"♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜", Color.WHITE)
 
         white_king = castle_board.get_piece('E1')
         white_rook = castle_board.get_piece('H1')
@@ -1416,7 +1415,7 @@ class TestCastlingFunctions(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        castle_board = Board("♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜,B,0,0")
+        castle_board = Board(u"♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜", Color.BLACK)
 
         black_king = castle_board.get_piece('E8')
         black_rook = castle_board.get_piece('A8')
@@ -1442,7 +1441,7 @@ class TestCastlingFunctions(unittest.TestCase):
            A B C D E F G H
 
         """
-        castle_board = Board("♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜,B,0,0")
+        castle_board = Board(u"♖___♔__♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜___♚__♜", Color.BLACK)
 
         black_king = castle_board.get_piece('E8')
         black_rook = castle_board.get_piece('H8')
@@ -1473,7 +1472,7 @@ class TestDirectionSearch(unittest.TestCase):
            A B C D E F G H
 
         """
-        rook_board = Board("♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-_♖______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        rook_board = Board(u"♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-_♖______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         from_ = 'B3'
         left = (-1, 0)
         right = (1, 0)
@@ -1926,7 +1925,7 @@ class TestPinnedBy(unittest.TestCase):
            A B C D E F G H
 
         """
-        pinned_board = Board("♖♘♗♕♔♗_♖-♙♙♙♙♘♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_,W,0,0")
+        pinned_board = Board(u"♖♘♗♕♔♗_♖-♙♙♙♙♘♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_", Color.WHITE)
         pinned_by = pinned_board._pinned('E2')
         assert_that(pinned_by, is_('E5'))
 
@@ -1947,7 +1946,7 @@ class TestPinnedBy(unittest.TestCase):
            A B C D E F G H
 
         """
-        pinned_board = Board("♜_♗♕♔♗♘♖-♙_♙_♙♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,B,0,0")
+        pinned_board = Board(u"♜_♗♕♔♗♘♖-♙_♙_♙♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
         pinned = pinned_board._pinned('C1')
         assert_that(pinned, is_(None))
 
@@ -1968,7 +1967,7 @@ class TestPinnedBy(unittest.TestCase):
            A B C D E F G H
 
         """
-        pinned_board = Board("♜_♗_♔♗♘♖-♙_♙_♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,B,0,0")
+        pinned_board = Board(u"♜_♗_♔♗♘♖-♙_♙_♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
         pinned = pinned_board._pinned('C1')
         assert_that(pinned, is_('A1'))
 
@@ -1989,7 +1988,7 @@ class TestPinnedBy(unittest.TestCase):
            A B C D E F G H
 
         """
-        pinned_board = Board("♜_♗_♔♗♘♖-♙_♙_♙♙♙♙-________-_______♝-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,B,0,0")
+        pinned_board = Board(u"♜_♗_♔♗♘♖-♙_♙_♙♙♙♙-________-_______♝-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
         pinned = pinned_board._pinned('F2')
         assert_that(pinned, is_('H4'))
 
@@ -2010,7 +2009,7 @@ class TestPinnedBy(unittest.TestCase):
            A B C D E F G H
 
         """
-        pinned_board = Board("♖♘♗♕♔♗_♖-♙♙♙♙♘♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_,W,0,0")
+        pinned_board = Board(u"♖♘♗♕♔♗_♖-♙♙♙♙♘♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_", Color.WHITE)
         knight_moves = pinned_board.get_moves('E2')
         assert_that(knight_moves, is_(set([])))
 
@@ -2031,7 +2030,7 @@ class TestPinnedBy(unittest.TestCase):
            A B C D E F G H
 
         """
-        pinned_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_,W,0,0")
+        pinned_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_", Color.WHITE)
         pawn_moves = pinned_board.get_moves('E2')
         assert_that(pawn_moves, contains_inanyorder('E3', 'E4'))
 
@@ -2051,7 +2050,7 @@ class TestPinnedBy(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        pinned_board = Board("♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-___♟_♟__-________-____♜___-________-♟♟♟_♟_♟♟-♜♞♝♛♚♝♞_,W,0,0")
+        pinned_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-___♟_♟__-________-____♜___-________-♟♟♟_♟_♟♟-♜♞♝♛♚♝♞_", Color.WHITE)
         pawn_moves = pinned_board.get_moves('E2')
         assert_that(pawn_moves, contains_inanyorder('E3', 'E4'))
 
@@ -2071,12 +2070,12 @@ class TestPinnedBy(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        pinned_board = Board("♖♘♗♕♔♗♘_-♙♙♙♙_♙♙♙-________-♖___m♙♟_♚-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,W,0,0")
+        pinned_board = Board(u"♖♘♗♕♔♗♘_-♙♙♙♙_♙♙♙-________-♖___m♙♟_♚-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.WHITE)
         pawn_moves = pinned_board.get_moves('F4')
         assert_that(pawn_moves, contains_inanyorder('F3'))
 
     def test_get_moves_pawn_pinned_by_rook_4(self):
-        """Test that a pawn pinned horizontally by a rook can still move forward normally but cannot attack
+        """Test that a pawn pinned horizontally by a rook cannot move
 
         The board looks like:
            ________________
@@ -2091,7 +2090,7 @@ class TestPinnedBy(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        pinned_board = Board("♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-________-♖____♟_♚-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜,W,0,0")
+        pinned_board = Board(u"♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-________-♖____♟_♚-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.BLACK)
         pawn_moves = pinned_board.get_moves('F4')
         assert_that(pawn_moves, is_(set([])))
 
@@ -2111,7 +2110,7 @@ class TestPinnedBy(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        pinned_board = Board("♖♘♗♕♔_♘♖-♙♙♙♙♙♙♙♙-________-________-_______♗-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        pinned_board = Board(u"♖♘♗♕♔_♘♖-♙♙♙♙♙♙♙♙-________-________-_______♗-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         pawn_moves = pinned_board.get_moves('F7')
         assert_that(pawn_moves, is_(set([])))
 
@@ -2131,7 +2130,7 @@ class TestPinnedBy(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        pinned_board = Board("♖♘♗♕♔_♘♖-♙♙♙♙♙♙♙♙-________-________-________-______♗_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        pinned_board = Board(u"♖♘♗♕♔_♘♖-♙♙♙♙♙♙♙♙-________-________-________-______♗_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         pawn_moves = pinned_board.get_moves('F7')
         assert_that(pawn_moves, contains_inanyorder('G6'))
 
@@ -2151,7 +2150,7 @@ class TestPinnedBy(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        pinned_board = Board("♖♘♗♕♔_♘♖-♙♙♙♙_♙♙♙-________-________-________-____♙_♗_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜,W,0,0")
+        pinned_board = Board(u"♖♘♗♕♔_♘♖-♙♙♙♙_♙♙♙-________-________-________-____♙_♗_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
         pawn_moves = pinned_board.get_moves('F7')
         assert_that(pawn_moves, contains_inanyorder('G6'))
 
