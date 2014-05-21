@@ -1,0 +1,42 @@
+[{
+    "model": "chess.ColorModel",
+    "pk": 1,
+    "fields": {
+        "color": "WHITE"
+    }
+},
+{
+    "model": "chess.ColorModel",
+    "pk": 2,
+    "fields": {
+        "color": "BLACK"
+    }
+},
+{
+    "model": "chess.WinnerModel",
+    "pk": 1,
+    "fields": {
+        "winner": "UNDECIDED"
+    }
+},
+{
+    "model": "chess.WinnerModel",
+    "pk": 2,
+    "fields": {
+        "winner": "DRAW"
+    }
+},
+{
+    "model": "chess.WinnerModel",
+    "pk": 3,
+    "fields": {
+        "winner": "WHITE"
+    }
+},
+{
+    "model": "chess.WinnerModel",
+    "pk": 4,
+    "fields": {
+        "winner": "BLACK"
+    }
+}]

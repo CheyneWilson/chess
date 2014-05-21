@@ -3,11 +3,10 @@
 # This can be easily done using any packaging tool (such as distribute).
 # See https://code.google.com/p/hamcrest/ for more details on hamcrest matchers
 from chess.board import Board, Color, King, Queen, Bishop, Knight, Rook, Pawn, BlackPawn, WhiteKing, WhiteRook, \
-    BlackKing, BlackQueen, BlackRook, BlackBishop, BlackKnight, IllegalMoveException, \
-    WhiteKnight, WhitePawn
+    BlackKing, BlackQueen, BlackRook, BlackBishop, BlackKnight, IllegalMoveException, WhiteKnight, WhitePawn, \
+    IllegalPromotionException, PromotePieceException, Winner, Move
 from hamcrest import is_, assert_that, equal_to, all_of, contains_inanyorder, instance_of
 import unittest
-import json
 
 
 # @unittest.skip("focusing on only one test")
@@ -178,7 +177,9 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_opening_black_pawn(self):
         """Check that a black pawn can move from it's starting position as either a single or double move."""
-        pawn_moves = self.board.get_moves('F7')
+        board = Board()
+        board.current_player = Color.BLACK  # Change color to black
+        pawn_moves = board.get_moves('F7')
         assert_that(pawn_moves, contains_inanyorder('F6', 'F5'))
 
     def test_get_moves_moved_white_pawn(self):
@@ -210,7 +211,7 @@ class TestBoardFunctions(unittest.TestCase):
               A B C D E F G H
 
         """
-        pawn_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙__-________-______♙♙-_______♟-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.WHITE)
+        pawn_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙__-________-______♙♙-_______♟-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         pawn_moves = pawn_board.get_moves('H5')
         assert_that(pawn_moves, contains_inanyorder('G4'))
 
@@ -258,8 +259,8 @@ class TestBoardFunctions(unittest.TestCase):
         assert_that(pawn_moves, contains_inanyorder('H1'))
 
         pawn_moves = pawn_board.move_piece('H2', 'H1')
-
-        self.assertRaises(IllegalMoveException, pawn_board.get_moves, 'H1')
+        assert_that(pawn_board.get_moves('H1'), is_(set([])))
+        # self.assertRaises(IllegalMoveException, pawn_board.get_moves, 'H1')
 
     # TODO:
     # Add more tests for the following
@@ -272,7 +273,9 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_black_knight_opening(self):
         """Check the opening moves of a black knight."""
-        knight_moves = self.board.get_moves('G8')
+        board = Board()
+        board.current_player = Color.BLACK  # Change player color for this test
+        knight_moves = board.get_moves('G8')
         assert_that(knight_moves, contains_inanyorder('F6', 'H6'))
 
     def test_get_moves_knight_fork_attack(self):
@@ -306,7 +309,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_black_bishop_free(self):
         """Test get_moves for a black bishop in the middle of the board."""
-        bishop_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-___♝____-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚_♞♜", Color.WHITE)
+        bishop_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-___♝____-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚_♞♜", Color.BLACK)
         bishop_moves = bishop_board.get_moves('D5')
         assert_that(bishop_moves, contains_inanyorder(
             'C6',  # (2, 7),  # forward left
@@ -405,7 +408,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_black_queen_free(self):
         """Check the moves of a black queen in the open."""
-        queen_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___♛____-________-________-♟♟♟♟♟♟♟♟-♜♞♝_♚♝♞♜", Color.WHITE)
+        queen_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___♛____-________-________-♟♟♟♟♟♟♟♟-♜♞♝_♚♝♞♜", Color.BLACK)
         queen_moves = queen_board.get_moves('D4')
         assert_that(queen_moves, contains_inanyorder(
             'D5', 'D6',  # forward
@@ -445,7 +448,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_get_moves_black_king_partially_free(self):
         """Check the moves of a black king in front of white pawns."""
-        king_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___m♚____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.WHITE)
+        king_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-___m♚____-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.BLACK)
         king_moves = king_board.get_moves('D4')
         assert_that(king_moves, contains_inanyorder(
             'D5',  # forward
@@ -457,7 +460,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_is_check_1(self):
         """Neither king starts off in check. Test for a fresh board."""
-        assert_that(self.board.is_check(), is_(False))
+        assert_that(self.board.is_check(Color.WHITE), is_(False))
 
     def test_is_check_2(self):
         """Test white king in check from two black pawns
@@ -476,7 +479,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
         check_board = Board(u"♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-______♔_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
-        assert_that(check_board.is_check(), is_(True))
+        assert_that(check_board.is_check(Color.WHITE), is_(True))
 
     def test_is_check_3(self):
         """Test black king in check from white knight
@@ -495,7 +498,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
         check_board = Board(u"♖♘♗♕♔♗♘_-♙♙♙♙♙♙♙♙-________-________-____♚__♖-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.BLACK)
-        assert_that(check_board.is_check(), is_(True))
+        assert_that(check_board.is_check(Color.BLACK), is_(True))
 
     def test_is_check_4(self):
         """Test black king in check from white queen horizontally
@@ -514,7 +517,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
         check_board = Board(u"♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-____♚__♕-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.BLACK)
-        assert_that(check_board.is_check(), is_(True))
+        assert_that(check_board.is_check(Color.BLACK), is_(True))
 
     def test_is_check_5(self):
         """Test black king in check from white queen vertically
@@ -533,7 +536,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
         check_board = Board(u"♖♘♗_♔♗♘♖-♙♙♙♙♙♙♙♙-____♕___-________-____♚___-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.BLACK)
-        assert_that(check_board.is_check(), is_(True))
+        assert_that(check_board.is_check(Color.BLACK), is_(True))
 
     def test_is_check_6(self):
         """Test white king in check from black knight
@@ -552,7 +555,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
         check_board = Board(u"♖♘♗♕_♗♘♖-♙♙♙♙♙♙♙♙-________-_♔______-________-__♞_____-♟♟♟♟♟♟♟♟-♜_♝♛♚♝♞♜", Color.WHITE)
-        assert_that(check_board.is_check(), is_(True))
+        assert_that(check_board.is_check(Color.WHITE), is_(True))
 
     def test_checkmate_1(self):
         """Test the '2 move' checkmate. King cannot move and no pieces can
@@ -672,7 +675,7 @@ class TestBoardFunctions(unittest.TestCase):
 
         # Check that we know the correct blocking squares
         # TODO: This should become it's own set of test cases
-        blockers, attacker = check_board._get_blocking_squares()
+        blockers, attacker = check_board._get_blocking_squares(Color.WHITE)
         assert_that(attacker, is_('H4'))
         assert_that(blockers, is_(set(['F2', 'G3'])))
 
@@ -689,7 +692,7 @@ class TestBoardFunctions(unittest.TestCase):
 
     def test_statemate_1(self):
         u"""At the start of a game there is no stalemate as each player has moves and enough pieces for checkmate."""
-        assert_that(self.board.is_stalemate(), is_(False))
+        assert_that(self.board.is_stalemate(Color.WHITE), is_(False))
 
     def test_statemate_2(self):
         """White player cannot move any piece.
@@ -706,7 +709,7 @@ class TestBoardFunctions(unittest.TestCase):
            A B C D E F G H
         """
         stale_board = Board(u"_♘♗___♔♖-_♙_♙___♙-♙♟♙♟_♛_♟-♟_♟_____-________-___♟____-_____♟♟_-♜♞♝_♚♝♞♜", Color.WHITE)
-        assert_that(stale_board.is_stalemate(), is_(True))
+        assert_that(stale_board.is_stalemate(Color.WHITE), is_(True))
 
     def test_stalemate_3(self):
         """If a player has only one bishop or knight they cannot checkmate
@@ -715,13 +718,13 @@ class TestBoardFunctions(unittest.TestCase):
          This tests for stalemate where neither player can achieve checkmate.
         """
         stale_board = Board(u"_♘____♔_-________-________-________-________-________-________-____♚___", Color.WHITE)
-        assert_that(stale_board.is_stalemate(), is_(True))
+        assert_that(stale_board.is_stalemate(Color.WHITE), is_(True))
 
     def test_stalemate_4(self):
         """If a player has a pawn, they can promote it. So it is not stalemate.
         """
         stale_board = Board(u"______♔_-♙_______-________-________-________-________-________-____♚___", Color.WHITE)
-        assert_that(stale_board.is_stalemate(), is_(False))
+        assert_that(stale_board.is_stalemate(Color.WHITE), is_(False))
 
     def test_board_repr_1(self):
         """Serialize a board, restore it and re-serialize it, it is the same as the original?"""
@@ -742,7 +745,8 @@ class TestBoardFunctions(unittest.TestCase):
         assert_that(board_.get_piece('A3'), is_(piece))
 
     def test_move_pawn_forward_2(self):
-        """Test whether a black pawn can move forward two spaces into an empty square.
+        """
+        Test whether a black pawn can move forward two spaces into an empty square.
         """
         board_ = Board()
 
@@ -761,7 +765,8 @@ class TestBoardFunctions(unittest.TestCase):
         assert_that(board_.get_piece('D7'), is_(None))
         assert_that(board_.get_piece('D5'), is_(black_pawn))
 
-        assert_that(board_.get_moves('D5'), contains_inanyorder('D4'))
+        # Check pawn can move foward, ignoring that it is not BLACK's turn
+        assert_that(board_.get_moves('D5', False), contains_inanyorder('D4'))
 
     def test_move_knight(self):
         """Test whether a knight can move in its 'L' shape
@@ -950,6 +955,7 @@ class TestDisplayMethods(unittest.TestCase):
         board = Board()
         board.display()
 
+    @unittest.skip("This display method is being removed from the controller")
     def test_display_json(self):
         u"""Simply tests that the method runs without raising an exception"""
         board = Board()
@@ -1002,7 +1008,7 @@ class TestSpecificScenarios(unittest.TestCase):
         # Checkmate with white queen
         chess_board.move_piece('F3', 'F7')
 
-        assert_that(chess_board.winner, is_(Color.WHITE))
+        assert_that(chess_board.winner, is_(Winner.WHITE))
         # print chess_board.display()
 
     def test_knight_can_capture_attacker(self):
@@ -1053,8 +1059,8 @@ class TestSpecificScenarios(unittest.TestCase):
         assert_that(knight_moves, is_(set(['E8', 'G8'])))
 
     def test_checkmate_stops_movement(self):
-        u""" White manually testing this testcase was discoved. It is checkmate, so the king should not be able to move
-
+        """
+        While manually testing this testcase was discoved. It is checkmate, so the king should not be able to move
            ________________
         8 |_|_|_|♖|_|_|♚|_|
         7 |♟|_|_|_|♖|_|_|_|
@@ -1069,13 +1075,6 @@ class TestSpecificScenarios(unittest.TestCase):
         """
         chess_board = Board(u"____♔_♘♖-♙♙♙___♙♙-__♘_____-__♟_____-_♟____♗_-________-♟___m♖___-___m♖__m♚_", Color.BLACK)
         checkmate = chess_board.is_checkmate(Color.BLACK)
-        # h8 = Square('H8')
-        # g8 = Square('G8')
-
-        # print chess_board._get_attackers(h8, Color.WHITE, ignore_king=True)
-        print chess_board._get_moves_and_attacks('G8')
-        # from_, direction, color, limit=None, ignore_king=False):
-
         assert_that(checkmate, is_(True))
 
     def test_blackbishop_can_move(self):
@@ -1113,8 +1112,8 @@ class TestSpecificScenarios(unittest.TestCase):
            A B C D E F G H
         """
 
-        # TODO: Encode last move into board repr below
         chess_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙_♙__♙-________-___♙♟_♙_-__♟__♙__-________-♟♟_♟_♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
+        chess_board.previous_move = Move('WP', 'D2', 'D4', True)
         chess_board.move_piece('E4', 'D3')
 
 
@@ -1173,7 +1172,7 @@ class TestPromotePawns(unittest.TestCase):
 
         chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
-        chess_board.promote_pawn(BlackQueen())
+        chess_board._promote_pawn(BlackQueen())
         black_queen = chess_board.get_piece('A1')
         assert_that(black_queen, instance_of(BlackQueen))
 
@@ -1197,7 +1196,7 @@ class TestPromotePawns(unittest.TestCase):
 
         chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
-        chess_board.promote_pawn(BlackRook())
+        chess_board._promote_pawn(BlackRook())
         black_rook = chess_board.get_piece('A1')
         assert_that(black_rook, instance_of(BlackRook))
 
@@ -1221,7 +1220,7 @@ class TestPromotePawns(unittest.TestCase):
 
         chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
-        chess_board.promote_pawn(BlackBishop())
+        chess_board._promote_pawn(BlackBishop())
         black_bishop = chess_board.get_piece('A1')
         assert_that(black_bishop, instance_of(BlackBishop))
 
@@ -1245,14 +1244,15 @@ class TestPromotePawns(unittest.TestCase):
 
         chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
-        chess_board.promote_pawn(BlackKnight())
+        chess_board._promote_pawn(BlackKnight())
         black_knight = chess_board.get_piece('A1')
         assert_that(black_knight, instance_of(BlackKnight))
 
     def test_promote_pawn_to_king(self):
-        """Tests the promotion of a pawn to a king. This is not allowed, so should raise TypeError
+        """
+        Tests the promotion of a pawn to a king. This is not allowed, so should raise an IllegalPromotionException
 
-           The board looks like the following:
+        The board looks like the following:
 
            ________________
         8 |♜|♞|♝|♛|♚|♝|♞|♜|
@@ -1270,12 +1270,12 @@ class TestPromotePawns(unittest.TestCase):
         chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
         # should raise an exception for an invalid piece
-        self.assertRaises(TypeError, chess_board.promote_pawn, BlackKing)
+        self.assertRaises(IllegalPromotionException, chess_board._promote_pawn, BlackKing)
 
     def test_promote_pawn_to_pawn(self):
-        """Tests the promotion of a pawn to a pawn. This is not allowed, so should raise TypeError
+        """Tests the promotion of a pawn to a pawn. This is not allowed, so should raise an IllegalPromotionException
 
-           The board looks like the following:
+        The board looks like the following:
 
            ________________
         8 |♜|♞|♝|♛|♚|♝|♞|♜|
@@ -1293,12 +1293,13 @@ class TestPromotePawns(unittest.TestCase):
         chess_board = Board(u"_♘♗♕♔♗♘♖-♟♙♙♙♙♙♙♙-________-________-________-________-_♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
         chess_board.move_piece('A2', 'A1')
         # should raise an exception for an invalid piece
-        self.assertRaises(TypeError, chess_board.promote_pawn, BlackPawn)
+        self.assertRaises(IllegalPromotionException, chess_board._promote_pawn, BlackPawn)
 
     def test_promote_pawn_in_wrong_location(self):
-        """Tests the promotion of a pawn to a in the wron location. This is not allowed, so should raise TypeError
+        """
+        Tests the promotion of a pawn when none present in end zone. This should raise an IllegalPromotionException
 
-           The board looks like the following:
+        The board looks like the following:
 
            ________________
         8 |♜|♞|♝|♛|♚|♝|♞|♜|
@@ -1316,12 +1317,13 @@ class TestPromotePawns(unittest.TestCase):
         chess_board = Board(u"♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟_-♜♞♝♛♚♝♞♜", Color.BLACK)
 
         # should raise an exception for an invalid piece
-        self.assertRaises(IllegalMoveException, chess_board.promote_pawn, BlackKnight)
+        self.assertRaises(IllegalPromotionException, chess_board._promote_pawn, BlackKnight)
 
     def test_move_before_promote(self):
-        """Tests that promotion is required before moving to the next move.
+        """
+        Tests that promotion is required before moving to the next move.
 
-           The board looks like the following:
+        The board looks like the following:
 
            ________________
         8 |♜|♞|♝|♛|♚|♝|♞|♜|
@@ -1340,7 +1342,7 @@ class TestPromotePawns(unittest.TestCase):
         chess_board.move_piece('A2', 'A1')
 
         # should raise an exception for because the previous peice has not been promoted
-        self.assertRaises(IllegalMoveException, chess_board.move_piece, 'B2', 'B3')
+        self.assertRaises(PromotePieceException, chess_board.move_piece, 'B2', 'B3')
 
 
 class TestCastlingFunctions(unittest.TestCase):
@@ -1590,323 +1592,6 @@ class TestDirectionSearch(unittest.TestCase):
         assert_that(attacks, is_(set(['C7', 'E7'])))
 
 
-@unittest.skip("focusing")
-class TestDisplayFunctions(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    @unittest.skip("Format not finalized.")
-    def test_board_display_json(self):
-        """This function tests that the display method produces valid JSON of a consistent format."""
-
-        board = Board()
-
-        expected_json = json.loads(u"""{
-            "current_player":"white",
-            "board": [
-                {
-                    "x": 1,
-                    "y": 1,
-                    "piece": "white_rook",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 2,
-                    "y": 1,
-                    "piece": "white_knight",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 3,
-                    "y": 1,
-                    "piece": "white_bishop",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 4,
-                    "y": 1,
-                    "piece": "white_queen",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 5,
-                    "y": 1,
-                    "piece": "white_king",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 6,
-                    "y": 1,
-                    "piece": "white_bishop",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 7,
-                    "y": 1,
-                    "piece": "white_knight",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 8,
-                    "y": 1,
-                    "piece": "white_rook",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                                {
-                    "x": 1,
-                    "y": 2,
-                    "piece": "white_pawn",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 2,
-                    "y": 2,
-                    "piece": "white_pawn",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 3,
-                    "y": 2,
-                    "piece": "white_pawn",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 4,
-                    "y": 2,
-                    "piece": "white_pawn",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 5,
-                    "y": 2,
-                    "piece": "white_pawn",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 6,
-                    "y": 2,
-                    "piece": "white_pawn",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 7,
-                    "y": 2,
-                    "piece": "white_pawn",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 8,
-                    "y": 2,
-                    "piece": "white_pawn",
-                    "color": "white",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 1,
-                    "y": 8,
-                    "piece": "black_rook",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 2,
-                    "y": 8,
-                    "piece": "black_knight",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 3,
-                    "y": 8,
-                    "piece": "black_bishop",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 4,
-                    "y": 8,
-                    "piece": "black_queen",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 5,
-                    "y": 8,
-                    "piece": "black_king",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 6,
-                    "y": 8,
-                    "piece": "black_bishop",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 7,
-                    "y": 8,
-                    "piece": "black_knight",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 8,
-                    "y": 8,
-                    "piece": "black_rook",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                                {
-                    "x": 1,
-                    "y": 7,
-                    "piece": "black_pawn",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 2,
-                    "y": 7,
-                    "piece": "black_pawn",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 3,
-                    "y": 7,
-                    "piece": "black_pawn",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 4,
-                    "y": 7,
-                    "piece": "black_pawn",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 5,
-                    "y": 7,
-                    "piece": "black_pawn",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 6,
-                    "y": 7,
-                    "piece": "black_pawn",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 7,
-                    "y": 7,
-                    "piece": "black_pawn",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                },
-                {
-                    "x": 8,
-                    "y": 7,
-                    "piece": "black_pawn",
-                    "color": "black",
-                    "moved": false,
-                    "moves": [],
-                    "attacks": []
-                }
-            ],
-            "previous_moves": [],
-            "status": "IN_PROGRESS"
-        }""")
-
-        result_json = json.loads(board.json())
-
-        assert_that(result_json[u'current_player'], equal_to(expected_json[u'current_player']))
-        assert_that(result_json[u'previous_moves'], equal_to(expected_json[u'previous_moves']))
-        assert_that(result_json[u'status'], equal_to(expected_json[u'status']))
-
-        # Check that the board contains the same pieces
-        assert_that(result_json[u'board'], contains_inanyorder(*expected_json[u'board']))
-
-
 class TestPinnedBy(unittest.TestCase):
     def test_pinned_by_rook(self):
         u"""Check that a pinned knight cannot move (as there is no way for it to still be blocking check if it moves)
@@ -1929,6 +1614,49 @@ class TestPinnedBy(unittest.TestCase):
         pinned_by = pinned_board._pinned('E2')
         assert_that(pinned_by, is_('E5'))
 
+    def test_pinned_by_rook_2(self):
+        u"""The bishop should be pinned by the rook in A1.
+
+        The board looks like:
+           ________________
+        8 |♜|♞|♝|♛|♚|♝|♞|♜|
+        7 |♟|♟|♟|♟|♟|♟|♟|♟|
+        6 |_|_|_|_|_|_|_|_|
+        5 |_|_|_|_|_|_|_|_|
+        4 |_|_|_|_|_|_|_|_|
+        3 |_|_|_|_|_|_|_|_|
+        2 |♙|_|♙|_|♙|♙|♙|♙|
+        1 |♜|_|♗|_|♔|♗|♘|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           A B C D E F G H
+
+        """
+        pinned_board = Board(u"♜_♗_♔♗♘♖-♙_♙_♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
+        pinned = pinned_board._pinned('C1')
+        assert_that(pinned, is_('A1'))
+
+    def test_pinned_by_rook_3(self):
+        u"""
+        Check that a pinned knight can move as it is not pinned by pieces of the same color
+
+        The board looks like:
+           ________________
+        8 |♜|♞|♝|♛|♚|♝|♞|_|
+        7 |♟|♟|♟|♟|♟|♟|♟|♟|
+        6 |_|_|_|_|_|_|_|_|
+        5 |_|_|_|_|♖|_|_|_|
+        4 |_|_|_|_|_|_|_|_|
+        3 |_|_|_|_|_|_|_|_|
+        2 |♙|♙|♙|♙|♘|♙|♙|♙|
+        1 |♖|♘|♗|♕|♔|♗|_|♖|
+           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+           A B C D E F G H
+
+        """
+        pinned_board = Board(u"♖♘♗♕♔♗_♖-♙♙♙♙♘♙♙♙-________-________-____♖___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞_", Color.WHITE)
+        pinned_by = pinned_board._pinned('E2')
+        assert_that(pinned_by, is_(None))
+
     def test_not_pinned(self):
         u"""The bishop should not be pinned because the queen is also protecting the king
 
@@ -1949,27 +1677,6 @@ class TestPinnedBy(unittest.TestCase):
         pinned_board = Board(u"♜_♗♕♔♗♘♖-♙_♙_♙♙♙♙-________-________-____♜___-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
         pinned = pinned_board._pinned('C1')
         assert_that(pinned, is_(None))
-
-    def test_pinned_by_rook_2(self):
-        u"""The bishop should be pinned by the rook in a1.
-
-        The board looks like:
-           ________________
-        8 |♜|♞|♝|♛|♚|♝|♞|♜|
-        7 |♟|♟|♟|♟|♟|♟|♟|♟|
-        6 |_|_|_|_|_|_|_|_|
-        5 |_|_|_|_|_|_|_|_|
-        4 |_|_|_|_|_|_|_|_|
-        3 |_|_|_|_|_|_|_|_|
-        2 |♙|_|♙|_|♙|♙|♙|♙|
-        1 |♜|_|♗|_|♔|♗|♘|♖|
-           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
-           A B C D E F G H
-
-        """
-        pinned_board = Board(u"♜_♗_♔♗♘♖-♙_♙_♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
-        pinned = pinned_board._pinned('C1')
-        assert_that(pinned, is_('A1'))
 
     def test_pinned_by_bishop(self):
         u"""The pawn should be pinned by the bishop at h4
@@ -2070,7 +1777,7 @@ class TestPinnedBy(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        pinned_board = Board(u"♖♘♗♕♔♗♘_-♙♙♙♙_♙♙♙-________-♖___m♙♟_♚-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.WHITE)
+        pinned_board = Board(u"♖♘♗♕♔♗♘_-♙♙♙♙_♙♙♙-________-♖___m♙♟_♚-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛_♝♞♜", Color.BLACK)
         pawn_moves = pinned_board.get_moves('F4')
         assert_that(pawn_moves, contains_inanyorder('F3'))
 
@@ -2130,7 +1837,7 @@ class TestPinnedBy(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        pinned_board = Board(u"♖♘♗♕♔_♘♖-♙♙♙♙♙♙♙♙-________-________-________-______♗_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
+        pinned_board = Board(u"♖♘♗♕♔_♘♖-♙♙♙♙♙♙♙♙-________-________-________-______♗_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
         pawn_moves = pinned_board.get_moves('F7')
         assert_that(pawn_moves, contains_inanyorder('G6'))
 
@@ -2150,7 +1857,7 @@ class TestPinnedBy(unittest.TestCase):
            ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
            A B C D E F G H
         """
-        pinned_board = Board(u"♖♘♗♕♔_♘♖-♙♙♙♙_♙♙♙-________-________-________-____♙_♗_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.WHITE)
+        pinned_board = Board(u"♖♘♗♕♔_♘♖-♙♙♙♙_♙♙♙-________-________-________-____♙_♗_-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜", Color.BLACK)
         pawn_moves = pinned_board.get_moves('F7')
         assert_that(pawn_moves, contains_inanyorder('G6'))
 

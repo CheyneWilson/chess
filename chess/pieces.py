@@ -1,4 +1,4 @@
-from color import Color
+from chess.color import Color
 
 
 class InvlaidPieceException(Exception):
@@ -54,7 +54,7 @@ class King(object):
     def __new__(cls, *args, **kwargs):
         if cls is King:
             raise TypeError(u"King class may not be instantiated.")
-        return object.__new__(cls, *args, **kwargs)
+        return object.__new__(cls)
 
 
 class WhiteKing(King, Piece):
@@ -123,7 +123,7 @@ class Rook(object):
     def __new__(cls, *args, **kwargs):
         if cls is Rook:
             raise TypeError(u"Rook class may not be instantiated.")
-        return object.__new__(cls, *args, **kwargs)
+        return object.__new__(cls)
 
 
 class WhiteRook(Rook, Piece):

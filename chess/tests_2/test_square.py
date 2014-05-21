@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import unittest
 from hamcrest import is_, assert_that, equal_to, all_of, contains_inanyorder, instance_of
 from chess.square import Square, InvalidSquareException

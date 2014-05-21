@@ -29,6 +29,14 @@ class Square(object):
         self.y = y
         self.piece = piece
 
+    @property
+    def row(self):
+        return self.y
+
+    @property
+    def column(self):
+        return chr(ord(u'A') + self.x - 1)
+
     @staticmethod
     def _nameFromCoords(x, y):
         u"""Maps x,y coordinates like A4 to x,y coordinates like (1, 4).

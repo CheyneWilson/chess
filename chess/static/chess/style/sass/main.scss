@@ -1,0 +1,172 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+
+.sidebar {
+    background-color: #FF0000;
+    float: left;
+    width: 20%;
+    padding: 10px;
+    -moz-box-sizing: border-box;
+}
+
+.piece {
+    max-width: 100%;
+    width: 100%;
+}
+
+.square {
+    display: table-cell;
+    border: 1px solid grey;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+.board-row {
+    display: table-row;
+    line-height: 0;
+}
+
+.board-row:nth-child(2n) .square:nth-child(2n+1) {
+    background-color: pink;
+}
+.board-row:nth-child(2n+1) .square:nth-child(2n) {
+    background-color: pink;
+}
+
+.wrapper {
+    margin: 80px 0 30px;
+}
+
+.red {
+    background-color: red !important;
+    cursor: pointer;
+    &:hover {
+        opacity: 0.5;
+    }
+}
+
+.yellow {
+    background-color: yellow !important;
+    cursor: pointer;
+    &:hover {
+        opacity: 0.5;
+    }
+}
+
+.blue {
+    background-color: blue !important;
+    cursor: pointer;
+    &:hover {
+        opacity: 0.5;
+    }
+}
+
+.occupied {
+    cursor: pointer;
+    &:hover {
+        opacity: 0.5;
+    }
+}
+
+.outer {
+    display: table;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+.middle {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.inner {
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+    padding-top: 1px;
+    h2 {
+        margin: 9px 0 10px;
+        text-align: center;
+    }
+}
+
+.overlay {
+    background-color: #565656;
+    bottom: 0;
+    color: #FFFFFF;
+    display: table-cell;
+    left: 15px;
+    opacity: 0.8;
+    position: absolute;
+    right: 15px;
+    text-align: center;
+    text-shadow: 2px 2px #000000;
+    top: 0;
+
+    h1 {
+        margin-top: 24%;
+    }
+}
+
+.promote {
+    margin: 20px 0 auto;
+    text-align: center;
+    .square {
+        display: inline-block;
+    }
+}
+
+.new-game-options {
+    .modal-body{
+        button {
+            display: block;
+            margin: 0 auto;
+        }
+
+    }
+    &.modal.center .modal-dialog {
+        max-width: 300px;
+        min-width: 300px;
+    }
+}
+
+.game-option {
+    line-height: 1.7;
+    input {
+        margin-top: -1px;
+        vertical-align: middle;
+    }
+    label {
+        float: left;
+        font-size: 20px;
+    }
+    button {
+        float: right;
+    }
+    &:after {
+        clear: both;
+        content: " ";
+        display: table;
+    }
+}
+
+
+.btn-neutral {
+    background-color: #8B8BEE;
+    border-color: #7C7CDF;
+    color: #FFFFFF;
+    &:hover {
+        color: #FFFFFF;
+        background-color: #7C7CDF;
+    }
+}
+
+.navbar-right .btn {
+    margin: 0 5px;
+}
+

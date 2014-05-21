@@ -1,0 +1,40 @@
+[{
+    "model": "auth.user",
+    "pk": 1000001,
+    "fields": {
+        "first_name": "Adam",
+        "last_name": "test",
+        "username": "adam",
+        "password": "pbkdf2_sha256$10000$hNQK98kdzVVq$zoB8Xz1WC73ENLLjZRpYHImYbD/cCAMkD8a2n3ik/oU="
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 1000002,
+    "fields": {
+        "first_name": "Bob",
+        "last_name": "test",
+        "username": "bob",
+        "password": "pbkdf2_sha256$10000$hNQK98kdzVVq$zoB8Xz1WC73ENLLjZRpYHImYbD/cCAMkD8a2n3ik/oU="
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 1000003,
+    "fields": {
+        "first_name": "Charles",
+        "last_name": "test",
+        "username": "charles",
+        "password": "pbkdf2_sha256$10000$hNQK98kdzVVq$zoB8Xz1WC73ENLLjZRpYHImYbD/cCAMkD8a2n3ik/oU="
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 1000004,
+    "fields": {
+        "first_name": "David",
+        "last_name": "test",
+        "username": "david",
+        "password": "pbkdf2_sha256$10000$hNQK98kdzVVq$zoB8Xz1WC73ENLLjZRpYHImYbD/cCAMkD8a2n3ik/oU="
+    }
+}]

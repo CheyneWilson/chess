@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en" > <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang="en" > <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap core CSS -->
+<!--
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//mgcrea.github.io/angular-strap/static/styles/angular-motion.css">
+    <link rel="stylesheet" href="//mgcrea.github.io/angular-strap/static/styles/bootstrap-additions.css">
+    <link rel="stylesheet" href="//mgcrea.github.io/angular-strap/static/styles/libraries.min.css">
+    <link rel="stylesheet" href="//mgcrea.github.io/angular-strap/static/styles/main.min.css">
+-->
+    <link rel="stylesheet" href=" {%static 'chess/contrib/bootstrap.min.css' %}">
+    <link rel="stylesheet" href=" {%static 'chess/contrib/font-awesome.min.css' %}">
+    <link rel="stylesheet" href=" {%static 'chess/contrib/angular-motion.css' %}">
+    <link rel="stylesheet" href=" {%static 'chess/contrib/bootstrap-additions.css' %}">
+    <link rel="stylesheet" href=" {%static 'chess/contrib/libraries.min.css' %}">
+    <link rel="stylesheet" href=" {%static 'chess/contrib/main.min.css' %}">
+
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <link rel="stylesheet" type="text/css" href="{%static 'chess/style/main.css' %}">
+
+</head>
+
+    <body ng-app="chess">
+        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Project name</a>
+                </div>
+
+                <div ng-controller="Login" class="navbar-collapse collapse">
+                    {% if user.is_authenticated %}
+                    <div class="navbar-right navbar-form">
+                        <button type="button" class="btn btn-success" data-template="{% static 'chess/modal/newgame.html' %}"
+                             bs-modal="modal" data-placement="center" data-container="#new-game-modal">
+                            Start New Game
+                        </button>
+                        <button ng-controller="ChangeGame" type="button" class="btn btn-neutral" ng-model="selectedIcon" data-placeholder="Load Game"
+                            ng-options="icon.value as icon.label for icon in icons" bs-select >
+                            Action <span class="caret"></span>
+                        </button>
+                        <button type="button"  class="btn btn-danger" ng-click="logout()">Sign out</button>
+                    </div>
+                    {% else %}
+                    <form class="navbar-form navbar-right" ng-submit="login()">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input ng-model="formData.username" type="text" placeholder="Username" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <input ng-model="formData.password" type="password" placeholder="Password" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success">Sign in</button>
+                            <label style="color: white; display: inline-block; padding: 0px 3px 0 2px;">OR</label>
+                            <a href="register" class="btn btn-warning">Register</a>
+                        </div>
+                    </form>
+                    {% endif %}
+
+                </div><!--/.navbar-collapse -->
+            </div>
+        </div>
+
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+        <!-- Add your site or application content here -->
+
+        <div class="wrapper">
+            <!-- Location in html the new game modal is injected -->
+            <div id="new-game-modal"> </div>
+
+            <div class="container">
+                <div class="row" ng-controller="DrawBoard">
+                    <div class="col-lg-8">
+                        <div class="board">
+
+                            <!--
+                            <div class="board-row" ng-repeat="row in board">
+                                <span ng-repeat="column in row track by $index" class="square" ng-class="{yellow: column.highlight, red: column.attack, blue: column.selected, occupied: column.active}">
+                                    <img class="piece" ng-src="/img/{{column.piece}}.png" ng-click="highlightMoves($index, $parent.$index)"/>
+
+                                </span>
+                                <br />
+                            </div>
+                            -->
+                            {% verbatim %}
+                            <div class="board-row" ng-repeat="row in [1,2,3,4,5,6,7,8]">
+                                <span ng-repeat="column in ['A','B','C','D','E','F','G','H']" class="square"
+                                        ng-class="highlight[column + row]">
+
+                                    <img class="piece" ng-src="/static/chess/img/{{ board[column + row].piece || 'empty'}}.png"
+                                        ng-click="selectPiece(column + row)" />
+                                </span>
+                                <br />
+                            </div>
+                            {% endverbatim %}
+                            <div class="empty" ng-show="!board">
+                                <h1>Welcome to my chess game</h1>
+                                <p>Create or load a new game from the left hand panel. Enjoy!</p>
+                                <p>(The login functionality isn't enabled yet, but it will come)</p>
+                            </div>
+                            <div class="promote" ng-show="promotablePieces">
+                                <h2>Choose piece to promote pawn to:</h2>
+                                <span ng-repeat="piece in promotablePieces" class="square occupied">
+                                    <img class="piece" ng-src="/img/{{piece}}.png" ng-click="promote(piece)" />
+                                </span>
+                            </div>
+
+                            <div class="overlay" ng-show="showGameOver()">
+                                <h1>Game Over</h1>
+                                {% verbatim %}
+                                <h3>{{winner}} player wins!!</h3>
+                                {% endverbatim %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <h2>Development Panel</h2>
+
+                        <hr>
+                        <div>
+
+                            <label>&nbsp; &nbsp;</label>
+                        </div>
+                        <hr>
+                        {% verbatim %}
+                        <label>Game Id:&nbsp;</label><span>{{gameId}}</span><br />
+                        <label>Current turn:&nbsp;</label><span>{{currentPlayer}}</span><br />
+                        <label>Code:&nbsp;</label><span>{{code}}</span><br />
+                        <label>Moves taken:&nbsp;</label>
+                        <ol>
+                            <li ng-repeat="move in moves" >{{move.value}}</li>
+                        </ol>
+                        {% endverbatim %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <!-- <script src="{% static "chess/contrib/require.js"  %}"  data-main="{% static "chess/js/main.js" %}" ></script> -->
+
+<!--
+    <script src="//code.angularjs.org/1.2.13/angular.min.js"></script>
+    <script src="//code.angularjs.org/1.2.13/angular-animate.min.js"></script>
+    <script src="//code.angularjs.org/1.2.13/angular-sanitize.min.js"></script>
+    <script src="//mgcrea.github.io/angular-strap/dist/angular-strap.js" ></script>
+    <script type="text/javascript">
+    <script src="//mgcrea.github.io/angular-strap/dist/angular-strap.tpl.js" ></script>
+-->
+
+    <script type="text/javascript">
+    {% if user.is_authenticated %}
+        var _USERNAME = '{{ user.username }}';
+    {% else %}
+        var _USERNAME = null;
+    {% endif %}
+    </script>
+
+
+
+    <!-- <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script> -->
+    <script type="text/javascript" src="{% static 'chess/contrib/angular.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'chess/contrib/angular-animate.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'chess/contrib/angular-sanitize.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'chess/contrib/angular-strap.js' %}"></script>
+    <script type="text/javascript" src="{% static 'chess/contrib/angular-strap.tpl.js' %}"></script>
+
+    <script type="text/javascript" src="{% static 'chess/js/chessApp.js' %}"></script>
+
+</body>
+</html>

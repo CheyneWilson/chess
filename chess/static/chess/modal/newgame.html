@@ -1,0 +1,45 @@
+<div ng-controller="NewGameOptions"
+        class="new-game-options modal ng-scope top am-fade-and-slide-top" tabindex="-1" role="dialog" style="display: block;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="$hide()">×</button>
+                <h4 class="modal-title">Start New Game</h4>
+            </div>
+            <form ng-submit="createGame()">
+                <div class="modal-body">
+                    <div class="game-option">
+                        <label for="hotseat" data-title="Play against another person on the same computer.">
+                            <input name="baar" value="hotseat" id="hotseat" type="radio" ng-model="gameMode"></input>
+                            Hot Seat
+                        </label>
+                    </div>
+                    <div class="game-option">
+                        <label for="challenge" data-title="Play against another person over the internet.">
+                            <input name="baar" value="challenge" id="challenge" type="radio" ng-model="gameMode"></input>
+                            Challenge
+                        </label>
+                        <button type="button" class="btn btn-default" ng-model="selectedPlayer" data-placeholder="Choose player"
+                                ng-options="player.value as player.label for player in players" bs-select ng-click="selectChallenge()">
+                                Action <span class="caret"></span>
+                        </button>
+                    </div>
+                    <div class="game-option">
+                        <label for="ai" data-title="Play against a computer opponent.">
+                            <input name="baar" value="ai" id="ai" type="radio" ng-model="gameMode"></input>
+                            Play vs. AI
+                        </label>
+                        <button type="button" class="btn btn-default" ng-model="selectedAgents" data-placeholder="Choose Agent"
+                                ng-options="agent.value as agent.label for agent in agents" bs-select ng-click="selectAi()" >
+                                Action <span class="caret"></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" ng-click="$hide()">Cancel</button>
+                    <button type="submit" class="btn btn-success" >Start Game</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

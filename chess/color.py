@@ -12,7 +12,7 @@ class Color(Enum):
             return Color.BLACK
         elif code == 'W':
             return Color.WHITE
-        raise ValueError("Invalid color code '{0}.".format(code))
+        raise Color.InvalidColorException("Invalid color code '{0}'.".format(code))
 
     def inverse(self):
         if self is Color.BLACK:
@@ -28,3 +28,9 @@ class Color(Enum):
         elif self == Color.WHITE:
             return 'W'
         assert(False, "Should not be able to end up here")
+
+    class InvalidColorException(Exception):
+        """
+        This is raised when a color value that is not BLACK or WHITE is used.
+        """
+        pass
