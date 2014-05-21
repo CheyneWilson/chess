@@ -68,13 +68,12 @@ angular.module("chess").controller("NewGameOptions", ["$rootScope", "$scope",  "
         var reloadActivePlayers = function() {
             myService.listActivePlayers().then(function(data) {
                 $scope.players = myService.activePlayers;
-                // $scope.players = data.players;
             });
         };
 
         var reloadAgents = function() {
             myService.listAgents().then(function(data) {
-                $scope.agents = data.agents;
+                $scope.agents = myService.agents;
             });
         };
 
@@ -193,46 +192,17 @@ angular.module('chess').factory('myService', ["$http", "$q",
         var BASE_URL = '/chess/'
         var USER_URL = '/chess/user/' + _USERNAME + '/';
 
-        var restCall2 = function(url, method){
-            // TODO: Take in the method
-            var deferred = $q.defer();
-            var promise = deferred.promise;
-            var config = {
-                "xsrfHeaderName": "X-CSRFToken",
-                "xsrfCookieName": "csrftoken"
-            }
-
-            $http.get(url, {}, config).success(function(data, status, headers, config) {
-                deferred.resolve(data);
-            }).error(function(data, status, headers, config) {
-                deferred.reject("An error occured retriving moves");
-            });
-            return deferred.promise;
-        };
-
         return {
             hotseat: function() {
                 var thisService = this;
                 var url = USER_URL + 'game/'
-                // var deferred = $q.defer();
-                // var promise = deferred.promise;
-                // var config = {
-                //     "xsrfHeaderName": "X-CSRFToken",
-                //     "xsrfCookieName": "csrftoken"
-                // }
 
-                // $http.post(url, {}, config).success(function(data, status, headers, config) {
-                //     deferred.resolve(data);
-                // }).error(function(data, status, headers, config) {
-                //     deferred.reject("An error occured while fetching items");
-                // });
-                var promise = restCall2(url, 'post');
+                var promise = restCall2($q, $http, url, "POST");
                 promise.then(function(data) {
                     thisService.gameId = data.id;
                     thisService.winner = data.winner;
                     thisService.currentPlayer = data.active_player;
-            // $scope.promotablePieces = thisService.promotablePieces;
-
+                    // $scope.promotablePieces = thisService.promotablePieces;
                     thisService.code = data.board_code;
                     thisService.board = data.board;
                 });
@@ -241,23 +211,13 @@ angular.module('chess').factory('myService', ["$http", "$q",
             movePiece: function(gameId, from, to) {
                 var thisService = this;
                 var url = USER_URL + 'game/' + gameId + '/move/' + from + '/' + to;
-                var deferred = $q.defer();
-                var promise = deferred.promise;
-                var config = {
-                    "xsrfHeaderName": "X-CSRFToken",
-                    "xsrfCookieName": "csrftoken"
-                }
-
-                $http.post(url, {}, config).success(function(data, status, headers, config) {
-                    deferred.resolve(data);
-                }).error(function(data, status, headers, config) {
-                    deferred.reject("An error occured retriving board");
-                });
+                var promise = restCall2($q, $http, url, "POST");
 
                 promise.then(function(data) {
                     thisService.board = data.board;
                     thisService.currentPlayer = data.active_player;
                     thisService.gameId = data.id;
+                    thisService.code = data.board_code;
                     thisService.winner = data.winner;
                 });
                 return promise;
@@ -265,7 +225,7 @@ angular.module('chess').factory('myService', ["$http", "$q",
             listMoves: function(gameId) {
                 var thisService = this;
                 var url = USER_URL + 'game/' + gameId + '/previous/'
-                var promise = restCall2(url, 'get');
+                var promise = restCall2($q, $http, url);
 
                 promise.then(function(data) {
                     thisService.previousMoves = data;
@@ -275,52 +235,35 @@ angular.module('chess').factory('myService', ["$http", "$q",
             loadGame: function(gameId) {
                 var thisService = this;
                 var url = USER_URL + 'game/' + gameId;
-                // var deferred = $q.defer();
-                // var promise = deferred.promise;
-                // var config = {
-                //     "xsrfHeaderName": "X-CSRFToken",
-                //     "xsrfCookieName": "csrftoken"
-                // }
+                var promise = restCall2($q, $http, url);
 
-                // $http.get(url, {}, config).success(function(data, status, headers, config) {
-                //     deferred.resolve(data);
-                // }).error(function(data, status, headers, config) {
-                //     deferred.reject("An error occured while fetching items");
-                // });
-                var promise = restCall2(url, 'get');
                 promise.then(function(data) {
                     thisService.board = data.board;
                     thisService.currentPlayer = data.active_player;
                     thisService.gameId = data.id;
-                    // thisService.code = data.board_code;
+                    thisService.code = data.board_code;
                     thisService.winner = data.winner;
                 });
                 return promise;
             },
             listGames: function() {
                 var url = USER_URL + 'game/';
-                var deferred = $q.defer();
                 var thisService = this;
-                $http.get(url).success(function(data, status, headers, config) {
+                var promise = restCall2($q, $http, url);
+
+                promise.then(function(data) {
                     var allGames = [];
                     // TODO: Move this formatting server side instead?
-                    // JSON data is a bit heavy
                     for (var i = 0; i < data.length; i++) {
                         allGames.push({
                             "value": "" + data[i].id,
                             "label": "Game " + data[i].id
                         });
                     }
-                    deferred.resolve(allGames);
-                }).error(function(data, status, headers, config) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    deferred.reject("An error occured while fetching items");
+                    thisService.allGames = allGames
                 });
-                deferred.promise.then(function(allGames) {
-                    thisService.allGames = allGames;
-                });
-                return deferred.promise;
+
+                return promise;
             },
             promote: function(piece) {
                 var thisService = this;
@@ -335,48 +278,23 @@ angular.module('chess').factory('myService', ["$http", "$q",
             },
             login: function(username, password){
                 var url = BASE_URL + 'login/';
-                var deferred = $q.defer();
-
-                var config = {
-                    "xsrfHeaderName": "X-CSRFToken",
-                    "xsrfCookieName": "csrftoken"
-                }
-
                 var data = {
                     "username": username,
                     "password": password
                 };
+                var promise = restCall2($q, $http, url, "POST", data);
 
-                $http.post(url, data, config).success(function(data, status, headers, config) {
-                    deferred.resolve();
-                }).error(function(data, status, headers, config) {
-                    deferred.reject("An error occured while logging in.");
-                });
-                return deferred.promise;
+                return promise;
             },
             logout: function(){
-                var url = BASE_URL + 'login/';
-                var deferred = $q.defer();
+                var url = BASE_URL + 'logout/';
+                var promise = restCall2($q, $http, url, "POST");
 
-                var config = {
-                    "xsrfHeaderName": "X-CSRFToken",
-                    "xsrfCookieName": "csrftoken"
-                }
-
-                var data = {
-                    "logout": true
-                };
-
-                $http.post(url, data, config).success(function(data, status, headers, config) {
-                    deferred.resolve();
-                }).error(function(data, status, headers, config) {
-                    deferred.reject("An error occured while logging out.");
-                });
-                return deferred.promise;
+                return promise;
             },
             listActivePlayers: function(){
                 var url = USER_URL + 'players/';
-                var promise = restCall2(url, 'get');
+                var promise = restCall2($q, $http, url);
                 var thisService = this;
 
                 promise.then(function(data) {
@@ -390,36 +308,14 @@ angular.module('chess').factory('myService', ["$http", "$q",
                     thisService.activePlayers = players;
                 });
 
-
-                // var deferred = $q.defer();
-                // var config = {
-                //     "xsrfHeaderName": "X-CSRFToken",
-                //     "xsrfCookieName": "csrftoken"
-                // }
-
-                // $http.get(url, {}, config).success(function(data, status, headers, config) {
-                //     var players = [];
-                //     for (var i = 0; i < data.length; i++) {
-                //         players.push({
-                //             "value": "" + data[i],
-                //             "label": "" + data[i]
-                //         });
-                //     }
-                //     deferred.resolve({"players": players});
-                // }).error(function(data, status, headers, config) {
-                //     deferred.reject("An error occured while retriving active players.");
-                // });
                 return promise;
             },
             listAgents: function(){
                 var url = USER_URL + 'agents/';
-                var deferred = $q.defer();
-                var config = {
-                    "xsrfHeaderName": "X-CSRFToken",
-                    "xsrfCookieName": "csrftoken"
-                }
+                var promise = restCall2($q, $http, url);
+                var thisService = this;
 
-                $http.get(url, {}, config).success(function(data, status, headers, config) {
+                promise.then(function(data) {
                     var agents = [];
                     for (var i = 0; i < data.length; i++) {
                         agents.push({
@@ -427,16 +323,14 @@ angular.module('chess').factory('myService', ["$http", "$q",
                             "label": "" + data[i]
                         });
                     }
-                    deferred.resolve({"agents": agents});
-                }).error(function(data, status, headers, config) {
-                    deferred.reject("An error occured while retriving AI agents.");
+                    thisService.agents = agents;
                 });
-                return deferred.promise;
+
+                return promise;
             }
         }
     }
 ]);
-
 
 /*
  * Returns true if the piece in the location belongs to the current player
@@ -484,3 +378,35 @@ var clearHighlight = function($scope) {
     $scope.from = null;
     return;
 }
+
+/*
+ * This function makes a rest call to our web services and returns a promise
+ * object that can be acted on.
+ */
+var restCall2 = function($q, $http, url, method, data){
+    var deferred = $q.defer();
+    var promise = deferred.promise;
+
+    if (method == undefined) {
+        method = 'GET'
+    }
+
+    var config = {
+        "method": method,
+        "url": url,
+        "xsrfHeaderName": "X-CSRFToken",
+        "xsrfCookieName": "csrftoken"
+    }
+
+    if (data != undefined) {
+        config["data"] = data
+    }
+
+    $http(config).success(function(data, status, headers, config) {
+        deferred.resolve(data);
+    }).error(function(data, status, headers, config) {
+        deferred.reject("An error occured retriving moves");
+    });
+    return deferred.promise;
+
+};

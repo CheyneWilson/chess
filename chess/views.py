@@ -55,13 +55,12 @@ def index(request):
 
 class LoginLogout(APIView):
     """
-
+    Allows a user to login and logout
     """
     permission_classes = (AllowAny,)
 
-    def post(self, request):
-        data = json.loads(request.body)
-        if data.get("logout", None):
+    def post(self, request, do_logout=False):
+        if do_logout:
             logout(request)
             return Response(LoginResponses.LOGOUT_SUCCESS)
         else:
@@ -76,27 +75,6 @@ class LoginLogout(APIView):
                     return Response(LoginResponses.LOGIN_SUCCESS)
 
         return Response(LoginResponses.LOGIN_FAILED, HTTP_401_UNAUTHORIZED)
-
-
-def login_logout(request):
-    if request.method == 'POST':  # If the form has been submitted...
-        data = json.loads(request.body)
-
-        if data.get("logout", None):
-            logout(request)
-            return Response(LoginResponses.LOGOUT_SUCCESS)
-        else:
-            data = json.loads(request.body)
-            # TOOD: Add default incase username or password is missing
-            username = data.get("username", None)  # data["username"]
-            password = data.get("password", None)  # data["password"]
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return Response(LoginResponses.LOGIN_SUCCESS)
-
-    return Response(LoginResponses.LOGIN_FAILED)
 
 
 # @csrf_exempt

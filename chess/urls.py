@@ -6,13 +6,12 @@ urlpatterns = patterns(
     '',
     # Examples:
     # url(r'^$', 'mysite.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
 
     # Wire up our API using automatic URL routing.
     # Additionally, we include login URLs for the browseable API.
     url(r'^$', views.index, name='index'),
-    # url(r'^login/$', views.login_logout, name='index'),
     url(r'^login/$', views.LoginLogout.as_view()),
+    url(r'^logout/$', views.LoginLogout.as_view(), {'do_logout': True}),
     url(r'^docs/', include('rest_framework_swagger.urls')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
@@ -31,9 +30,6 @@ urlpatterns = patterns(
     # url(r'^user/(?P<username>[0-9a-zA-Z]+)/matchmake/(?P<id>[0-9]+)', views.MatchMake.as_view()),
     url(r'^user/(?P<username>[0-9a-zA-Z]+)/challenge/$', views.ChallengeList.as_view()),
     url(r'^user/(?P<username>[0-9a-zA-Z]+)/challenge2/(?P<opponent>[0-9a-zA-Z]+)$', views.Challenge.as_view()),
-
     url(r'^user/(?P<username>[0-9a-zA-Z]+)/players/$', views.ActivePlayers.as_view()),
     url(r'^user/(?P<username>[0-9a-zA-Z]+)/agents/$', views.AiAgents.as_view()),
-    # url(r'^login/$', views.AuthView.as_view()),
-    # url(r'^login/$', views.LogInOut),
 )
