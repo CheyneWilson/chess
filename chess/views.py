@@ -6,7 +6,8 @@ from django.http import HttpResponse
 from django.template import RequestContext, loader
 # from django.views.decorators.csrf import csrf_exempt
 
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
+
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_500_INTERNAL_SERVER_ERROR
 from rest_framework.permissions import AllowAny  # , IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -40,10 +41,14 @@ class ChessResponses(object):
     CHALLENGE_ALREADY_EXISTS = {"error": "Challenge already exists, accept their challenge instead"}
 
 
-class LoginResponses(object):
+class AuthorizationResponses(object):
     LOGIN_SUCCESS = {"message": "Login success"}
     LOGOUT_SUCCESS = {"message": "Logout success"}
     LOGIN_FAILED = {"error": "Login failed"}
+    USER_ALREADY_EXISTS = {"error": "User already exists"}
+    USER_INACTIVE = {"error": "User is inactive"}
+    USERNAME_REQUIRED = {"error": "A username is required, but none was provided"}
+    PASSWORD_REQUIRED = {"error": "A password is required, but none was provided"}
 
 
 # Create your views here.
@@ -62,61 +67,62 @@ class LoginLogout(APIView):
     def post(self, request, do_logout=False):
         if do_logout:
             logout(request)
-            return Response(LoginResponses.LOGOUT_SUCCESS)
+            return Response(AuthorizationResponses.LOGOUT_SUCCESS)
         else:
             data = json.loads(request.body)
-            # TOOD: Add default incase username or password is missing
-            username = data.get("username", None)  # data["username"]
-            password = data.get("password", None)  # data["password"]
+            username = data.get("username", None)
+            password = data.get("password", None)
             user = authenticate(username=username, password=password)
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    return Response(LoginResponses.LOGIN_SUCCESS)
+                    return Response(AuthorizationResponses.LOGIN_SUCCESS)
 
-        return Response(LoginResponses.LOGIN_FAILED, HTTP_401_UNAUTHORIZED)
+        return Response(AuthorizationResponses.LOGIN_FAILED, HTTP_401_UNAUTHORIZED)
 
 
-# @csrf_exempt
-class AuthView(APIView):
-    """
-    This text is the description for this API
-    username -- A first parameter
-    password -- A second parameter
-    """
+class RegisterUser(APIView):
     permission_classes = (AllowAny,)
-    # authentication_classes
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
+        """
+        Create a new user account.
 
-        # data = JSONParser().parse(request)
-        username = request.POST.get('username', '')
-        password = request.POST.get('password', '')
-        # username = request.POST['username']
-        # password = request.POST['password']
+        The post data should be a json object containing the username and password, e.g
+        {
+            "username": "me",
+            "password": "secret"
+        }
+        """
+        data = json.loads(request.body)
+
+        username = data.get("username", None)
+        password = data.get("password", None)
+
+        if username is None:
+            return Response(AuthorizationResponses.USERNAME_REQUIRED, HTTP_400_BAD_REQUEST)
+        if password is None:
+            return Response(AuthorizationResponses.PASSWORD_REQUIRED, HTTP_400_BAD_REQUEST)
+
+        try:
+            User.objects.create_user(username=username, password=password)
+        except IntegrityError:
+            # User already exists
+            return Response(AuthorizationResponses.USER_ALREADY_EXISTS, HTTP_400_BAD_REQUEST)
+
         user = authenticate(username=username, password=password)
         if user is not None:
             if user.is_active:
                 login(request, user)
-                # Redirect to a success page.
-                params = {"login": "Success"}
-                return Response()
+                return Response(AuthorizationResponses.LOGIN_SUCCESS)
             else:
-                # Return a 'disabled account' error message
-                params = {
-                    "login": 'Disabled'
-                }
-                return Response(params)
+                # Should not happen because newly created uses should be active by default
+                # TODO: Add logging
+                return Response(AuthorizationResponses.USER_INACTIVE, HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            # Return an 'invalid login' error message.
-            params = {
-                "login": request.POST  # "Failed"
-            }
-            return Response(params)
-
-    def delete(self, request, *args, **kwargs):
-        logout(request)
-        return Response({})
+            # Should not happen because newly created uses should be active by default
+            # TODO: Add logging
+            return Response(AuthorizationResponses.LOGIN_FAILED, HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class GameCreateOrList(APIView):

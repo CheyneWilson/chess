@@ -6,7 +6,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
     <meta charset="utf-8">
-    <title>Chess</title>
+    <title>Register Account</title>
     {% include "chess/includes/header.html" %}
 </head>
     <body ng-app="chess">
@@ -19,14 +19,14 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Chessu</a>
+                    <a class="navbar-brand" href="/chess">Chessu</a>
                 </div>
 
                 <div ng-controller="Login" class="navbar-collapse collapse">
                     {% if user.is_authenticated %}
                     <div class="navbar-right navbar-form">
                         <button type="button" class="btn btn-success" data-template="{% static 'chess/modal/newgame.html' %}"
-                             bs-modal="modal" data-placement="center" data-container="#modal-location">
+                             bs-modal="modal" data-placement="center" data-container="#new-game-modal">
                             Start New Game
                         </button>
                         <button ng-controller="ChangeGame" type="button" class="btn btn-neutral" ng-model="selectedIcon" data-placeholder="Load Game"
@@ -47,12 +47,7 @@
                         <div class="form-group">
                             <button type="submit" class="btn btn-success">Sign in</button>
                             <label style="color: white; display: inline-block; padding: 0px 3px 0 2px;">OR</label>
-                            <!-- <a href="register" class="btn btn-warning">Register</a> -->
-
-                        <button type="button" class="btn btn-warning" data-template="{% static 'chess/modal/register.html' %}"
-                             bs-modal="modal" data-placement="center" data-container="#modal-location">
-                            Register
-                        </button>
+                            <a href="register" class="btn btn-warning">Register</a>
                         </div>
                     </form>
                     {% endif %}
@@ -69,71 +64,20 @@
 
         <div class="wrapper">
             <!-- Location in html the new game modal is injected -->
-            <div id="modal-location"> </div>
+            <div id="new-game-modal"> </div>
 
             <div class="container">
                 <div class="row" ng-controller="DrawBoard">
                     <div class="col-lg-8">
-                        <div class="board">
+                        <form ng-submit="createAccount()" >
+                            {% csrf_token %}
+                            <!-- {{ form.as_p }} -->
 
-                            <!--
-                            <div class="board-row" ng-repeat="row in board">
-                                <span ng-repeat="column in row track by $index" class="square" ng-class="{yellow: column.highlight, red: column.attack, blue: column.selected, occupied: column.active}">
-                                    <img class="piece" ng-src="/img/{{column.piece}}.png" ng-click="highlightMoves($index, $parent.$index)"/>
-
-                                </span>
-                                <br />
-                            </div>
-                            -->
-                            {% verbatim %}
-                            <div class="board-row" ng-repeat="row in [1,2,3,4,5,6,7,8]">
-                                <span ng-repeat="column in ['A','B','C','D','E','F','G','H']" class="square"
-                                        ng-class="highlight[column + row]">
-
-                                    <img class="piece" ng-src="/static/chess/img/{{ board[column + row].piece || 'empty'}}.png"
-                                        ng-click="selectPiece(column + row)" />
-                                </span>
-                                <br />
-                            </div>
-                            {% endverbatim %}
-                            <div class="empty" ng-show="!board">
-                                <h1>Welcome to my chess game</h1>
-                                <p>Create or load a new game from the left hand panel. Enjoy!</p>
-                                <p>(The login functionality isn't enabled yet, but it will come)</p>
-                            </div>
-                            <div class="promote" ng-show="promotablePieces">
-                                <h2>Choose piece to promote pawn to:</h2>
-                                <span ng-repeat="piece in promotablePieces" class="square occupied">
-                                    <img class="piece" ng-src="/img/{{piece}}.png" ng-click="promote(piece)" />
-                                </span>
-                            </div>
-
-                            <div class="overlay" ng-show="showGameOver()">
-                                <h1>Game Over</h1>
-                                {% verbatim %}
-                                <h3>{{winner}} player wins!!</h3>
-                                {% endverbatim %}
-                            </div>
-                        </div>
+                            <button type="submit" class="btn btn-success">Register</button>
+                        </form>
                     </div>
                     <div class="col-lg-4">
-                        <h2>Development Panel</h2>
 
-                        <hr>
-                        <div>
-
-                            <label>&nbsp; &nbsp;</label>
-                        </div>
-                        <hr>
-                        {% verbatim %}
-                        <label>Game Id:&nbsp;</label><span>{{gameId}}</span><br />
-                        <label>Current turn:&nbsp;</label><span>{{currentPlayer}}</span><br />
-                        <label>Code:&nbsp;</label><span>{{code}}</span><br />
-                        <label>Moves taken:&nbsp;</label>
-                        <ol>
-                            <li ng-repeat="move in moves" >{{move.value}}</li>
-                        </ol>
-                        {% endverbatim %}
                     </div>
                 </div>
             </div>

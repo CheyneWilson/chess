@@ -53,9 +53,41 @@ angular.module('chess').controller('ChangeGame', ["$rootScope", "$scope", "$sele
     }
 ]);
 
+
+angular.module("chess").controller("Register", ["$rootScope", "$scope",  "$select", "$modal", "myService",
+    function($rootScope, $scope, $select, $modal, myService) {
+        $scope.createAccount = function(){
+            var username = $scope.username;
+            var password = $scope.password;
+            if (password == undefined || $scope.password2 != password){
+                // If the passwords do not match, simply return
+                // The register form will show the error because the form is dirty
+                return;
+            }
+            myService.createAccount(username, password).then(function(data) {
+                $scope.$hide();
+                location.reload();
+                // $rootScope.emit("chess.loggedIn");
+            },
+            function(errorMessage) {
+                // alert("oh noes");
+                $scope.error = errorMessage; // TODO: This isn't displayed
+                // $scope.usernameTaken = true;
+            });
+        }
+    }
+]);
+
+
+
+
+
+
 /* This controller supports the modals for new game */
 angular.module("chess").controller("NewGameOptions", ["$rootScope", "$scope",  "$select", "$modal", "myService",
     function($rootScope, $scope, $select, $modal, myService) {
+        // default selection
+        $scope.gameMode = 'hotseat';
 
         $scope.selectChallenge = function() {
             $scope.gameMode = "challenge";
@@ -265,6 +297,16 @@ angular.module('chess').factory('myService', ["$http", "$q",
 
                 return promise;
             },
+            listPromotablePieces: function(gameId) {
+                var thisService = this;
+                var url = USER_URL + 'game/' + gameId + '/promote';
+                var promise = restCall2($q, $http, url);
+
+                promise.then(function(data) {
+                    thisService.promotablePieces = data;
+                });
+                return promise;
+            },
             promote: function(piece) {
                 var thisService = this;
                 var url = '//' + BASE_URL + '/rest/game/' + thisService.gameId + '/promote/' + piece;
@@ -327,7 +369,17 @@ angular.module('chess').factory('myService', ["$http", "$q",
                 });
 
                 return promise;
-            }
+            },
+            createAccount: function(username, password){
+                var url = BASE_URL + 'register/';
+                var data = {
+                    "username": username,
+                    "password": password
+                };
+                var promise = restCall2($q, $http, url, "POST", data);
+
+                return promise;
+            },
         }
     }
 ]);
@@ -405,7 +457,7 @@ var restCall2 = function($q, $http, url, method, data){
     $http(config).success(function(data, status, headers, config) {
         deferred.resolve(data);
     }).error(function(data, status, headers, config) {
-        deferred.reject("An error occured retriving moves");
+        deferred.reject(data["error"]);
     });
     return deferred.promise;
 

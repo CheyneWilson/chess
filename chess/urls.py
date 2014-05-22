@@ -12,6 +12,8 @@ urlpatterns = patterns(
     url(r'^$', views.index, name='index'),
     url(r'^login/$', views.LoginLogout.as_view()),
     url(r'^logout/$', views.LoginLogout.as_view(), {'do_logout': True}),
+    url(r'^register/$', views.RegisterUser.as_view()),
+
     url(r'^docs/', include('rest_framework_swagger.urls')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 

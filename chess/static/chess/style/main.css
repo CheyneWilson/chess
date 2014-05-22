@@ -149,50 +149,68 @@ body {
   display: block;
   margin: 0 auto;
 }
-/* line 132, sass/main.scss */
-.new-game-options.modal.center .modal-dialog {
-  max-width: 300px;
-  min-width: 300px;
-}
 
-/* line 138, sass/main.scss */
+/* line 134, sass/main.scss */
 .game-option {
   line-height: 1.7;
 }
-/* line 140, sass/main.scss */
+/* line 136, sass/main.scss */
 .game-option input {
   margin-top: -1px;
   vertical-align: middle;
 }
-/* line 144, sass/main.scss */
+/* line 140, sass/main.scss */
 .game-option label {
   float: left;
   font-size: 20px;
 }
-/* line 148, sass/main.scss */
+/* line 144, sass/main.scss */
 .game-option button {
   float: right;
 }
-/* line 151, sass/main.scss */
+/* line 147, sass/main.scss */
 .game-option:after {
   clear: both;
   content: " ";
   display: table;
 }
 
-/* line 159, sass/main.scss */
+/* line 155, sass/main.scss */
 .btn-neutral {
   background-color: #8B8BEE;
   border-color: #7C7CDF;
   color: #FFFFFF;
 }
-/* line 163, sass/main.scss */
+/* line 159, sass/main.scss */
 .btn-neutral:hover {
   color: #FFFFFF;
   background-color: #7C7CDF;
 }
 
-/* line 169, sass/main.scss */
+/* line 165, sass/main.scss */
 .navbar-right .btn {
   margin: 0 5px;
+}
+
+/* line 170, sass/main.scss */
+.register-user .modal-body {
+  padding: 15px 20px;
+}
+/* line 172, sass/main.scss */
+.register-user .modal-body .form-control {
+  margin: 5px 0;
+}
+
+/*
+ * Popup modals were not centred with bootstrap default 10 0 margins
+ */
+/* line 181, sass/main.scss */
+.modal-dialog {
+  margin: 0;
+}
+
+/* line 186, sass/main.scss */
+.modal.center .modal-dialog {
+  min-width: 300px;
+  max-width: 300px;
 }

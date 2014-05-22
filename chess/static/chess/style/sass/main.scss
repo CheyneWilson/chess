@@ -129,10 +129,6 @@ body {
         }
 
     }
-    &.modal.center .modal-dialog {
-        max-width: 300px;
-        min-width: 300px;
-    }
 }
 
 .game-option {
@@ -170,3 +166,24 @@ body {
     margin: 0 5px;
 }
 
+.register-user {
+    .modal-body {
+        padding: 15px 20px;
+        .form-control {
+            margin: 5px 0;
+        }
+    }
+}
+
+/*
+ * Popup modals were not centred with bootstrap default 10 0 margins
+ */
+.modal-dialog {
+    margin: 0;
+}
+
+// And look better with 300px min instead of 320px
+.modal.center .modal-dialog {
+    min-width: 300px;
+    max-width: 300px;
+}
