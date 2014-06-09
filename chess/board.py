@@ -149,8 +149,8 @@ class Board(object):
             # Not under attack
             return False
         if len(self.get_moves(king_loc, False)) > 0:
-                # Can move king to safety
-                return False
+            # Can move king to safety
+            return False
         else:
             if blocking_square_names is set([]):
                 # Cannot block, cannot move king, checkmate
@@ -809,14 +809,14 @@ class Board(object):
             # Not under attack
             return None, None
         elif len(enemy_attacking_pieces) == 1:
-                # It is possible to capture the attacker
-                [enemy_loc] = enemy_attacking_pieces
+            # It is possible to capture the attacker
+            [enemy_loc] = enemy_attacking_pieces
 
-                # Can we block the attacking piece?
-                attack_vector = king_square.direction(enemy_loc)
+            # Can we block the attacking piece?
+            attack_vector = king_square.direction(enemy_loc)
 
-                # Find all of the squares that block the path between the enemy piece and king
-                return self._get_squares_in_direction(king_square_name, attack_vector, color)
+            # Find all of the squares that block the path between the enemy piece and king
+            return self._get_squares_in_direction(king_square_name, attack_vector, color)
 
         else:
             # We cannot block / capture multiple pieces in one move
@@ -948,6 +948,7 @@ class Board(object):
             x = to_square.x
             y = to_square.y - pawn.forward
             single_move_square = self.square(x=x, y=y)
+
             if isinstance(single_move_square.piece, Pawn):
                 return set([single_move_square.name])
 
@@ -955,6 +956,11 @@ class Board(object):
             y = to_square.y - 2 * pawn.forward
             double_move_square = self.square(x=x, y=y)
             if isinstance(double_move_square.piece, Pawn) and (self._pawn_has_moved(double_move_square.name) is False):
+
+                if single_move_square.piece is not None:
+                    # Cannot move, square in the middle is occupied
+                    return set([])
+
                 return set([double_move_square.name])
 
         except InvalidSquareException:
