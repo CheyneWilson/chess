@@ -10,7 +10,8 @@ class BoardField(models.Field):
 
     __metaclass__ = models.SubfieldBase
 
-    description = u"TODO:"
+    description = u"This field stores the position of pices on a chess board. It does not store the previous move " + \
+                  u"which must be stored in a different field."
 
     def __init__(self, *args, **kwargs):
 
@@ -68,7 +69,7 @@ class ColorField(models.Field):
             try:
                 return Color._member_map_[color]
             except KeyError:
-                raise ValueError("Invalid color '{color}', should be 'BLACK' or 'WHITE'.".format(color))
+                raise ValueError(u"Invalid color '{color}', should be 'BLACK' or 'WHITE'.".format(color))
 
     def get_prep_value(self, color):
         return color.name
@@ -105,7 +106,7 @@ class WinnerField(models.Field):
             try:
                 return Winner._member_map_[value]
             except KeyError:
-                raise Exception("Invalid {value}, should be 'BLACK', 'WHITE', 'DRAW' or 'UNDECIDED'"
+                raise Exception(u"Invalid {value}, should be 'BLACK', 'WHITE', 'DRAW' or 'UNDECIDED'"
                                 .format(value=value))
 
     def get_prep_value(self, value):
@@ -121,8 +122,8 @@ class WinnerField(models.Field):
 
 class ColorModel(models.Model):
     class Meta:
-        app_label = 'chess'
-        db_table = 'chess_color'
+        app_label = u'chess'
+        db_table = u'chess_color'
 
     BLACK = Color.BLACK
     WHITE = Color.WHITE
@@ -146,8 +147,8 @@ class ColorModel(models.Model):
 
 class WinnerModel(models.Model):
     class Meta:
-        app_label = 'chess'
-        db_table = 'chess_winner'
+        app_label = u'chess'
+        db_table = u'chess_winner'
 
     BLACK = Winner.BLACK
     WHITE = Winner.WHITE
@@ -174,7 +175,7 @@ class WinnerModel(models.Model):
 
 class GameModelManager(models.Manager):
     def create_game(self, player_1_username, player_2_username):
-        """
+        u"""
         Create a new game with the black and white player determined at random.
         """
         # The default Mersenne Twister random should be sufficient for this
@@ -185,11 +186,14 @@ class GameModelManager(models.Manager):
 
 
 class GameModel(models.Model):
+    u"""
+    This class wraps the 'board' modal to allow django's persistence to manage the storage of games.
+    """
     # objects = GameModelManager()
 
     class Meta:
-        app_label = 'chess'
-        db_table = 'chess_game'
+        app_label = u'chess'
+        db_table = u'chess_game'
 
     @classmethod
     def create(cls, white_player, black_player):
@@ -204,10 +208,9 @@ class GameModel(models.Model):
     _board = BoardField(default=Board())
 
     # Previous moves are linked via a foreign key from MoveModel
-
     @property
     def board(self):
-        """
+        u"""
         Instanciates a board including the other properties stored in the GameModel
 
         returns -- A board
@@ -227,7 +230,7 @@ class GameModel(models.Model):
 
     @board.setter
     def board(self, board):
-        """
+        u"""
         Updates a game_model from the information stored in a board. This also appends the previous move
         taken. This method SAVES THE BOARD when it is updated.
 
@@ -256,10 +259,10 @@ class GameModel(models.Model):
         # TODO: Should be  in an atomic transaction
         move_model.save()
         self.save()  # Including the save in here is ~iffy, BUT since we save the move, we should save the board as
-                         # close as possible
+                     # close as possible to keep things consistent
 
     def active_player(self, username):
-        """
+        u"""
         Check is the username provided is that of the active player
 
         username -- The username of the player
@@ -276,7 +279,7 @@ class GameModel(models.Model):
         return False
 
     def player_color(self, username):
-        """
+        u"""
         Returns the color that the player with the username provided is playing as. If they are playing both
         colors, say in a hotseat manner, returns the color of the active player. If the player is no a player of
         this game, then returns None.
@@ -298,11 +301,11 @@ class GameModel(models.Model):
 
 
 class MoveModel(models.Model):
-    ordering = ['id']
+    ordering = [u'id']
 
     class Meta:
-        app_label = 'chess'
-        db_table = 'chess_move'
+        app_label = u'chess'
+        db_table = u'chess_move'
 
     game = models.ForeignKey(GameModel)
     from_loc = models.CharField(max_length=2, db_column=u"from")
@@ -322,12 +325,12 @@ class MoveModel(models.Model):
 
 
 class ChallengeModel(models.Model):
-    """
+    u"""
     Represents one player challenging another
     """
     challenger = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_challenger_related")
     challengee = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_challengee_related")
 
     class Meta:
-        app_label = 'chess'
-        unique_together = ('challenger', 'challengee')
+        app_label = u'chess'
+        unique_together = (u'challenger', u'challengee')
