@@ -101,14 +101,14 @@
                                 <p>Create or load a new game from the left hand panel. Enjoy!</p>
                                 <p>(The login functionality isn't enabled yet, but it will come)</p>
                             </div>
-                            <div class="promote" ng-show="promotePhase">
+                            <div class="promote ng-hide" ng-show="promotePhase">
                                 <h2>Choose piece to promote pawn to:</h2>
                                 <span ng-repeat="piece in promotablePieces" class="square occupied">
                                     <img class="piece" ng-src="/static/chess/img/{{piece}}.png" ng-click="promote(piece)" />
                                 </span>
                             </div>
 
-                            <div class="overlay" ng-show="showGameOver()" style="display:none">
+                            <div class="overlay ng-hide" ng-show="showGameOver()">
                                 <h1>Game Over</h1>
                                 <h3>{{winner}} player wins!!</h3>
                             </div>
