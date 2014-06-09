@@ -328,10 +328,9 @@ class Board(object):
                -- PromotePieceException if a pawn needs to be promoted before another move can be taken
                -- WrongPlayerException if the piece is not the same color as the current_player
 
-
         """
 
-        if self.promote_pawn_location is not None:
+        if self.is_promote_phase():
             raise PromotePieceException(u"Cannot move piece, previously moved pawn must be promoted first.")
 
         legal_moves = self.get_moves(from_)
@@ -401,6 +400,7 @@ class Board(object):
             # Do not change player if the current player still needs to promote their pawn
             opponent_color = self.current_player.inverse()
 
+            # Get informatation about current board for recording the move taken
             is_check = self.is_check(opponent_color)
             is_checkmate = self.is_checkmate(opponent_color)
             is_stalemate = self.is_stalemate(opponent_color)
@@ -461,6 +461,15 @@ class Board(object):
         else:
             return True
 
+    def is_promote_phase(self):
+        u"""
+        Returns True if a pawn must be promoted, False otherwise
+        """
+        if self.promote_pawn_location is None:
+            return False
+        else:
+            return True
+
     def promote_pawn(self, piece_name):
         """
         Promotes a pawn that has been moved to the last row. Should be called after move_piece.
@@ -468,6 +477,7 @@ class Board(object):
         piece_name -- The name of the piece to promote the pawn to
         """
         try:
+            # TODO: Make the piece factory accept a piece_name or existing piece, like Java's toString method
             piece = PieceFactory.create(piece_name)
         except InvlaidPieceException:
             raise IllegalPromotionException("Cannot interpret {piece_name}".format(piece_name=piece_name))
@@ -479,7 +489,7 @@ class Board(object):
 
         piece -- The piece to promote the pawn to. One of Queen, Rook, Bishop, Knight or their colored subclass.
         """
-        if self.promote_pawn_location is None:
+        if self.is_promote_phase() is False:
             raise IllegalPromotionException("Cannot promote pawn, no pawn has been moved into end row")
 
         square = self._all_squares[self.promote_pawn_location]
@@ -1170,7 +1180,7 @@ class Board(object):
                         if isinstance(piece, Pawn):
                             # Is pawn in the final row?
                             if y == 1 or y == 8:
-                                self.promote_pawn_location = square
+                                self.promote_pawn_location = square.name
 
                     has_moved = False
 

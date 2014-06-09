@@ -24,8 +24,8 @@ angular.module('chess').controller('Login', ["$scope", "myService",
     }
 ]);
 
-angular.module('chess').controller('ChangeGame', ["$rootScope", "$scope", "$select", "myService",
-    function($rootScope, $scope, $select, myService) {
+angular.module('chess').controller('ChangeGame', ["$rootScope", "$scope", "$select", "$q", "myService",
+    function($rootScope, $scope, $select, $q, myService) {
         var reloadGameList = function(selectNew) {
             myService.listGames().then(function() {
                 $scope.icons = myService.allGames;
@@ -44,9 +44,12 @@ angular.module('chess').controller('ChangeGame', ["$rootScope", "$scope", "$sele
         $scope.$on('$select.select', function(event, value, index) {
             var gameId = value;
             var promise = myService.loadGame(gameId);
-            promise.then(function() {
+            var promise_2 = myService.listPromotablePieces(gameId);
+
+            $q.all([promise, promise_2]).then(function() {
                 $rootScope.$emit('chess.gameLoaded');
             });
+
         });
 
         reloadGameList();
@@ -67,20 +70,13 @@ angular.module("chess").controller("Register", ["$rootScope", "$scope",  "$selec
             myService.createAccount(username, password).then(function(data) {
                 $scope.$hide();
                 location.reload();
-                // $rootScope.emit("chess.loggedIn");
             },
             function(errorMessage) {
-                // alert("oh noes");
                 $scope.error = errorMessage; // TODO: This isn't displayed
-                // $scope.usernameTaken = true;
             });
         }
     }
 ]);
-
-
-
-
 
 
 /* This controller supports the modals for new game */
@@ -157,7 +153,7 @@ angular.module("chess").controller("DrawBoard", ["$rootScope", "$scope", "$http"
         $rootScope.$on('chess.gameLoaded', reloadBoard);
 
         $scope.promote = function(piece) {
-            promise = myService.promote(piece);
+            var promise = myService.promote(piece);
             promise.then(function() {
                 $rootScope.$emit('chess.boardChanged');
             });
@@ -187,7 +183,7 @@ angular.module("chess").controller("DrawBoard", ["$rootScope", "$scope", "$http"
             // Highlight piece
             if ($scope.from != null) {
                 // We already have a piece highlighed, try and move it to the location chosen
-                if ($scope.highlight[loc]) {
+                if ($scope.highlight[loc] != undefined) {
                     // Deselect square if clicked on
                     if ($scope.from == loc) {
                         clearHighlight($scope);
@@ -195,9 +191,10 @@ angular.module("chess").controller("DrawBoard", ["$rootScope", "$scope", "$http"
                     }
 
                     var promise = myService.movePiece($scope.gameId, $scope.from, loc);
-                    promise.then(function(data) {
-                        // $scope.board = myService.board;
-                        //$rootScope.$emit('chess.moveTaken');
+
+                    promise.then(function(){
+                        return myService.listPromotablePieces($scope.gameId);
+                    }).then(function() {
                         clearHighlight($scope);
                         $rootScope.$emit('chess.boardChanged');
                     },
@@ -205,6 +202,9 @@ angular.module("chess").controller("DrawBoard", ["$rootScope", "$scope", "$http"
                         $scope.error = errorMessage; // TODO: This isn't displayed
                     });
                     return;
+                } else {
+                    // Clicked on a square that hasn't been highlighted
+                    clearHighlight($scope);
                 }
             }
 
@@ -309,13 +309,18 @@ angular.module('chess').factory('myService', ["$http", "$q",
             },
             promote: function(piece) {
                 var thisService = this;
-                var url = '//' + BASE_URL + '/rest/game/' + thisService.gameId + '/promote/' + piece;
-                promise = restCall(url);
-                promise.then(function(gameInfo) {
-                    for (var key in gameInfo) {
-                        thisService[key] = gameInfo[key]; //copy all the fields
-                    }
+                var gameId = thisService.gameId;
+                var url = USER_URL + 'game/' + gameId + '/promote/' + piece;
+                var promise = restCall2($q, $http, url, "POST");
+
+                promise.then(function(data) {
+                    thisService.board = data.board;
+                    thisService.currentPlayer = data.active_player;
+                    thisService.gameId = data.id;
+                    thisService.code = data.board_code;
+                    thisService.winner = data.winner;
                 });
+
                 return promise;
             },
             login: function(username, password){

@@ -95,7 +95,7 @@
                                 </span>
                                 <br />
                             </div>
-                            {% endverbatim %}
+
                             <div class="empty" ng-show="!board">
                                 <h1>Welcome to my chess game</h1>
                                 <p>Create or load a new game from the left hand panel. Enjoy!</p>
@@ -104,16 +104,15 @@
                             <div class="promote" ng-show="promotablePieces">
                                 <h2>Choose piece to promote pawn to:</h2>
                                 <span ng-repeat="piece in promotablePieces" class="square occupied">
-                                    <img class="piece" ng-src="/img/{{piece}}.png" ng-click="promote(piece)" />
+                                    <img class="piece" ng-src="/static/chess/img/{{piece}}.png" ng-click="promote(piece)" />
                                 </span>
                             </div>
 
-                            <div class="overlay" ng-show="showGameOver()">
+                            <div class="overlay" ng-show="showGameOver()" style="display:none">
                                 <h1>Game Over</h1>
-                                {% verbatim %}
                                 <h3>{{winner}} player wins!!</h3>
-                                {% endverbatim %}
                             </div>
+                            {% endverbatim %}
                         </div>
                     </div>
                     <div class="col-lg-4">
@@ -133,7 +132,9 @@
                         <ol>
                             <li ng-repeat="move in moves" >{{move.value}}</li>
                         </ol>
+
                         {% endverbatim %}
+
                     </div>
                 </div>
             </div>

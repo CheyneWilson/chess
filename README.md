@@ -52,8 +52,13 @@ The controller runs all of the backend services. It is started as follows
 
 Running tests
 ----
-From the root directory all tests can be run as follows:
-`python -m unittest discover -s tests`
 
-Specific tests can be run as follows:
-`python -m tests.board_test`
+The tests are currently partitioned into two separate sets, unittests and integration tests.
+The unit tests test the model, and can be run as follows from the root directoy (same directory as this README):
+
+    python -m chess.tests_2.test_board
+    python -m chess.tests_2.test_square
+
+The integration tests test the webservices. From the root directory (same directory as this README) all tests can be
+run as follows:
+    python manage.py test chess

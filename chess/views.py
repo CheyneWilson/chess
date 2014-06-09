@@ -191,6 +191,8 @@ class GameDetail(APIView):
             return Response(serializer.data)
 
 
+# TODO: This should be changed just to load_game, and django should be configured to be able to raise exceptions into
+# a response. Currently we cannot break the contol flow easily from a child function call.
 def load_game_or_error(username, game_id=None):
     """
     Retrieve a game.
@@ -199,8 +201,6 @@ def load_game_or_error(username, game_id=None):
     game_id  -- The game to load
 
     Returns -- The game information or a Response with an HTTP status code explaining the problem.
-
-    Usage -- TODO:
 
     """
     try:
@@ -234,6 +234,12 @@ def load_game_or_error(username, game_id=None):
 
 
 def username_color(game, username):
+    """
+    Returns the color that a player is playing as in a given game
+
+    game -- The game to check
+    username -- The players username
+    """
     if game.black_player.username == username:
         return Color.BLACK
     elif game.white_player.username == username:
@@ -242,10 +248,16 @@ def username_color(game, username):
         return None
 
 
-def serilize_moves_and_attacks(from_, moves, attacks):
+def combine_moves_and_attacks(from_, moves, attacks):
+    """
+    Combine, from_, moves, and attacks into a single object that can be more easily manipulated
+
+    from_ -- The location of a piece (a string)
+    moves -- The non-capturing moves that can be made by the peice at from_
+    attacks -- The capturing moves that can be made by the peice at from_
+    """
     moves_and_attacks = []
 
-    # Format response
     for x in moves:
         moves_and_attacks.append({
             "square": x,
@@ -289,7 +301,7 @@ class MoveList(APIView):
                 for square in board.player_piece_squares(board.current_player):
                     moves, attacks = board._get_moves_and_attacks(square)
 
-                    moves_and_attacks = serilize_moves_and_attacks(square, moves, attacks)
+                    moves_and_attacks = combine_moves_and_attacks(square, moves, attacks)
                     response.append(moves_and_attacks)
 
             return Response(response)
@@ -323,7 +335,7 @@ class MoveDetail(APIView):
             else:
                 moves = set([])
                 attacks = set([])
-            moves_and_attacks = serilize_moves_and_attacks(from_loc, moves, attacks)
+            moves_and_attacks = combine_moves_and_attacks(from_loc, moves, attacks)
             return Response(moves_and_attacks)
             # else:
             #     return Response(ChessResponses.USER_IS_NOT_CURRENT_PLAYER, status=HTTP_400_BAD_REQUEST)
@@ -375,7 +387,8 @@ class PromotablePieces(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, username, game_id, pk=None):
-        """Returns all the pieces that the pawn can be promoted to
+        """
+        Returns all the pieces that the pawn can be promoted to.
 
         username -- The username of the player
         game_id  -- The game to list the possible moves for
@@ -389,11 +402,10 @@ class PromotablePieces(APIView):
         else:
             board = game.board
             player_color = game.player_color(username)
-            assert(player_color is not None)  # Guartenteed by load_game_or_error succeeding
+            assert(player_color is not None)  # Should be guaranteed by load_game_or_error succeeding
 
             pieces = board.promotable_pieces(player_color)
             piece_names = [piece.__name__ for piece in pieces]
-
             return Response(piece_names)
 
 

@@ -33,7 +33,8 @@ class CreateGameTest(TestCase):
                 "winner": "UNDECIDED",
                 "black_player": 1000001,
                 "white_player": 1000001,
-                "board_code": "♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜"
+                "board_code": "♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜",
+                "promote_phase": false
         }""")
 
         assert_that(content, equal_to(expected))
@@ -116,7 +117,8 @@ class GetGameTest(TestCase):
                 "winner": "UNDECIDED",
                 "black_player": 1000001,
                 "white_player": 1000001,
-                "board_code": "♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜"
+                "board_code": "♖♘♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-________-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜",
+                "promote_phase": false
         }""")
         assert_that(content, equal_to(expected))
 
@@ -340,7 +342,8 @@ class TestMove_1(TestCase):
                 "winner": "UNDECIDED",
                 "black_player": 1000001,
                 "white_player": 1000001,
-                "board_code": "♖♘♗♕♔♗♘♖-_♙♙♙♙♙♙♙-♙_______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜"
+                "board_code": "♖♘♗♕♔♗♘♖-_♙♙♙♙♙♙♙-♙_______-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜",
+                "promote_phase": false
         }""")
 
         assert_that(response.status_code, equal_to(HTTP_200_OK))
@@ -368,7 +371,8 @@ class TestMove_1(TestCase):
                 "winner": "UNDECIDED",
                 "black_player": 1000001,
                 "white_player": 1000001,
-                "board_code": "♖♘♗♕♔♗♘♖-_♙♙♙♙♙♙♙-________-♙_______-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜"
+                "board_code": "♖♘♗♕♔♗♘♖-_♙♙♙♙♙♙♙-________-♙_______-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜",
+                "promote_phase": false
         }""")
 
         assert_that(response.status_code, equal_to(HTTP_200_OK))
@@ -396,7 +400,8 @@ class TestMove_1(TestCase):
                 "winner": "UNDECIDED",
                 "black_player": 1000001,
                 "white_player": 1000001,
-                "board_code": "♖_♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-__♘_____-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜"
+                "board_code": "♖_♗♕♔♗♘♖-♙♙♙♙♙♙♙♙-__♘_____-________-________-________-♟♟♟♟♟♟♟♟-♜♞♝♛♚♝♞♜",
+                "promote_phase": false
         }""")
 
         assert_that(response.status_code, equal_to(HTTP_200_OK))
@@ -660,7 +665,8 @@ class TestPromotePawn_1(TestCase):
                 "winner": "UNDECIDED",
                 "black_player": 1000001,
                 "white_player": 1000001,
-                "board_code": "♖♘♗♕♔♗♘♖-_♙♙♙♙♙♟♙-________-________-________-________-♟_♟♟♟♟♟_-♕♞♝♛♚♝♞♜"
+                "board_code": "♖♘♗♕♔♗♘♖-_♙♙♙♙♙♟♙-________-________-________-________-♟_♟♟♟♟♟_-♕♞♝♛♚♝♞♜",
+                "promote_phase": false
         }""")
 
         assert_that(response.status_code, equal_to(HTTP_200_OK))
@@ -684,7 +690,8 @@ class TestPromotePawn_1(TestCase):
                 "winner": "UNDECIDED",
                 "black_player": 1000001,
                 "white_player": 1000001,
-                "board_code": "♖♘♗♕♔♗♘♟-_♙♙♙♙♙_♙-________-________-________-________-♟_♟♟♟♟♟_-♕♞♝♛♚♝♞♜"
+                "board_code": "♖♘♗♕♔♗♘♟-_♙♙♙♙♙_♙-________-________-________-________-♟_♟♟♟♟♟_-♕♞♝♛♚♝♞♜",
+                "promote_phase": true
         }""")
 
         assert_that(response.status_code, equal_to(HTTP_200_OK))
@@ -705,7 +712,8 @@ class TestPromotePawn_1(TestCase):
                 "winner": "UNDECIDED",
                 "black_player": 1000001,
                 "white_player": 1000001,
-                "board_code": "♖♘♗♕♔♗♘♜-_♙♙♙♙♙_♙-________-________-________-________-♟_♟♟♟♟♟_-♕♞♝♛♚♝♞♜"
+                "board_code": "♖♘♗♕♔♗♘♜-_♙♙♙♙♙_♙-________-________-________-________-♟_♟♟♟♟♟_-♕♞♝♛♚♝♞♜",
+                "promote_phase": false
         }""")
 
         assert_that(response.status_code, equal_to(HTTP_200_OK))
