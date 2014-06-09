@@ -110,7 +110,8 @@
 
                             <div class="overlay ng-hide" ng-show="showGameOver()">
                                 <h1>Game Over</h1>
-                                <h3>{{winner}} player wins!!</h3>
+                                <h3 ng-if="winner!='DRAW'">{{winner}} player wins!!</h3>
+                                <h3 ng-if="winner=='DRAW'">Game is a draw!</h3>
                             </div>
                             {% endverbatim %}
                         </div>
