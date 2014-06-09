@@ -302,7 +302,7 @@ angular.module('chess').factory('myService', ["$http", "$q",
             },
             listPromotablePieces: function(gameId) {
                 var thisService = this;
-                var url = USER_URL + 'game/' + gameId + '/promote';
+                var url = USER_URL + 'game/' + gameId + '/promote/';
                 var promise = restCall2($q, $http, url);
 
                 promise.then(function(data) {
