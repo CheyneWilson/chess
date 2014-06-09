@@ -139,6 +139,7 @@ angular.module("chess").controller("DrawBoard", ["$rootScope", "$scope", "$http"
             $scope.board = myService.board;
             $scope.winner = myService.winner;
             $scope.currentPlayer = myService.currentPlayer;
+            $scope.promotePhase = myService.promotePhase;
             $scope.promotablePieces = myService.promotablePieces;
             $scope.moves = myService.moves;
             $scope.code = myService.code;
@@ -251,6 +252,7 @@ angular.module('chess').factory('myService', ["$http", "$q",
                     thisService.gameId = data.id;
                     thisService.code = data.board_code;
                     thisService.winner = data.winner;
+                    thisService.promotePhase = data.promote_phase;
                 });
                 return promise;
             },
@@ -275,6 +277,7 @@ angular.module('chess').factory('myService', ["$http", "$q",
                     thisService.gameId = data.id;
                     thisService.code = data.board_code;
                     thisService.winner = data.winner;
+                    thisService.promotePhase = data.promote_phase;
                 });
                 return promise;
             },
@@ -319,6 +322,7 @@ angular.module('chess').factory('myService', ["$http", "$q",
                     thisService.gameId = data.id;
                     thisService.code = data.board_code;
                     thisService.winner = data.winner;
+                    thisService.promotePhase = data.promote_phase;
                 });
 
                 return promise;

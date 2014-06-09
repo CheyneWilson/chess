@@ -101,7 +101,7 @@
                                 <p>Create or load a new game from the left hand panel. Enjoy!</p>
                                 <p>(The login functionality isn't enabled yet, but it will come)</p>
                             </div>
-                            <div class="promote" ng-show="promotablePieces">
+                            <div class="promote" ng-show="promotePhase">
                                 <h2>Choose piece to promote pawn to:</h2>
                                 <span ng-repeat="piece in promotablePieces" class="square occupied">
                                     <img class="piece" ng-src="/static/chess/img/{{piece}}.png" ng-click="promote(piece)" />
