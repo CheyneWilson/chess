@@ -60,5 +60,5 @@ The unit tests test the model, and can be run as follows from the root directoy 
     python -m chess.tests_2.test_square
 
 The integration tests test the webservices. From the root directory (same directory as this README) all tests can be
-run as follows:
+run as follows (note, the venv with django must be activated):
     python manage.py test chess
