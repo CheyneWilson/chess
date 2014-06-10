@@ -1917,7 +1917,7 @@ class TestWinConditions(unittest.TestCase):
         king_moves = board.get_moves(king_loc)
         assert_that(len(king_moves), is_(0))
 
-        # assert_that(board.is_checkmate(Color.BLACK), is_(False))
+        assert_that(board.is_checkmate(Color.BLACK), is_(False))
         assert_that(board.is_checkmate(Color.WHITE), is_(True))
 
     def test_statemate_1(self):
